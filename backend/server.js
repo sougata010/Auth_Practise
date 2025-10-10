@@ -13,10 +13,11 @@ app.use(cors());
 app.use(express.json());
 app.use("/login",loginRoute);
 app.use("/register",registerRoute)
-app.get("/hacker",auth,(req,res)=>{
+app.get("/protected",auth,(req,res)=>{
     res.status(200).json({user:req.user})
 })
 app.listen(process.env.PORT, () => {
   console.log(`The app is listening on port ${process.env.PORT}`);
 });
+
 

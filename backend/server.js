@@ -4,20 +4,23 @@ import DataBase from "./database/db.js";
 import auth from "./utils/middleware.js";
 import loginRoute from "./controllers/login.controllers.js";
 import registerRoute from "./controllers/register.controllers.js";
+import mealRoute from "./controllers/meal.controllers.js"; 
+import userDetailsRoute from "./controllers/user_details.controllers.js"; 
 import cors from "cors";
 
 dotenv.config();
-const app=express();
+const app = express();
 DataBase();
+
 app.use(cors());
 app.use(express.json());
-app.use("/login",loginRoute);
-app.use("/register",registerRoute)
-app.get("/protected",auth,(req,res)=>{
-    res.status(200).json({user:req.user})
-})
+
+app.use("/auth", loginRoute);
+app.use("/auth", registerRoute);
+
+app.use("/user-details", auth, userDetailsRoute); 
+app.use("/meal", auth, mealRoute); 
+
 app.listen(process.env.PORT, () => {
   console.log(`The app is listening on port ${process.env.PORT}`);
 });
-
-

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login</title>
+</head>
+<body>
+    <h2>Login</h2>
+    <form id="loginForm">
+        <input type="text" id="username" placeholder="Username" required><br>
+        <input type="password" id="password" placeholder="Password" required><br>
+        <button type="submit">Login</button>
+    </form>
+
+    <script>
+        const BACKEND_BASE_URL = "http://localhost:5000"; 
+
+        document.getElementById("loginForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            
+            // FIX 2: Retrieve the value from the element with ID 'username'
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+
+            const res = await fetch(`${BACKEND_BASE_URL}/auth/login`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                // FIX 3: Send 'username' and 'password' in the body
+                body: JSON.stringify({ username, password }) 
+            });
+
+            const data = await res.json();
+            
+            // FIX 4: Check for 'access' property (Access Token) as sent by the backend
+            if (res.ok && data.access) { 
+                // FIX 5: Save the Access Token correctly
+                localStorage.setItem("accessToken", data.access);
+                
+                // OPTIONAL: Save the Refresh Token too, for later renewal
+                if (data.refresh) {
+                    localStorage.setItem("refreshToken", data.refresh);
+                }
+
+                alert("Login successful!");
+                window.location.href = "dashboard.html";
+            } else {
+                // Handle errors like 401 Unauthorized
+                const errorMessage = data.error || "Login failed due to a server error.";
+                alert(errorMessage);
+            }
+        });
+    </script>
+</body>
+</html>

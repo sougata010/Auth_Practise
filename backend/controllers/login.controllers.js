@@ -3,46 +3,61 @@ import bcrypt from "bcrypt";
 import jsonwebtoken from "jsonwebtoken";
 import User from "../model/User.model.js";
 import dotenv from "dotenv";
-dotenv.config()
 
-const jwt=jsonwebtoken
-const router=express.Router()
-function genRefresh(user){
-    return jwt.sign({user:user.username},process.env.SECRET_KEY,{expiresIn:"7d"})
-}
-function genAccess(user){
-    return jwt.sign({user:user.username},process.env.SECRET_KEY,{expiresIn:"1h"})
-}
-router.post("/",async(req,res)=>{
-    const {username,password,email} = req.body;
-    if (username){
-        const user= await User.findOne({username});
-        if(!user){
-            return res.status(400).json({error:"User not found"});
-        }
-        const match=await bcrypt.compare(password,user.password)
-        if(!match){
-            return res.status(401).json({error:"Invalid password"})
-        }
-        const access=genAccess(user);
-        const refresh=genRefresh(user);
-        user.refreshToken=refresh;
-        await user.save();
-        res.status(200).json({access,refresh});
+dotenv.config();
 
+const jwt = jsonwebtoken;
+const router = express.Router();
+
+function genRefresh(user) {
+    return jwt.sign({ username: user.username }, process.env.SECRET_KEY, { expiresIn: "7d" });
+}
+
+function genAccess(user) {
+    const userRoles = user.roles || ["student"];
+    return jwt.sign({ username: user.username, roles: userRoles }, process.env.SECRET_KEY, { expiresIn: "1h" });
+}
+
+router.post("/login", async (req, res) => {
+    const { username, password, email } = req.body;
+
+    if (!password) {
+        return res.status(400).json({ error: "Password is required." });
     }
-    
-    const user= await User.findOne({email});
-        if(!user){
-            return res.status(400).json({error:"User not found"});
+    if (!username && !email) {
+        return res.status(400).json({ error: "Username or email is required." });
+    }
+
+    try {
+        let user;
+        
+        if (username) {
+            user = await User.findOne({ username });
+        } else if (email) {
+            user = await User.findOne({ email });
         }
-        const match=bcrypt.compare(password,user.password)
-        if(!match){
-            return res.status(401).json({error:"Invalid password"})
+
+        if (!user) {
+            return res.status(401).json({ error: "Invalid credentials." });
         }
-         user.refreshToken=refresh;
+
+        const match = await bcrypt.compare(password, user.password);
+        if (!match) {
+            return res.status(401).json({ error: "Invalid credentials." });
+        }
+
+        const access = genAccess(user);
+        const refresh = genRefresh(user);
+        
+        user.refreshToken = refresh;
         await user.save();
-        res.status(200).json({access,refresh});
-    
-})
+
+        res.status(200).json({ access, refresh });
+
+    } catch (error) {
+        console.error("Login Error:", error);
+        res.status(500).json({ error: "Internal server error during login." });
+    }
+});
+
 export default router;

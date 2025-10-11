@@ -103,16 +103,14 @@ router.put("/meal/:userId", async (req, res) => {
         
     } catch (error) {
         console.error("Error updating meal preference:", error);
-        
-        // Check for Mongoose Validation Errors (e.g., if a field is required but missing)
         if (error.name === 'ValidationError') {
-            // Return a 400 Bad Request with the specific validation message
             return res.status(400).json({ error: error.message });
         }
         
         res.status(500).json({ error: "Internal Server Error during update." });
     }
 });
+
 
 
 

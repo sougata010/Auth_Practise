@@ -10,9 +10,10 @@ router.post("/register",async(req,res)=>{
     const salt = await bcrypt.genSalt(7);
     const hased_password = await bcrypt.hash(password,salt);
     const user = new User({
-        "username":username,"password":hased_password,"email":email,"role":"student"
+        "username":username,"password":hased_password,"email":email,"roles":"student"
     });
     await user.save();
 })
 
 export default router;
+

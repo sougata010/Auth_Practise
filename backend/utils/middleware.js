@@ -13,7 +13,6 @@ function auth(req,res,next){
         const token = authHeader.split(" ")[1];
         
         const pass = jsonwebtoken.verify(token,process.env.SECRET_KEY);
-        
         req.user = pass;
         next();
     } catch (error) {

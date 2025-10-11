@@ -20,10 +20,20 @@ const userSchema = mongoose.Schema({
     },
     roles:{
         type:String
+    },
+    roll:{
+        type:Number
+    },
+    fullName:{
+        type:String
+    },
+    year:{
+        type:String
+    },
+    department:{
+        type:String
     }
 })
 
 const User =mongoose.model('User',userSchema);
-
 export default User
-

@@ -7,7 +7,8 @@ import registerRoute from "./controllers/register.controllers.js";
 import mealRoute from "./controllers/meal.controllers.js"; 
 import userDetailsRoute from "./controllers/user_details.controllers.js"; 
 import cors from "cors";
-
+import superRoute from "./controllers/superintendent.controllers.js"
+import superauth from "./utils/supermiddleware.js";
 dotenv.config();
 const app = express();
 DataBase();
@@ -20,6 +21,7 @@ app.use("/auth", registerRoute);
 
 app.use("/user-details", auth, userDetailsRoute); 
 app.use("/meal", auth, mealRoute); 
+app.use("/superintendent",[auth,superauth],superRoute)
 
 app.listen(process.env.PORT, () => {
   console.log(`The app is listening on port ${process.env.PORT}`);

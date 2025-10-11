@@ -4,6 +4,9 @@ const mealSchema= mongoose.Schema({
     username:{
         type:String
     },
+    fullName:{
+        type:String
+    },
     day:{
         type:String
     },

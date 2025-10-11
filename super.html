@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Superintendent Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+        h1 {
+            color: #1f2937;
+            border-bottom: 2px solid #6b7280;
+            padding-bottom: 10px;
+            margin-bottom: 25px;
+            text-align: center;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+        #controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 15px;
+        }
+        .action-button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        #createMeal {
+            background-color: #10b981; /* Emerald green */
+            color: white;
+        }
+        #createMeal:hover {
+            background-color: #059669;
+            transform: translateY(-1px);
+        }
+        #mealTable {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 12px;
+            margin-top: 10px;
+        }
+        #mealTable th, #mealTable td {
+            padding: 15px 15px;
+            text-align: left;
+        }
+        #mealTable thead th {
+            background-color: #e5e7eb;
+            color: #374151;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        #mealTable tbody tr {
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            transition: box-shadow 0.2s;
+        }
+        #mealTable tbody tr:hover {
+             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .edit-btn {
+            background-color: #3b82f6; /* Blue */
+            color: white;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-right: 5px;
+        }
+        .edit-btn:hover {
+            background-color: #2563eb;
+        }
+        .delete-btn {
+            background-color: #ef4444; /* Red */
+            color: white;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .delete-btn:hover {
+            background-color: #dc2626;
+        }
+        .empty-state {
+            text-align: center;
+            color: #6b7280;
+            padding: 40px;
+            font-style: italic;
+        }
+        
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .modal.open {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px; /* Increased max-width for form */
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+        .modal.open .modal-content {
+            transform: scale(1);
+        }
+        /* Style for form elements in the modal */
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #374151;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            box-sizing: border-box; /* Ensures padding doesn't increase width */
+        }
+
+        /* Mobile adjustments (Card View for Table) */
+        @media (max-width: 768px) {
+            #mealTable thead {
+                display: none;
+            }
+            #mealTable tbody tr {
+                display: block;
+                margin-bottom: 15px;
+                border: 1px solid #e5e7eb;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            }
+            #mealTable td {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 10px 15px;
+                border-bottom: 1px solid #f3f4f6;
+                text-align: right;
+            }
+            #mealTable td:last-child {
+                border-bottom: none;
+            }
+            #mealTable td::before {
+                content: attr(data-label);
+                font-weight: bold;
+                color: #4b5563;
+                text-transform: uppercase;
+                font-size: 0.8rem;
+                text-align: left;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1><svg class="w-8 h-8 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20h-5v-2a3 3 0 00-5.356-1.857M17 20v-2c0-.523-.213-1.055-.5-1.556m0 0a2.502 2.502 0 00-4.444 0m0 0a2.502 2.502 0 00-4.444 0M12 10a2 2 0 00-2 2v2a2 2 0 002 2h4a2 2 0 002-2v-2a2 2 0 00-2-2h-4zM7 7h.01M17 7h.01"></path></svg> Superintendent Meal Overview</h1>
+    
+    <div id="controls">
+        <p class="text-gray-700">User: <strong id="superName" class="text-blue-600">Loading...</strong></p>
+        <button id="createMeal" class="action-button" onclick="openMealModal()">Create New Meal</button> 
+    </div>
+
+    <table id="mealTable">
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Full Name</th> <th>Day Meal</th>
+                <th>Night Main & Carb</th>
+                <th>Sunday Day</th>
+                <th>Sunday Night</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="mealTableBody">
+            </tbody>
+    </table>
+    <p id="loadingMessage" class="empty-state">Loading meal data...</p>
+</div>
+
+<div id="customAlertModal" class="modal">
+    <div class="modal-content">
+        <h3 id="modalTitle" class="text-lg font-bold mb-3 text-gray-800">Title</h3>
+        <p id="modalMessage" class="mb-5 text-gray-600">Message</p>
+        <div id="modalButtons" class="flex justify-end space-x-3">
+            </div>
+    </div>
+</div>
+
+<div id="mealUpsertModal" class="modal">
+    <div class="modal-content">
+        <h3 id="upsertModalTitle" class="text-lg font-bold mb-5 text-gray-800">Create Meal Preference</h3>
+        <form id="mealForm" onsubmit="event.preventDefault(); saveMealPreference();">
+            <input type="hidden" id="mealUserId">
+
+            <div class="form-group">
+                <label for="mealUsername">Username</label>
+                <input type="text" id="mealUsername" required placeholder="Student's Username" disabled>
+            </div>
+            
+            <div class="form-group">
+                <label for="mealDay">Day Meal Preference</label>
+                <select id="mealDay" required>
+                    <option value="" disabled selected>Select Day Meal</option>
+                    <option value="fish">Fish</option>
+                    <option value="curd">Curd</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="mealNightMain">Night Main Course (Protein)</label>
+                <select id="mealNightMain" required>
+                    <option value="" disabled selected>Select Night Main Course</option>
+                    <option value="egg">Egg</option>
+                    <option value="veg">Veg</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="mealNightCarb">Night Carb/Side</label>
+                <select id="mealNightCarb" required>
+                    <option value="" disabled selected>Select Night Carb/Side</option>
+                    <option value="roti">Roti</option>
+                    <option value="rice">Rice</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="mealSundayDay">Sunday Day Meal</label>
+                <select id="mealSundayDay" required>
+                    <option value="" disabled selected>Select Sunday Day Meal</option>
+                    <option value="meat">Meat</option>
+                    <option value="fish">Fish</option>
+                    <option value="panner">Panner</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="mealSundayNight">Sunday Night Meal</label>
+                 <select id="mealSundayNight" required>
+                    <option value="" disabled selected>Select Sunday Night Meal</option>
+                    <option value="veg">Veg</option>
+                </select>
+            </div>
+
+            <div class="flex justify-end space-x-3 mt-5">
+                <button type="button" onclick="closeUpsertModal()" class="px-4 py-2 bg-gray-300 text-gray-800 font-semibold rounded-md hover:bg-gray-400 transition">Cancel</button>
+                <button type="submit" id="saveButton" class="px-4 py-2 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700 transition">Save Preference</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<script>
+    const BACKEND_BASE_URL = "http://localhost:5000"; 
+
+    // =========================================================================
+    // I. AUTHENTICATION SERVICE (Integrated from authservice.js)
+    // =========================================================================
+
+    /**
+     * Attempts to renew the access token using the stored refresh token.
+     * @returns {string|null} The new access token or null on failure.
+     */
+    async function renewAccessToken() {
+        const refreshToken = localStorage.getItem('refreshToken');
+        if (!refreshToken) {
+            // Redirecting users to login page if no refresh token is found
+            window.location.href = 'login.html'; // Assuming a login page exists
+            return null;
+        }
+
+        try {
+            const response = await fetch(`${BACKEND_BASE_URL}/auth/refresh`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${refreshToken}`
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                localStorage.setItem('accessToken', data.access);
+                return data.access;
+            } else {
+                // Refresh failed (e.g., refresh token expired), force re-login
+                window.location.href = 'login.html';
+                return null;
+            }
+        } catch (error) {
+            console.error("Network error during token renewal:", error);
+            return null;
+        }
+    }
+
+    /**
+     * Wrapper around fetch to handle access token attachment and renewal on 401/403 errors.
+     * @param {string} url - The URL to fetch.
+     * @param {object} options - Fetch options.
+     * @param {boolean} retry - Whether to retry the request after renewal (default: true).
+     * @returns {Response|null} The fetch response object or null if authentication fails.
+     */
+    async function authenticatedFetch(url, options = {}, retry = true) {
+        let accessToken = localStorage.getItem('accessToken');
+
+        if (!accessToken) {
+            window.location.href = 'login.html';
+            return null;
+        }
+
+        options.headers = {
+            ...options.headers,
+            'Authorization': `Bearer ${accessToken}`
+        };
+
+        let response = await fetch(url, options);
+
+        // Check for token expiration (401 Unauthorized or 403 Forbidden)
+        if ((response.status === 401 || response.status === 403) && retry) {
+            const newAccessToken = await renewAccessToken();
+
+            if (newAccessToken) {
+                // Retry the original request with the new token
+                options.headers['Authorization'] = `Bearer ${newAccessToken}`;
+                // Set retry to false to prevent infinite loops
+                response = await authenticatedFetch(url, options, false);
+            } else {
+                return null; // Failed to renew token
+            }
+        }
+        
+        // Handle case where fetch failed or token was not renewed/valid
+        if (!response || response.status === 401 || response.status === 403) {
+            // If we are here, either the initial token failed and the retry failed, 
+            // or the new token failed. Redirect to login if a previous auth step didn't.
+            if (response) {
+                // If it's a 403/401 that wasn't retried successfully,
+                // assume session expired and force redirect
+                window.location.href = 'login.html';
+            }
+            return null;
+        }
+
+        return response;
+    }
+
+
+    // =========================================================================
+    // II. CUSTOM MODAL IMPLEMENTATION (Alert/Confirm)
+    // =========================================================================
+
+    const customAlertModal = document.getElementById('customAlertModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalMessage = document.getElementById('modalMessage');
+    const modalButtons = document.getElementById('modalButtons');
+
+    function hideModal() {
+        customAlertModal.classList.remove('open');
+        modalButtons.innerHTML = '';
+        document.onkeydown = null;
+    }
+
+    /**
+     * Displays a simple alert message (replaces window.alert).
+     * @param {string} title - The title for the message box.
+     * @param {string} message - The message content.
+     */
+    function showMessage(title, message) {
+        modalTitle.textContent = title;
+        modalMessage.textContent = message;
+
+        const okButton = document.createElement('button');
+        okButton.textContent = 'OK';
+        okButton.className = 'px-4 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition';
+        okButton.onclick = hideModal;
+        
+        modalButtons.appendChild(okButton);
+        customAlertModal.classList.add('open');
+    }
+
+    /**
+     * Displays a confirmation prompt (replaces window.confirm).
+     * @param {string} title - The title for the confirmation box.
+     * @param {string} message - The confirmation message.
+     * @returns {Promise<boolean>} Resolves to true for OK, false for Cancel.
+     */
+    function showConfirmation(title, message) {
+        return new Promise(resolve => {
+            modalTitle.textContent = title;
+            modalMessage.textContent = message;
+
+            // OK Button
+            const okButton = document.createElement('button');
+            okButton.textContent = 'Confirm';
+            okButton.className = 'px-4 py-2 bg-red-600 text-white font-semibold rounded-md hover:bg-red-700 transition';
+            okButton.onclick = () => {
+                hideModal();
+                resolve(true);
+            };
+
+            // Cancel Button
+            const cancelButton = document.createElement('button');
+            cancelButton.textContent = 'Cancel';
+            cancelButton.className = 'px-4 py-2 bg-gray-300 text-gray-800 font-semibold rounded-md hover:bg-gray-400 transition';
+            cancelButton.onclick = () => {
+                hideModal();
+                resolve(false);
+            };
+
+            modalButtons.appendChild(cancelButton);
+            modalButtons.appendChild(okButton);
+            customAlertModal.classList.add('open');
+
+            // Allow 'Enter' key to act as 'Confirm'
+            document.onkeydown = (e) => {
+                if (e.key === 'Enter') {
+                    okButton.click();
+                }
+            };
+        });
+    }
+
+    // =========================================================================
+    // III. MEAL UPSERT MODAL LOGIC (Create/Update)
+    // =========================================================================
+
+    const mealUpsertModal = document.getElementById('mealUpsertModal');
+    const upsertModalTitle = document.getElementById('upsertModalTitle');
+    const mealForm = document.getElementById('mealForm');
+    const mealUserId = document.getElementById('mealUserId');
+    const mealUsername = document.getElementById('mealUsername');
+    const mealDay = document.getElementById('mealDay');
+    const mealNightMain = document.getElementById('mealNightMain');
+    const mealNightCarb = document.getElementById('mealNightCarb');
+    const mealSundayDay = document.getElementById('mealSundayDay');
+    const mealSundayNight = document.getElementById('mealSundayNight');
+    const saveButton = document.getElementById('saveButton');
+
+    /**
+     * Opens the meal preference modal for creation or editing.
+     * @param {object|null} user - The user object for editing, or null for creating.
+     */
+    function openMealModal(user = null) {
+        mealForm.reset(); // Clear previous data
+        mealUserId.value = '';
+
+        if (user) {
+            // Edit Mode
+            upsertModalTitle.textContent = `Edit Meal for ${user.username}`;
+            mealUserId.value = user.userId || '';
+            mealUsername.value = user.username || '';
+            mealUsername.disabled = true; // Cannot change username on edit
+            saveButton.textContent = 'Update Preference';
+
+            const meals = user.mealPreferences;
+            if (meals) {
+                // Set dropdown values based on existing data
+                mealDay.value = meals.day || '';
+                mealNightMain.value = meals.night1 || '';
+                mealNightCarb.value = meals.night2 || '';
+                mealSundayDay.value = meals.sunday_day || '';
+                mealSundayNight.value = meals.sunday_night || '';
+            }
+        } else {
+            // Create Mode 
+            // NOTE: In a real system, you'd likely fetch a list of unassigned users for creation.
+            // For now, we allow the superintendent to manually enter a username.
+            upsertModalTitle.textContent = 'Create New Meal Preference';
+            mealUsername.value = '';
+            mealUsername.disabled = false; // Enable username input for creation
+            saveButton.textContent = 'Create Preference';
+
+            // Ensure dropdowns show the placeholder/default option
+            mealDay.value = '';
+            mealNightMain.value = '';
+            mealNightCarb.value = '';
+            mealSundayDay.value = '';
+            mealSundayNight.value = 'veg'; // Sunday night only has one option, so select it by default.
+        }
+
+        mealUpsertModal.classList.add('open');
+    }
+
+    /**
+     * Closes the meal preference modal.
+     */
+    function closeUpsertModal() {
+        mealUpsertModal.classList.remove('open');
+    }
+
+    /**
+     * Handles the form submission for creating or updating a meal preference.
+     */
+    async function saveMealPreference() {
+        closeUpsertModal(); // Close the modal immediately after submission to indicate action taken
+
+        const userId = mealUserId.value;
+        const isUpdate = !!userId;
+        
+        const mealData = {
+            // The API payload structure uses day, night1, night2, etc.
+            username: mealUsername.value, 
+            day: mealDay.value,
+            night1: mealNightMain.value,
+            night2: mealNightCarb.value,
+            sunday_day: mealSundayDay.value,
+            sunday_night: mealSundayNight.value
+        };
+
+        let url = `${BACKEND_BASE_URL}/superintendent/meal`;
+        let method = 'POST';
+        let successMessage = `Meal preference for ${mealData.username} created successfully.`;
+        
+        if (isUpdate) {
+            // NOTE: Assuming your backend has a PUT route like /superintendent/meal/:userId for updates
+            url = `${BACKEND_BASE_URL}/superintendent/meal/${userId}`;
+            method = 'PUT';
+            successMessage = `Meal preference for ${mealData.username} updated successfully.`;
+        }
+
+        try {
+            const response = await authenticatedFetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(mealData)
+            });
+
+            if (!response) {
+                showMessage("Authentication Error", "Session expired or access denied. Please re-login.");
+                return;
+            }
+
+            if (response.ok) {
+                showMessage('Success', successMessage);
+                fetchAllMealData(); // Refresh the table
+            } else {
+                const errorData = await response.json();
+                showMessage(`${isUpdate ? 'Update' : 'Creation'} Failed`, `Error: ${errorData.error || response.statusText} (Status: ${response.status})`);
+            }
+
+        } catch (error) {
+            showMessage("Network Error", "A network error occurred while saving the preference.");
+            console.error("Save meal network error:", error);
+        }
+    }
+
+
+    // =========================================================================
+    // IV. DASHBOARD LOGIC (Updated to use authenticatedFetch, custom modals, and Edit button)
+    // =========================================================================
+
+    /**
+     * Helper function to render a user row in the table.
+     * @param {object} user - Single user meal preference object from API.
+     * @returns {HTMLElement} The table row element.
+     */
+    function renderUserRow(user) {
+        const row = document.createElement('tr');
+        const meals = user.mealPreferences;
+        const userJsonString = JSON.stringify({
+            userId: user.userId,
+            username: user.username,
+            fullName: user.fullName,
+            mealPreferences: meals
+        }).replace(/'/g, "\\'"); // Escape single quotes for use in onclick
+
+        row.innerHTML = `
+            <td data-label="Username">${user.username || '-'}</td>
+            <td data-label="Full Name">${user.fullName || '-'}</td> 
+            <td data-label="Day Meal">${meals ? meals.day : '-'}</td>
+            <td data-label="Night Main & Carb">${meals ? `${meals.night1 || '-'} w/ ${meals.night2 || '-'}` : '-'}</td>
+            <td data-label="Sun Day">${meals ? meals.sunday_day : '-'}</td>
+            <td data-label="Sun Night">${meals ? meals.sunday_night : '-'}</td>
+            <td data-label="Action">
+                <button class="edit-btn" onclick='openMealModal(${userJsonString})'>Edit</button>
+                <button class="delete-btn" onclick="deleteMealPreference('${user.userId}', '${user.username}')">Delete</button>
+            </td>
+        `;
+        return row;
+    }
+
+    /**
+     * Fetches all meal data from the superintendent endpoint and renders the table.
+     */
+    async function fetchAllMealData() {
+        const body = document.getElementById('mealTableBody');
+        const loadingMessage = document.getElementById('loadingMessage');
+        const accessToken = localStorage.getItem('accessToken');
+        
+        loadingMessage.textContent = 'Loading...';
+        loadingMessage.style.display = 'block';
+        body.innerHTML = ''; // Clear previous data
+
+        if (!accessToken) {
+            loadingMessage.textContent = "Error: Not authenticated. Redirecting to login...";
+            window.location.href = 'login.html'; // Fallback to login
+            return;
+        }
+
+        try {
+            // Use authenticatedFetch to automatically handle token renewal
+            const response = await authenticatedFetch(`${BACKEND_BASE_URL}/superintendent`, { method: 'GET' });
+
+            if (!response) {
+                // authenticatedFetch returned null, meaning auth/refresh failed or user was redirected.
+                loadingMessage.textContent = "Authentication required or session expired.";
+                return;
+            }
+
+            if (response.ok) {
+                const data = await response.json();
+                
+                // Set Superintendent name (placeholder)
+                document.getElementById('superName').textContent = 'Superintendent'; 
+                loadingMessage.style.display = 'none';
+                
+                if (data.length === 0) {
+                    body.innerHTML = '<tr><td colspan="7" class="empty-state">No student meal data found.</td></tr>'; // Updated colspan
+                    return;
+                }
+
+                data.forEach(user => {
+                    body.appendChild(renderUserRow(user));
+                });
+
+            } else {
+                const errorData = await response.json();
+                loadingMessage.textContent = `Error: ${errorData.error || 'Failed to fetch data.'} (Status: ${response.status})`;
+                if (response.status === 403) {
+                    showMessage("Access Denied", "Authorization failed: You do not have superintendent privileges to view this page.");
+                }
+            }
+        } catch (error) {
+            loadingMessage.textContent = "Network Error: Could not reach the server.";
+            console.error("Fetch error:", error);
+        }
+    }
+
+    /**
+     * Deletes a student's meal preference record.
+     * @param {string} userId - The unique ID of the meal record to delete.
+     * @param {string} username - The username for confirmation message.
+     */
+    async function deleteMealPreference(userId, username) {
+        const confirmed = await showConfirmation(
+            'Confirm Deletion', 
+            `Are you sure you want to delete the meal preference for ${username}? This action cannot be undone.`
+        );
+
+        if (!confirmed) {
+            return;
+        }
+
+        try {
+            // NOTE: Assuming your backend has a DELETE route like /superintendent/meal/:userId
+            const response = await authenticatedFetch(`${BACKEND_BASE_URL}/superintendent/meal/${userId}`, {
+                method: 'DELETE'
+            });
+
+            if (!response) {
+                showMessage("Authentication Error", "Session expired or access denied.");
+                return;
+            }
+
+            if (response.ok) {
+                showMessage('Success', `Meal preference for ${username} deleted successfully.`);
+                // Refresh the table after deletion
+                fetchAllMealData();
+            } else {
+                const errorData = await response.json();
+                showMessage('Deletion Failed', `Error: ${errorData.error || response.statusText} (Status: ${response.status})`);
+            }
+        } catch (error) {
+            showMessage("Network Error", "A network error occurred during deletion.");
+            console.error("Deletion network error:", error);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', fetchAllMealData);
+</script>
+
+</body>
+</html>

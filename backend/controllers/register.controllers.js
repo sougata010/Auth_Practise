@@ -14,6 +14,4 @@ router.post("/register",async(req,res)=>{
     });
     await user.save();
 })
-
 export default router;
-

@@ -41,7 +41,13 @@
                 }
 
                 alert("Login successful!");
-                window.location.href = "dashboard.html";
+                if(data.roles=="student"){
+
+                    window.location.href = "dashboard.html";
+                }
+                else if(data.roles="superintendent"){
+                    window.location.href="super.html"
+                }
             } else {
                 // Handle errors like 401 Unauthorized
                 const errorMessage = data.error || "Login failed due to a server error.";

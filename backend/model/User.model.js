@@ -18,7 +18,7 @@ const userSchema = mongoose.Schema({
     refreshToken:{
         type:String
     },
-    role:{
+    roles:{
         type:String
     }
 })
@@ -26,3 +26,4 @@ const userSchema = mongoose.Schema({
 const User =mongoose.model('User',userSchema);
 
 export default User
+

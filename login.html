@@ -1,15 +1,54 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+            background-color: #f3f4f6;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
 </head>
-<body>
-    <h2>Login</h2>
-    <form id="loginForm">
-        <input type="text" id="username" placeholder="Username" required><br>
-        <input type="password" id="password" placeholder="Password" required><br>
-        <button type="submit">Login</button>
-    </form>
+<body class="bg-gray-100">
+    
+    <div class="w-full max-w-sm bg-white p-8 rounded-xl shadow-2xl border-t-4 border-green-600">
+        
+        <h2 class="text-3xl font-extrabold text-center text-gray-900 mb-6">Welcome Back 👋</h2>
+        
+        <form id="loginForm" class="space-y-4">
+            
+            <div class="relative">
+                <input type="text" id="username" placeholder="Username" required
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition duration-150"
+                    aria-label="Username">
+            </div>
+            
+            <div class="relative">
+                <input type="password" id="password" placeholder="Password" required
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition duration-150"
+                    aria-label="Password">
+            </div>
+            
+            <button type="submit"
+                class="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700 transition duration-200 shadow-md transform hover:scale-[1.01]">
+                Login
+            </button>
+            
+            <p class="text-center text-sm text-gray-500 mt-4">
+                Don't have an account? 
+                <a href="register.html" class="text-green-600 hover:text-green-800 font-medium transition duration-150">Register here</a>
+            </p>
+
+        </form>
+
+    </div>
 
     <script>
         const BACKEND_BASE_URL = "http://localhost:5000"; 
@@ -17,39 +56,35 @@
         document.getElementById("loginForm").addEventListener("submit", async (e) => {
             e.preventDefault();
             
-            // FIX 2: Retrieve the value from the element with ID 'username'
             const username = document.getElementById("username").value;
             const password = document.getElementById("password").value;
 
             const res = await fetch(`${BACKEND_BASE_URL}/auth/login`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                // FIX 3: Send 'username' and 'password' in the body
                 body: JSON.stringify({ username, password }) 
             });
 
             const data = await res.json();
             
-            // FIX 4: Check for 'access' property (Access Token) as sent by the backend
             if (res.ok && data.access) { 
-                // FIX 5: Save the Access Token correctly
                 localStorage.setItem("accessToken", data.access);
                 
-                // OPTIONAL: Save the Refresh Token too, for later renewal
                 if (data.refresh) {
                     localStorage.setItem("refreshToken", data.refresh);
                 }
 
                 alert("Login successful!");
                 if(data.roles=="student"){
-
                     window.location.href = "dashboard.html";
                 }
-                else if(data.roles="superintendent"){
+                else if(data.roles=="superintendent"){
                     window.location.href="super.html"
                 }
+                else if(data.roles=="admin"){
+                     window.location.href="admin.html"
+                }
             } else {
-                // Handle errors like 401 Unauthorized
                 const errorMessage = data.error || "Login failed due to a server error.";
                 alert(errorMessage);
             }

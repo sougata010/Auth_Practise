@@ -1,6 +1,7 @@
 import express from "express";
 import Meal from "../model/Meal.model.js";
 import dotenv from "dotenv";
+import User from "../model/User.model.js";
 
 dotenv.config();
 
@@ -42,11 +43,15 @@ router.delete("/meal/:userId",async(req,res)=>{
 router.post("/meal", async (req, res) => {
     try {
         const { username, day, night1, night2, sunday_day, sunday_night, fullName } = req.body;
+        
 
         if (!username || !day || !night1 || !night2 || !sunday_day || !sunday_night) {
              return res.status(400).json({ error: "All meal fields and a username are required for creation." });
         }
-
+        const valid_user =await User.findOne({username});
+        if(!valid_user){
+            res.status(400).json({error:"User is not registered"})
+        }
         const existingMeal = await Meal.findOne({ username });
         if (existingMeal) {
             return res.status(409).json({ error: `Meal preference for user '${username}' already exists. Please use the Edit function (PUT).` });
@@ -103,14 +108,16 @@ router.put("/meal/:userId", async (req, res) => {
         
     } catch (error) {
         console.error("Error updating meal preference:", error);
+        
+        // Check for Mongoose Validation Errors (e.g., if a field is required but missing)
         if (error.name === 'ValidationError') {
+            // Return a 400 Bad Request with the specific validation message
             return res.status(400).json({ error: error.message });
         }
         
         res.status(500).json({ error: "Internal Server Error during update." });
     }
 });
-
 
 
 

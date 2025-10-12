@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -29,10 +30,12 @@
             visibility: hidden;
             transition: opacity 0.3s ease, visibility 0.3s ease;
         }
+
         .modal.open {
             opacity: 1;
             visibility: visible;
         }
+
         .modal-content {
             background: white;
             padding: 25px;
@@ -43,6 +46,7 @@
             transform: scale(0.9);
             transition: transform 0.3s ease;
         }
+
         .modal.open .modal-content {
             transform: scale(1);
         }
@@ -59,7 +63,7 @@
             <div class="user-info text-gray-700 space-y-1">
                 <p><strong>Username:</strong> <span id="userName" class="font-medium">Loading...</span></p>
                 <p><strong>Full Name:</strong> <span id="fullName" class="font-medium">Loading...</span></p>
-                <p><strong>Role:</strong> <span id="userRole" class="font-medium">Loading...</span></p>
+                <p><strong>Roll:</strong> <span id="userRole" class="font-medium">Loading...</span></p>
                 <p><strong>Department:</strong> <span id="userDept" class="font-medium">Loading...</span></p>
                 <p><strong>Year:</strong> <span id="userYear" class="font-medium">Loading...</span></p>
             </div>
@@ -67,14 +71,17 @@
 
         <!-- Meal Selector Dashboard -->
         <div class="dashboard bg-white p-6 sm:p-8 rounded-xl shadow-xl">
-            <h1 class="text-3xl font-extrabold text-gray-800 pb-3 mb-6 border-b-2 border-blue-600 text-center">Weekly Meal Selector</h1>
+            <h1 class="text-3xl font-extrabold text-gray-800 pb-3 mb-6 border-b-2 border-blue-600 text-center">Weekly
+                Meal Selector</h1>
 
             <!-- Weekday Day Meal -->
             <div class="meal-section bg-gray-100 p-4 rounded-lg mb-5">
                 <h2 class="text-lg font-semibold text-blue-600 mb-3">🍽️ Weekday Day Meal (Mon - Sat)</h2>
-                <div class="meal-option-group flex flex-col sm:flex-row items-start sm:items-center mb-3 space-y-2 sm:space-y-0 sm:space-x-4">
+                <div
+                    class="meal-option-group flex flex-col sm:flex-row items-start sm:items-center mb-3 space-y-2 sm:space-y-0 sm:space-x-4">
                     <label for="weekday-day-main" class="w-full sm:w-36 font-bold text-gray-600">Main Dish:</label>
-                    <select id="weekday-day-main" class="p-2 border border-gray-300 rounded-md flex-grow focus:border-green-500 focus:ring-green-500">
+                    <select id="weekday-day-main"
+                        class="p-2 border border-gray-300 rounded-md flex-grow focus:border-green-500 focus:ring-green-500">
                         <option value="" disabled selected>--Select Your Preference--</option>
                         <option value="fish">🐟 Fish</option>
                         <option value="curd">🥛 Curd</option>
@@ -85,7 +92,8 @@
             <!-- Weekday Night Meal -->
             <div class="meal-section bg-gray-100 p-4 rounded-lg mb-5">
                 <h2 class="text-lg font-semibold text-blue-600 mb-3">🌙 Weekday Night Meal (Mon - Sat)</h2>
-                <div class="meal-option-group flex flex-col sm:flex-row items-start sm:items-center mb-3 space-y-2 sm:space-y-0 sm:space-x-4">
+                <div
+                    class="meal-option-group flex flex-col sm:flex-row items-start sm:items-center mb-3 space-y-2 sm:space-y-0 sm:space-x-4">
                     <label for="weekday-night-main" class="w-full sm:w-36 font-bold text-gray-600">Main Dish:</label>
                     <select id="weekday-night-main" class="p-2 border border-gray-300 rounded-md flex-grow">
                         <option value="" disabled selected>--Select Your Preference--</option>
@@ -93,7 +101,8 @@
                         <option value="egg">🥚 Egg</option>
                     </select>
                 </div>
-                <div class="meal-option-group flex flex-col sm:flex-row items-start sm:items-center mb-3 space-y-2 sm:space-y-0 sm:space-x-4">
+                <div
+                    class="meal-option-group flex flex-col sm:flex-row items-start sm:items-center mb-3 space-y-2 sm:space-y-0 sm:space-x-4">
                     <label for="weekday-night-carb" class="w-full sm:w-36 font-bold text-gray-600">Carb/Starch:</label>
                     <select id="weekday-night-carb" class="p-2 border border-gray-300 rounded-md flex-grow">
                         <option value="" disabled selected>--Select Your Preference--</option>
@@ -107,7 +116,8 @@
             <div class="meal-section bg-green-100 p-4 rounded-lg mb-5">
                 <h2 class="text-lg font-semibold text-green-700 mb-3">☀️ Sunday Meal Plan</h2>
 
-                <div class="meal-option-group flex flex-col sm:flex-row items-start sm:items-center mb-3 space-y-2 sm:space-y-0 sm:space-x-4">
+                <div
+                    class="meal-option-group flex flex-col sm:flex-row items-start sm:items-center mb-3 space-y-2 sm:space-y-0 sm:space-x-4">
                     <label for="sunday-day" class="w-full sm:w-36 font-bold text-gray-700">Sunday Day Main:</label>
                     <select id="sunday-day" class="p-2 border border-gray-300 rounded-md flex-grow">
                         <option value="" disabled selected>--Select Your Preference--</option>
@@ -117,7 +127,8 @@
                     </select>
                 </div>
 
-                <div class="meal-option-group flex flex-col sm:flex-row items-start sm:items-center mb-3 space-y-2 sm:space-y-0 sm:space-x-4">
+                <div
+                    class="meal-option-group flex flex-col sm:flex-row items-start sm:items-center mb-3 space-y-2 sm:space-y-0 sm:space-x-4">
                     <label for="sunday-night" class="w-full sm:w-36 font-bold text-gray-700">Sunday Night Main:</label>
                     <select id="sunday-night" class="p-2 border border-gray-300 rounded-md flex-grow">
                         <option value="" disabled selected>--Select Your Preference--</option>
@@ -128,7 +139,9 @@
 
             <!-- Submit Button -->
             <div class="submit-container text-center mt-6">
-                <button onclick="submitMealSelections()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg shadow-md transition duration-300 transform hover:scale-[1.01]">Save Meal Choices</button>
+                <button onclick="submitMealSelections()"
+                    class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg shadow-md transition duration-300 transform hover:scale-[1.01]">Save
+                    Meal Choices</button>
             </div>
 
         </div>
@@ -140,14 +153,16 @@
             <h3 id="modalTitle" class="text-xl font-bold mb-3 text-gray-800">Notification</h3>
             <p id="modalMessage" class="mb-5 text-gray-600">Message</p>
             <div id="modalButtons" class="flex justify-end space-x-3">
-                <button id="okButton" class="px-4 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition" onclick="hideModal()">OK</button>
+                <button id="okButton"
+                    class="px-4 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition"
+                    onclick="hideModal()">OK</button>
             </div>
         </div>
     </div>
 
     <script>
         // --- Authentication Service Functions (Replaces refreshAuth.js) ---
-        const BACKEND_BASE_URL = "http://localhost:5000"; 
+        const BACKEND_BASE_URL = "http://localhost:5000";
 
         async function renewAccessToken() {
             const refreshToken = localStorage.getItem('refreshToken');
@@ -182,7 +197,7 @@
 
             if (!accessToken) {
                 // If the access token is missing entirely, redirect to login
-                window.location.href = 'login.html'; 
+                window.location.href = 'login.html';
                 return null;
             }
 
@@ -200,12 +215,12 @@
                 if (newAccessToken) {
                     options.headers['Authorization'] = `Bearer ${newAccessToken}`;
                     // Retry the request ONCE with the new token
-                    response = await authenticatedFetch(url, options, false); 
+                    response = await authenticatedFetch(url, options, false);
                 } else {
                     return null; // Failed to renew token
                 }
             }
-            
+
             return response;
         }
 
@@ -256,7 +271,7 @@
                     document.getElementById('userRole').textContent = "Login Required";
                     document.getElementById('userDept').textContent = "Login Required";
                     document.getElementById('userYear').textContent = "Login Required";
-                    return; 
+                    return;
                 }
 
                 if (response.ok) {
@@ -268,7 +283,7 @@
                     document.getElementById('userRole').textContent = data.roll || 'N/A'; // Corrected from data.roll
                     document.getElementById('userDept').textContent = data.department || 'N/A';
                     document.getElementById('userYear').textContent = data.year || 'N/A';
-                    
+
                     const meals = data.mealPreferences;
                     if (meals) {
                         for (const elementId in MEAL_FIELDS) {
@@ -322,14 +337,17 @@
 
                 if (!response) {
                     // Auth failure handled by authenticatedFetch, just stop here
-                    return; 
+                    return;
                 }
 
                 if (response.ok) {
                     showMessage('Success!', 'Meal choices saved successfully!');
-                } else {
+                }
+                else{
+                    console.error("Failed to fetch user data:", response.status);
                     const errorData = await response.json();
-                    showMessage('Error Saving', `Error saving meal choices: ${errorData.error || response.statusText}`);
+                    showMessage("Data Error", errorData.error || "Failed to load user profile.");
+                    document.getElementById('userName').textContent = "Error Loading";
                 }
             } catch (error) {
                 console.error("Error submitting meal choices:", error);

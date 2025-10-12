@@ -11,7 +11,7 @@ const router = express.Router();
 
 function genRefresh(user) {
     const userRoles = user.roles || ["student"];
-    return jwt.sign({ username: user.username, roles: userRoles }, process.env.SECRET_KEY, { expiresIn: "7d" });
+    return jwt.sign({ username: user.username}, process.env.SECRET_KEY, { expiresIn: "7d" });
 }
 
 function genAccess(user) {

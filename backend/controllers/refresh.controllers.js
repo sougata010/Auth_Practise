@@ -24,7 +24,7 @@ router.post("/",async(req,res)=>{
         return res.status(403).json({error:"Invalid refresh token"});
     }
     const access =jsonwebtoken.sign({username: user.username, roles: user.roles},process.env.SECRET_KEY,{expiresIn: '1h'});
-    res.status(201).json({refresh,access})
+    res.status(201).json({access})
 })
 
 export default router

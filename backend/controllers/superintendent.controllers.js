@@ -2,6 +2,7 @@ import express from "express";
 import Meal from "../model/Meal.model.js";
 import dotenv from "dotenv";
 import User from "../model/User.model.js";
+import bcrypt from "bcrypt";
 
 dotenv.config();
 
@@ -9,30 +10,39 @@ const router = express.Router();
 
 router.get("/",async(req,res)=>{
     try {
-        const user=await Meal.find();
-        const user_data=user.map((user)=>({
-            username:user.username,
-            fullName:user.fullName,
-            userId:user._id,
-            mealPreferences: {
-                    day: user.day,
-                    night1: user.night1,
-                    night2: user.night2,
-                    sunday_day: user.sunday_day,
-                    sunday_night: user.sunday_night
-                }
+        const user=await User.find({ roles: 'student'});
+        const user_data=await Promise.all(user.map(async(user)=>{
+            const meal = await Meal.findOne({ username: user.username });
+           return {
+                userId: user._id,
+                username: user.username,
+                fullName: user.fullName, 
+                email: user.email,
+                roll: user.roll,
+                department: user.department,
+                year: user.year,
+                mealPreferences: meal ? {
+                    day: meal.day,
+                    night1: meal.night1,
+                    night2: meal.night2,
+                    sunday_day: meal.sunday_day,
+                    sunday_night: meal.sunday_night
+                } : null
+            }
         }))
-        res.json(user_data);
+       res.json({ users: user_data, superintendent_name: req.user.username });
     } catch (error) {
         res.status(500).json({error:error})
     }
 })
 
-router.delete("/meal/:userId",async(req,res)=>{
+router.delete("/user/:userId",async(req,res)=>{
     try {
         const {userId} = req.params
-        const meal = await Meal.deleteOne({ _id: userId });
-        if(meal.deletedCount === 0){
+        const validuser = await User.findById({_id:userId});
+        const user = await User.deleteOne({ _id: userId });
+        await Meal.deleteOne({username: validuser.username});
+        if(user.deletedCount === 0){
             return res.status(400).json({error:"Meal deletion unsuccessfull"});
         }
         res.status(201).json({message:"student deleted successfully"});
@@ -40,39 +50,33 @@ router.delete("/meal/:userId",async(req,res)=>{
         res.status(500).json({ error: "Internal Server Error during deletion." });
     }
 })
-router.post("/meal", async (req, res) => {
+router.post("/user", async (req, res) => {
     try {
-        const { username, day, night1, night2, sunday_day, sunday_night, fullName } = req.body;
+        const { username, roll, department, year, full_name,password,email } = req.body;
         
 
-        if (!username || !day || !night1 || !night2 || !sunday_day || !sunday_night) {
+        if (!username || !roll || !department || !year || !password || !email || !full_name) {
              return res.status(400).json({ error: "All meal fields and a username are required for creation." });
         }
-        const valid_user =await User.findOne({username});
-        if(!valid_user){
-            res.status(400).json({error:"User is not registered"})
+        const existingUser =await User.findOne({username});
+        if(existingUser){
+            return res.status(400).json({error:`User with ${username} already exists kindly use update`});
         }
-        const existingMeal = await Meal.findOne({ username });
-        if (existingMeal) {
-            return res.status(409).json({ error: `Meal preference for user '${username}' already exists. Please use the Edit function (PUT).` });
-        }
-
-        const newMeal = new Meal({
+        const salt =await bcrypt.genSalt(7)
+        const hashedPassword = await bcrypt.hash(password,salt)
+        const newUser = new User({
             username,
-            day,
-            night1,
-            night2,
-            sunday_day,
-            sunday_night,
-            fullName: fullName || username 
+            email,
+            password: hashedPassword,
+            fullName: full_name,
+            roll,
+            department,
+            year,
+            roles: 'student'
         });
 
-        await newMeal.save();
-
-        res.status(201).json({ 
-            message: "Meal plan created successfully.",
-            mealId: newMeal._id
-        });
+        await newUser.save();
+        res.status(201).json({ message: "User created successfully", userId: newUser._id });
         
     } catch (error) {
         console.error("Error creating meal preference:", error);
@@ -80,42 +84,22 @@ router.post("/meal", async (req, res) => {
     }
 });
 
-router.put("/meal/:userId", async (req, res) => {
+router.put("/users/:id", async (req, res) => {
     try {
-        const { userId } = req.params; 
-        
-       
+        const { id } = req.params;
+        const updateData = req.body;
+        const updatedUser = await User.findByIdAndUpdate(id, {
+            fullName: updateData.full_name,
+            roll: updateData.roll,
+            department: updateData.department,
+            year: updateData.year,
+            ...(updateData.password && { password: updateData.password })
+        }, { new: true });
+        if (!updatedUser) return res.status(404).json({ error: "User not found" });
 
-        const mealData = {
-            day: req.body.day,
-            night1: req.body.night1,
-            night2: req.body.night2,
-            sunday_day: req.body.sunday_day,
-            sunday_night: req.body.sunday_night
-        };
-
-        const updatedMeal = await Meal.findOneAndUpdate(
-            {_id:userId},
-            { $set: mealData },
-            { new: true, runValidators: true }
-        );
-
-        if (!updatedMeal) {
-            return res.status(404).json({ error: "Meal preference record not found for the given ID." });
-        }
-
-        res.status(200).json({ message: "Meal plan updated successfully." });
-        
+        res.json({ message: "User updated successfully" });
     } catch (error) {
-        console.error("Error updating meal preference:", error);
-        
-        // Check for Mongoose Validation Errors (e.g., if a field is required but missing)
-        if (error.name === 'ValidationError') {
-            // Return a 400 Bad Request with the specific validation message
-            return res.status(400).json({ error: error.message });
-        }
-        
-        res.status(500).json({ error: "Internal Server Error during update." });
+        res.status(500).json({ error: "Internal Server Error" });
     }
 });
 

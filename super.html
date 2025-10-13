@@ -45,42 +45,42 @@
             transition: all 0.2s ease-in-out;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-        #createMeal {
-            background-color: #10b981; /* Emerald green */
+        #createUser {
+            background-color: #10b981;
             color: white;
         }
-        #createMeal:hover {
+        #createUser:hover {
             background-color: #059669;
             transform: translateY(-1px);
         }
-        #mealTable {
+        #studentTable {
             width: 100%;
             border-collapse: separate;
             border-spacing: 0 12px;
             margin-top: 10px;
         }
-        #mealTable th, #mealTable td {
-            padding: 15px 15px;
+        #studentTable th, #studentTable td {
+            padding: 15px;
             text-align: left;
+            vertical-align: middle;
         }
-        #mealTable thead th {
+        #studentTable thead th {
             background-color: #e5e7eb;
             color: #374151;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.05em;
         }
-        #mealTable tbody tr {
+        #studentTable tbody tr {
             background-color: #ffffff;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
             transition: box-shadow 0.2s;
         }
-        #mealTable tbody tr:hover {
+        #studentTable tbody tr:hover {
              box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
-        .edit-btn {
-            background-color: #3b82f6; /* Blue */
+        .table-btn {
             color: white;
             padding: 8px 12px;
             border: none;
@@ -88,29 +88,21 @@
             cursor: pointer;
             transition: background-color 0.2s;
             margin-right: 5px;
+            font-size: 0.875rem;
         }
-        .edit-btn:hover {
-            background-color: #2563eb;
-        }
-        .delete-btn {
-            background-color: #ef4444; /* Red */
-            color: white;
-            padding: 8px 12px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-        .delete-btn:hover {
-            background-color: #dc2626;
-        }
+        .view-btn { background-color: #22c55e; } /* Green */
+        .view-btn:hover { background-color: #16a34a; }
+        .edit-btn { background-color: #3b82f6; } /* Blue */
+        .edit-btn:hover { background-color: #2563eb; }
+        .delete-btn { background-color: #ef4444; } /* Red */
+        .delete-btn:hover { background-color: #dc2626; }
         .empty-state {
             text-align: center;
             color: #6b7280;
             padding: 40px;
             font-style: italic;
         }
-        
+
         /* Modal Styles */
         .modal {
             position: fixed;
@@ -136,7 +128,7 @@
             padding: 25px;
             border-radius: 10px;
             width: 90%;
-            max-width: 500px; /* Increased max-width for form */
+            max-width: 550px;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
             transform: scale(0.9);
             transition: transform 0.3s ease;
@@ -144,7 +136,6 @@
         .modal.open .modal-content {
             transform: scale(1);
         }
-        /* Style for form elements in the modal */
         .form-group label {
             display: block;
             margin-bottom: 5px;
@@ -157,21 +148,35 @@
             margin-bottom: 15px;
             border: 1px solid #d1d5db;
             border-radius: 6px;
-            box-sizing: border-box; /* Ensures padding doesn't increase width */
+            box-sizing: border-box; 
         }
 
-        /* Mobile adjustments (Card View for Table) */
+        /* Detail View Modal Specific Styles */
+        #studentDetailModal .detail-section { margin-bottom: 1.5rem; }
+        #studentDetailModal .detail-heading {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #4b5563;
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+        #studentDetailModal p { margin-bottom: 0.5rem; color: #374151; }
+        #studentDetailModal p strong {
+            color: #1f2937;
+            min-width: 120px;
+            display: inline-block;
+        }
+
+        /* Mobile adjustments */
         @media (max-width: 768px) {
-            #mealTable thead {
-                display: none;
-            }
-            #mealTable tbody tr {
+            #studentTable thead { display: none; }
+            #studentTable tbody tr {
                 display: block;
                 margin-bottom: 15px;
                 border: 1px solid #e5e7eb;
-                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
             }
-            #mealTable td {
+            #studentTable td {
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
@@ -179,16 +184,15 @@
                 border-bottom: 1px solid #f3f4f6;
                 text-align: right;
             }
-            #mealTable td:last-child {
-                border-bottom: none;
-            }
-            #mealTable td::before {
+            #studentTable td:last-child { border-bottom: none; }
+            #studentTable td::before {
                 content: attr(data-label);
                 font-weight: bold;
                 color: #4b5563;
                 text-transform: uppercase;
                 font-size: 0.8rem;
                 text-align: left;
+                margin-right: 10px;
             }
         }
     </style>
@@ -196,533 +200,364 @@
 <body>
 
 <div class="container">
-    <h1><svg class="w-8 h-8 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20h-5v-2a3 3 0 00-5.356-1.857M17 20v-2c0-.523-.213-1.055-.5-1.556m0 0a2.502 2.502 0 00-4.444 0m0 0a2.502 2.502 0 00-4.444 0M12 10a2 2 0 00-2 2v2a2 2 0 002 2h4a2 2 0 002-2v-2a2 2 0 00-2-2h-4zM7 7h.01M17 7h.01"></path></svg> Superintendent Meal Overview</h1>
-    
+    <h1><svg class="w-8 h-8 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M15 21v-2a6 6 0 00-12 0v2"></path></svg> Student Management</h1>
+
     <div id="controls">
         <p class="text-gray-700">User: <strong id="superName" class="text-blue-600">Loading...</strong></p>
-        <button id="createMeal" class="action-button" onclick="openMealModal()">Create New Meal</button> 
+        <button id="createUser" class="action-button" onclick="openStudentModal()">Create New Student</button> 
     </div>
 
-    <table id="mealTable">
+    <table id="studentTable">
         <thead>
             <tr>
                 <th>Username</th>
-                <th>Full Name</th> <th>Day Meal</th>
-                <th>Night Main & Carb</th>
-                <th>Sunday Day</th>
-                <th>Sunday Night</th>
-                <th>Action</th>
+                <th>Full Name</th>
+                <th>Roll No.</th>
+                <th>Department</th>
+                <th>Year</th>
+                <th>Actions</th>
             </tr>
         </thead>
-        <tbody id="mealTableBody">
-            </tbody>
+        <tbody id="studentTableBody">
+            <!-- Student rows are injected here -->
+        </tbody>
     </table>
-    <p id="loadingMessage" class="empty-state">Loading meal data...</p>
+    <p id="loadingMessage" class="empty-state">Loading student data...</p>
 </div>
 
+<!-- ========= MODALS ========= -->
 <div id="customAlertModal" class="modal">
     <div class="modal-content">
         <h3 id="modalTitle" class="text-lg font-bold mb-3 text-gray-800">Title</h3>
         <p id="modalMessage" class="mb-5 text-gray-600">Message</p>
-        <div id="modalButtons" class="flex justify-end space-x-3">
-            </div>
+        <div id="modalButtons" class="flex justify-end space-x-3"></div>
     </div>
 </div>
 
-<div id="mealUpsertModal" class="modal">
+<div id="studentUpsertModal" class="modal">
     <div class="modal-content">
-        <h3 id="upsertModalTitle" class="text-lg font-bold mb-5 text-gray-800">Create Meal Preference</h3>
-        <form id="mealForm" onsubmit="event.preventDefault(); saveMealPreference();">
-            <input type="hidden" id="mealUserId">
-
-            <div class="form-group">
-                <label for="mealUsername">Username</label>
-                <input type="text" id="mealUsername" required placeholder="Student's Username" disabled>
-            </div>
-            
-            <div class="form-group">
-                <label for="mealDay">Day Meal Preference</label>
-                <select id="mealDay" required>
-                    <option value="" disabled selected>Select Day Meal</option>
-                    <option value="fish">Fish</option>
-                    <option value="curd">Curd</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="mealNightMain">Night Main Course (Protein)</label>
-                <select id="mealNightMain" required>
-                    <option value="" disabled selected>Select Night Main Course</option>
-                    <option value="egg">Egg</option>
-                    <option value="veg">Veg</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="mealNightCarb">Night Carb/Side</label>
-                <select id="mealNightCarb" required>
-                    <option value="" disabled selected>Select Night Carb/Side</option>
-                    <option value="roti">Roti</option>
-                    <option value="rice">Rice</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="mealSundayDay">Sunday Day Meal</label>
-                <select id="mealSundayDay" required>
-                    <option value="" disabled selected>Select Sunday Day Meal</option>
-                    <option value="meat">Meat</option>
-                    <option value="fish">Fish</option>
-                    <option value="panner">Panner</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="mealSundayNight">Sunday Night Meal</label>
-                 <select id="mealSundayNight" required>
-                    <option value="" disabled selected>Select Sunday Night Meal</option>
-                    <option value="veg">Veg</option>
-                </select>
-            </div>
-
+        <h3 id="upsertModalTitle" class="text-lg font-bold mb-5 text-gray-800">Create New Student</h3>
+        <form id="studentForm" onsubmit="event.preventDefault(); saveStudent();">
+            <input type="hidden" id="formStudentId">
+            <div class="form-group"><label for="formUsername">Username</label><input type="text" id="formUsername" required></div>
+            <div class="form-group"><label for="formFullName">Full Name</label><input type="text" id="formFullName" required></div>
+            <div class="form-group"><label for="formEmail">Email</label><input type="email" id="formEmail" required></div>
+            <div class="form-group"><label for="formRoll">Roll Number</label><input type="text" id="formRoll" required></div>
+            <div class="form-group"><label for="formDepartment">Department</label><input type="text" id="formDepartment" required></div>
+            <div class="form-group"><label for="formYear">Year</label><input type="number" id="formYear" required min="1" max="5"></div>
+            <div class="form-group"><label for="formPassword">Password</label><input type="password" id="formPassword"></div>
             <div class="flex justify-end space-x-3 mt-5">
-                <button type="button" onclick="closeUpsertModal()" class="px-4 py-2 bg-gray-300 text-gray-800 font-semibold rounded-md hover:bg-gray-400 transition">Cancel</button>
-                <button type="submit" id="saveButton" class="px-4 py-2 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700 transition">Save Preference</button>
+                <button type="button" onclick="closeStudentModal()" class="px-4 py-2 bg-gray-300 text-gray-800 font-semibold rounded-md hover:bg-gray-400 transition">Cancel</button>
+                <button type="submit" id="saveButton" class="px-4 py-2 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700 transition">Save Student</button>
             </div>
         </form>
     </div>
 </div>
 
+<div id="studentDetailModal" class="modal">
+    <div class="modal-content">
+        <h3 class="text-xl font-bold mb-5 text-gray-800">Student Profile</h3>
+        <div class="detail-section">
+            <h4 class="detail-heading">Personal Details</h4>
+            <p><strong>Username:</strong> <span id="detailUsername"></span></p>
+            <p><strong>Full Name:</strong> <span id="detailFullName"></span></p>
+            <p><strong>Roll No:</strong> <span id="detailRoll"></span></p>
+            <p><strong>Department:</strong> <span id="detailDepartment"></span></p>
+            <p><strong>Year:</strong> <span id="detailYear"></span></p>
+        </div>
+        <div class="detail-section">
+            <h4 class="detail-heading">Meal Preferences</h4>
+            <p><strong>Day Meal:</strong> <span id="detailMealDay" class="capitalize"></span></p>
+            <p><strong>Night Main:</strong> <span id="detailMealNightMain" class="capitalize"></span></p>
+            <p><strong>Night Carb:</strong> <span id="detailMealNightCarb" class="capitalize"></span></p>
+            <p><strong>Sunday Day:</strong> <span id="detailMealSundayDay" class="capitalize"></span></p>
+            <p><strong>Sunday Night:</strong> <span id="detailMealSundayNight" class="capitalize"></span></p>
+        </div>
+        <div class="flex justify-end mt-6">
+            <button type="button" onclick="closeDetailModal()" class="px-5 py-2 bg-gray-500 text-white font-semibold rounded-md hover:bg-gray-600 transition">Close</button>
+        </div>
+    </div>
+</div>
 
 <script>
     const BACKEND_BASE_URL = "http://localhost:5000"; 
+    const SUPERINTENDENT_API_URL = `${BACKEND_BASE_URL}/superintendent`;
 
     // =========================================================================
-    // I. AUTHENTICATION SERVICE (Integrated from authservice.js)
+    // AUTHENTICATION SERVICE (No changes)
     // =========================================================================
-
-    /**
-     * Attempts to renew the access token using the stored refresh token.
-     * @returns {string|null} The new access token or null on failure.
-     */
     async function renewAccessToken() {
         const refreshToken = localStorage.getItem('refreshToken');
-        if (!refreshToken) {
-            // Redirecting users to login page if no refresh token is found
-            window.location.href = 'login.html'; // Assuming a login page exists
-            return null;
-        }
-
+        if (!refreshToken) { window.location.href = 'login.html'; return null; }
         try {
             const response = await fetch(`${BACKEND_BASE_URL}/auth/refresh`, {
                 method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${refreshToken}`
-                }
+                headers: { 'Authorization': `Bearer ${refreshToken}` }
             });
-
             if (response.ok) {
                 const data = await response.json();
                 localStorage.setItem('accessToken', data.access);
                 return data.access;
             } else {
-                // Refresh failed (e.g., refresh token expired), force re-login
-                window.location.href = 'login.html';
-                return null;
+                window.location.href = 'login.html'; return null;
             }
-        } catch (error) {
-            console.error("Network error during token renewal:", error);
-            return null;
-        }
+        } catch (error) { console.error("Token renewal error:", error); return null; }
     }
 
-    /**
-     * Wrapper around fetch to handle access token attachment and renewal on 401/403 errors.
-     * @param {string} url - The URL to fetch.
-     * @param {object} options - Fetch options.
-     * @param {boolean} retry - Whether to retry the request after renewal (default: true).
-     * @returns {Response|null} The fetch response object or null if authentication fails.
-     */
     async function authenticatedFetch(url, options = {}, retry = true) {
         let accessToken = localStorage.getItem('accessToken');
-
-        if (!accessToken) {
-            window.location.href = 'login.html';
-            return null;
-        }
-
-        options.headers = {
-            ...options.headers,
-            'Authorization': `Bearer ${accessToken}`
-        };
-
+        if (!accessToken) { window.location.href = 'login.html'; return null; }
+        options.headers = { ...options.headers, 'Authorization': `Bearer ${accessToken}` };
         let response = await fetch(url, options);
-
-        // Check for token expiration (401 Unauthorized or 403 Forbidden)
         if ((response.status === 401 || response.status === 403) && retry) {
             const newAccessToken = await renewAccessToken();
-
             if (newAccessToken) {
-                // Retry the original request with the new token
                 options.headers['Authorization'] = `Bearer ${newAccessToken}`;
-                // Set retry to false to prevent infinite loops
                 response = await authenticatedFetch(url, options, false);
-            } else {
-                return null; // Failed to renew token
-            }
+            } else { return null; }
         }
-        
-        // Handle case where fetch failed or token was not renewed/valid
         if (!response || response.status === 401 || response.status === 403) {
-            // If we are here, either the initial token failed and the retry failed, 
-            // or the new token failed. Redirect to login if a previous auth step didn't.
-            if (response) {
-                // If it's a 403/401 that wasn't retried successfully,
-                // assume session expired and force redirect
-                window.location.href = 'login.html';
-            }
+            if (response) window.location.href = 'login.html';
             return null;
         }
-
         return response;
     }
 
-
     // =========================================================================
-    // II. CUSTOM MODAL IMPLEMENTATION (Alert/Confirm)
+    // GENERIC MODAL CONTROLS (No changes)
     // =========================================================================
-
     const customAlertModal = document.getElementById('customAlertModal');
     const modalTitle = document.getElementById('modalTitle');
     const modalMessage = document.getElementById('modalMessage');
     const modalButtons = document.getElementById('modalButtons');
-
-    function hideModal() {
-        customAlertModal.classList.remove('open');
-        modalButtons.innerHTML = '';
-        document.onkeydown = null;
-    }
-
-    /**
-     * Displays a simple alert message (replaces window.alert).
-     * @param {string} title - The title for the message box.
-     * @param {string} message - The message content.
-     */
+    function hideModal() { customAlertModal.classList.remove('open'); modalButtons.innerHTML = ''; document.onkeydown = null; }
     function showMessage(title, message) {
         modalTitle.textContent = title;
         modalMessage.textContent = message;
-
         const okButton = document.createElement('button');
         okButton.textContent = 'OK';
         okButton.className = 'px-4 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition';
         okButton.onclick = hideModal;
-        
         modalButtons.appendChild(okButton);
         customAlertModal.classList.add('open');
     }
-
-    /**
-     * Displays a confirmation prompt (replaces window.confirm).
-     * @param {string} title - The title for the confirmation box.
-     * @param {string} message - The confirmation message.
-     * @returns {Promise<boolean>} Resolves to true for OK, false for Cancel.
-     */
     function showConfirmation(title, message) {
         return new Promise(resolve => {
             modalTitle.textContent = title;
             modalMessage.textContent = message;
-
-            // OK Button
             const okButton = document.createElement('button');
             okButton.textContent = 'Confirm';
             okButton.className = 'px-4 py-2 bg-red-600 text-white font-semibold rounded-md hover:bg-red-700 transition';
-            okButton.onclick = () => {
-                hideModal();
-                resolve(true);
-            };
-
-            // Cancel Button
+            okButton.onclick = () => { hideModal(); resolve(true); };
             const cancelButton = document.createElement('button');
             cancelButton.textContent = 'Cancel';
             cancelButton.className = 'px-4 py-2 bg-gray-300 text-gray-800 font-semibold rounded-md hover:bg-gray-400 transition';
-            cancelButton.onclick = () => {
-                hideModal();
-                resolve(false);
-            };
-
+            cancelButton.onclick = () => { hideModal(); resolve(false); };
             modalButtons.appendChild(cancelButton);
             modalButtons.appendChild(okButton);
             customAlertModal.classList.add('open');
-
-            // Allow 'Enter' key to act as 'Confirm'
-            document.onkeydown = (e) => {
-                if (e.key === 'Enter') {
-                    okButton.click();
-                }
-            };
+            document.onkeydown = (e) => { if (e.key === 'Enter') okButton.click(); };
         });
     }
 
     // =========================================================================
-    // III. MEAL UPSERT MODAL LOGIC (Create/Update)
+    // STUDENT MANAGEMENT LOGIC
     // =========================================================================
-
-    const mealUpsertModal = document.getElementById('mealUpsertModal');
+    const studentUpsertModal = document.getElementById('studentUpsertModal');
+    const studentDetailModal = document.getElementById('studentDetailModal');
+    const studentForm = document.getElementById('studentForm');
     const upsertModalTitle = document.getElementById('upsertModalTitle');
-    const mealForm = document.getElementById('mealForm');
-    const mealUserId = document.getElementById('mealUserId');
-    const mealUsername = document.getElementById('mealUsername');
-    const mealDay = document.getElementById('mealDay');
-    const mealNightMain = document.getElementById('mealNightMain');
-    const mealNightCarb = document.getElementById('mealNightCarb');
-    const mealSundayDay = document.getElementById('mealSundayDay');
-    const mealSundayNight = document.getElementById('mealSundayNight');
-    const saveButton = document.getElementById('saveButton');
+    const formStudentId = document.getElementById('formStudentId');
+    const formUsername = document.getElementById('formUsername');
+    const formFullName = document.getElementById('formFullName');
+    const formEmail = document.getElementById('formEmail');
+    const formRoll = document.getElementById('formRoll');
+    const formDepartment = document.getElementById('formDepartment');
+    const formYear = document.getElementById('formYear');
+    const formPassword = document.getElementById('formPassword');
 
-    /**
-     * Opens the meal preference modal for creation or editing.
-     * @param {object|null} user - The user object for editing, or null for creating.
-     */
-    function openMealModal(user = null) {
-        mealForm.reset(); // Clear previous data
-        mealUserId.value = '';
-
-        if (user) {
-            // Edit Mode
-            upsertModalTitle.textContent = `Edit Meal for ${user.username}`;
-            mealUserId.value = user.userId || '';
-            mealUsername.value = user.username || '';
-            mealUsername.disabled = true; // Cannot change username on edit
-            saveButton.textContent = 'Update Preference';
-
-            const meals = user.mealPreferences;
-            if (meals) {
-                // Set dropdown values based on existing data
-                mealDay.value = meals.day || '';
-                mealNightMain.value = meals.night1 || '';
-                mealNightCarb.value = meals.night2 || '';
-                mealSundayDay.value = meals.sunday_day || '';
-                mealSundayNight.value = meals.sunday_night || '';
-            }
+    function openStudentModal(student = null) {
+        studentForm.reset();
+        formStudentId.value = '';
+        if (student) {
+            upsertModalTitle.textContent = `Edit Student: ${student.username}`;
+            // FIX: Use 'userId' from your controller's response
+            formStudentId.value = student.userId; 
+            formUsername.value = student.username;
+            formUsername.disabled = true;
+            // FIX: Use 'fullName' from your controller's response
+            formFullName.value = student.fullName; 
+            formEmail.value = student.email || '';
+            formRoll.value = student.roll;
+            formDepartment.value = student.department;
+            formYear.value = student.year;
+            formPassword.placeholder = "Leave blank to keep unchanged";
+            formPassword.required = false;
         } else {
-            // Create Mode 
-            // NOTE: In a real system, you'd likely fetch a list of unassigned users for creation.
-            // For now, we allow the superintendent to manually enter a username.
-            upsertModalTitle.textContent = 'Create New Meal Preference';
-            mealUsername.value = '';
-            mealUsername.disabled = false; // Enable username input for creation
-            saveButton.textContent = 'Create Preference';
-
-            // Ensure dropdowns show the placeholder/default option
-            mealDay.value = '';
-            mealNightMain.value = '';
-            mealNightCarb.value = '';
-            mealSundayDay.value = '';
-            mealSundayNight.value = 'veg'; // Sunday night only has one option, so select it by default.
+            upsertModalTitle.textContent = 'Create New Student';
+            formUsername.disabled = false;
+            formPassword.placeholder = "Enter a password";
+            formPassword.required = true;
         }
-
-        mealUpsertModal.classList.add('open');
+        studentUpsertModal.classList.add('open');
     }
-
-    /**
-     * Closes the meal preference modal.
-     */
-    function closeUpsertModal() {
-        mealUpsertModal.classList.remove('open');
-    }
-
-    /**
-     * Handles the form submission for creating or updating a meal preference.
-     */
-    async function saveMealPreference() {
-        closeUpsertModal(); // Close the modal immediately after submission to indicate action taken
-
-        const userId = mealUserId.value;
-        const isUpdate = !!userId;
+    
+    function closeStudentModal() { studentUpsertModal.classList.remove('open'); }
+    
+    function openDetailModal(student) {
+        document.getElementById('detailUsername').textContent = student.username;
+        // FIX: Use 'fullName' from your controller's response
+        document.getElementById('detailFullName').textContent = student.fullName; 
+        document.getElementById('detailRoll').textContent = student.roll || 'N/A';
+        document.getElementById('detailDepartment').textContent = student.department || 'N/A';
+        document.getElementById('detailYear').textContent = student.year || 'N/A';
         
-        const mealData = {
-            // The API payload structure uses day, night1, night2, etc.
-            username: mealUsername.value, 
-            day: mealDay.value,
-            night1: mealNightMain.value,
-            night2: mealNightCarb.value,
-            sunday_day: mealSundayDay.value,
-            sunday_night: mealSundayNight.value
+        // FIX: Use 'mealPreferences' from your controller's response
+        const meals = student.mealPreferences || {}; 
+        document.getElementById('detailMealDay').textContent = meals.day || 'Not Set';
+        document.getElementById('detailMealNightMain').textContent = meals.night1 || 'Not Set';
+        document.getElementById('detailMealNightCarb').textContent = meals.night2 || 'Not Set';
+        document.getElementById('detailMealSundayDay').textContent = meals.sunday_day || 'Not Set';
+        document.getElementById('detailMealSundayNight').textContent = meals.sunday_night || 'Not Set';
+        studentDetailModal.classList.add('open');
+    }
+    function closeDetailModal() { studentDetailModal.classList.remove('open'); }
+
+    async function saveStudent() {
+        const studentId = formStudentId.value;
+        const isUpdate = !!studentId;
+        
+        // FIX: Send 'fullName' (camelCase) to match your controller's 'POST' route
+        const studentData = {
+            username: formUsername.value,
+            fullName: formFullName.value, 
+            email: formEmail.value,
+            roll: formRoll.value,
+            department: formDepartment.value,
+            year: parseInt(formYear.value, 10),
         };
 
-        let url = `${BACKEND_BASE_URL}/superintendent/meal`;
-        let method = 'POST';
-        let successMessage = `Meal preference for ${mealData.username} created successfully.`;
-        
-        if (isUpdate) {
-            // NOTE: Assuming your backend has a PUT route like /superintendent/meal/:userId for updates
-            url = `${BACKEND_BASE_URL}/superintendent/meal/${userId}`;
-            method = 'PUT';
-            successMessage = `Meal preference for ${mealData.username} updated successfully.`;
+        if (formPassword.value) {
+            studentData.password = formPassword.value;
         }
 
-        try {
-            const response = await authenticatedFetch(url, {
-                method: method,
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(mealData)
-            });
-
-            if (!response) {
-                showMessage("Authentication Error", "Session expired or access denied. Please re-login.");
-                return;
+        const url = isUpdate ? `${SUPERINTENDENT_API_URL}/users/${studentId}` : `${SUPERINTENDENT_API_URL}/user`;
+        const method = isUpdate ? 'PUT' : 'POST';
+        
+        // On update, send the correct format if your PUT route expects something different
+        let body = studentData;
+        if(isUpdate) {
+            body = {
+                // Your PUT route expects full_name, so we translate it
+                full_name: studentData.fullName,
+                roll: studentData.roll,
+                department: studentData.department,
+                year: studentData.year,
+                ...(studentData.password && { password: studentData.password })
             }
+        }
 
-            if (response.ok) {
-                showMessage('Success', successMessage);
-                fetchAllMealData(); // Refresh the table
-            } else {
-                const errorData = await response.json();
-                showMessage(`${isUpdate ? 'Update' : 'Creation'} Failed`, `Error: ${errorData.error || response.statusText} (Status: ${response.status})`);
-            }
+        const response = await authenticatedFetch(url, {
+            method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
 
-        } catch (error) {
-            showMessage("Network Error", "A network error occurred while saving the preference.");
-            console.error("Save meal network error:", error);
+        if (response && response.ok) {
+            showMessage('Success', `Student has been successfully ${isUpdate ? 'updated' : 'created'}.`);
+            closeStudentModal();
+            fetchAndDisplayStudents();
+        } else {
+            const error = await response.json();
+            showMessage('Error', `Failed to save student: ${error.error || 'Unknown error'}`);
         }
     }
 
+    async function deleteStudent(studentId) {
+        const confirmed = await showConfirmation('Delete Student', 'Are you sure you want to permanently delete this student?');
+        if (!confirmed) return;
+        
+        const response = await authenticatedFetch(`${SUPERINTENDENT_API_URL}/user/${studentId}`, { method: 'DELETE' });
 
-    // =========================================================================
-    // IV. DASHBOARD LOGIC (Updated to use authenticatedFetch, custom modals, and Edit button)
-    // =========================================================================
+        if (response && response.ok) {
+            showMessage('Success', 'Student has been deleted.');
+            fetchAndDisplayStudents();
+        } else {
+            const error = await response.json();
+            showMessage('Error', `Failed to delete student: ${error.error || 'Unknown error'}`);
+        }
+    }
 
-    /**
-     * Helper function to render a user row in the table.
-     * @param {object} user - Single user meal preference object from API.
-     * @returns {HTMLElement} The table row element.
-     */
-    function renderUserRow(user) {
-        const row = document.createElement('tr');
-        const meals = user.mealPreferences;
-        const userJsonString = JSON.stringify({
-            userId: user.userId,
-            username: user.username,
-            fullName: user.fullName,
-            mealPreferences: meals
-        }).replace(/'/g, "\\'"); // Escape single quotes for use in onclick
-
-        row.innerHTML = `
-            <td data-label="Username">${user.username || '-'}</td>
-            <td data-label="Full Name">${user.fullName || '-'}</td> 
-            <td data-label="Day Meal">${meals ? meals.day : '-'}</td>
-            <td data-label="Night Main & Carb">${meals ? `${meals.night1 || '-'} w/ ${meals.night2 || '-'}` : '-'}</td>
-            <td data-label="Sun Day">${meals ? meals.sunday_day : '-'}</td>
-            <td data-label="Sun Night">${meals ? meals.sunday_night : '-'}</td>
-            <td data-label="Action">
-                <button class="edit-btn" onclick='openMealModal(${userJsonString})'>Edit</button>
-                <button class="delete-btn" onclick="deleteMealPreference('${user.userId}', '${user.username}')">Delete</button>
+    function createStudentTableRow(student) {
+        const tr = document.createElement('tr');
+        // FIX: Use 'fullName' from your controller's response
+        tr.innerHTML = `
+            <td data-label="Username">${student.username}</td>
+            <td data-label="Full Name">${student.fullName}</td> 
+            <td data-label="Roll No.">${student.roll || 'N/A'}</td>
+            <td data-label="Department">${student.department || 'N/A'}</td>
+            <td data-label="Year">${student.year || 'N/A'}</td>
+            <td data-label="Actions">
+                <button class="table-btn view-btn">View</button>
+                <button class="table-btn edit-btn">Edit</button>
+                <button class="table-btn delete-btn">Delete</button>
             </td>
         `;
-        return row;
+        tr.querySelector('.view-btn').onclick = () => openDetailModal(student);
+        tr.querySelector('.edit-btn').onclick = () => openStudentModal(student);
+        // FIX: Use 'userId' from your controller's response for delete
+        tr.querySelector('.delete-btn').onclick = () => deleteStudent(student.userId); 
+        return tr;
     }
 
-    /**
-     * Fetches all meal data from the superintendent endpoint and renders the table.
-     */
-    async function fetchAllMealData() {
-        const body = document.getElementById('mealTableBody');
+    async function fetchAndDisplayStudents() {
+        const tableBody = document.getElementById('studentTableBody');
         const loadingMessage = document.getElementById('loadingMessage');
-        const accessToken = localStorage.getItem('accessToken');
-        
-        loadingMessage.textContent = 'Loading...';
+        tableBody.innerHTML = '';
+        loadingMessage.textContent = 'Loading student data...';
         loadingMessage.style.display = 'block';
-        body.innerHTML = ''; // Clear previous data
+        
+        const response = await authenticatedFetch(SUPERINTENDENT_API_URL);
 
-        if (!accessToken) {
-            loadingMessage.textContent = "Error: Not authenticated. Redirecting to login...";
-            window.location.href = 'login.html'; // Fallback to login
+        if (!response) {
+            loadingMessage.textContent = 'Failed to load data. Please log in again.';
             return;
         }
+        
+        // FIX: The response from your controller is the array directly, not nested in a 'users' object
+        const user_data = await response.json(); 
 
-        try {
-            // Use authenticatedFetch to automatically handle token renewal
-            const response = await authenticatedFetch(`${BACKEND_BASE_URL}/superintendent`, { method: 'GET' });
+        // Your controller sends the superintendent name separately, let's assume it might come in headers or a different call
+        // For now, we'll just check the main data. Your controller sends an object { users: ..., superintendent_name: ... }
+        // Let's assume the main response IS that object
+        const responseData = user_data;
 
-            if (!response) {
-                // authenticatedFetch returned null, meaning auth/refresh failed or user was redirected.
-                loadingMessage.textContent = "Authentication required or session expired.";
-                return;
-            }
 
-            if (response.ok) {
-                const data = await response.json();
-                
-                // Set Superintendent name (placeholder)
-                document.getElementById('superName').textContent = 'Superintendent'; 
-                loadingMessage.style.display = 'none';
-                
-                if (data.length === 0) {
-                    body.innerHTML = '<tr><td colspan="7" class="empty-state">No student meal data found.</td></tr>'; // Updated colspan
-                    return;
-                }
-
-                data.forEach(user => {
-                    body.appendChild(renderUserRow(user));
-                });
-
-            } else {
-                const errorData = await response.json();
-                loadingMessage.textContent = `Error: ${errorData.error || 'Failed to fetch data.'} (Status: ${response.status})`;
-                if (response.status === 403) {
-                    showMessage("Access Denied", "Authorization failed: You do not have superintendent privileges to view this page.");
-                }
-            }
-        } catch (error) {
-            loadingMessage.textContent = "Network Error: Could not reach the server.";
-            console.error("Fetch error:", error);
-        }
-    }
-
-    /**
-     * Deletes a student's meal preference record.
-     * @param {string} userId - The unique ID of the meal record to delete.
-     * @param {string} username - The username for confirmation message.
-     */
-    async function deleteMealPreference(userId, username) {
-        const confirmed = await showConfirmation(
-            'Confirm Deletion', 
-            `Are you sure you want to delete the meal preference for ${username}? This action cannot be undone.`
-        );
-
-        if (!confirmed) {
-            return;
-        }
-
-        try {
-            // NOTE: Assuming your backend has a DELETE route like /superintendent/meal/:userId
-            const response = await authenticatedFetch(`${BACKEND_BASE_URL}/superintendent/meal/${userId}`, {
-                method: 'DELETE'
+        if (responseData.users && responseData.users.length > 0) {
+            loadingMessage.style.display = 'none';
+            responseData.users.forEach(student => {
+                const row = createStudentTableRow(student);
+                tableBody.appendChild(row);
             });
-
-            if (!response) {
-                showMessage("Authentication Error", "Session expired or access denied.");
-                return;
-            }
-
-            if (response.ok) {
-                showMessage('Success', `Meal preference for ${username} deleted successfully.`);
-                // Refresh the table after deletion
-                fetchAllMealData();
-            } else {
-                const errorData = await response.json();
-                showMessage('Deletion Failed', `Error: ${errorData.error || response.statusText} (Status: ${response.status})`);
-            }
-        } catch (error) {
-            showMessage("Network Error", "A network error occurred during deletion.");
-            console.error("Deletion network error:", error);
+        } else if (Array.isArray(user_data) && user_data.length > 0) {
+            // Fallback if the controller just sends an array
+            loadingMessage.style.display = 'none';
+            user_data.forEach(student => {
+                const row = createStudentTableRow(student);
+                tableBody.appendChild(row);
+            });
         }
+        else {
+            loadingMessage.textContent = 'No students found.';
+        }
+        document.getElementById('superName').textContent = responseData.superintendent_name || 'Superintendent';
     }
 
-    document.addEventListener('DOMContentLoaded', fetchAllMealData);
+    document.addEventListener('DOMContentLoaded', () => {
+        fetchAndDisplayStudents();
+    });
 </script>
 
 </body>
 </html>
+

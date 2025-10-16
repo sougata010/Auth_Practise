@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Superintendent Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #fff7ed;
+        }
+        .tab-button {
+            transition: all 0.3s ease;
+        }
+        .tab-button.active {
+            border-color: #f97316;
+            background-color: #f97316;
+            color: white;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .custom-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 12px;
+            margin-top: 10px;
+        }
+        .custom-table th, .custom-table td {
+            padding: 15px;
+            text-align: left;
+            vertical-align: middle;
+        }
+        .custom-table thead th {
+            background-color: #fed7aa;
+            color: #9a3412;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-size: 0.75rem;
+        }
+        .custom-table tbody tr {
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            transition: box-shadow 0.2s;
+        }
+        .custom-table tbody tr:hover {
+             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .table-btn {
+            color: white;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin: 2px;
+            font-size: 0.875rem;
+            display: inline-flex;
+            align-items: center;
+        }
+        .view-btn { background-color: #f97316; } .view-btn:hover { background-color: #ea580c; }
+        .edit-btn { background-color: #fb923c; } .edit-btn:hover { background-color: #f97316; }
+        .delete-btn, .reject-btn { background-color: #ef4444; } .delete-btn:hover, .reject-btn:hover { background-color: #dc2626; }
+        .approve-btn { background-color: #f97316; } .approve-btn:hover { background-color: #ea580c; }
+        .toggle-btn { padding: 4px 8px; font-size: 0.75rem; }
+
+        .modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.6); display: flex;
+            justify-content: center; align-items: center; z-index: 1000;
+            opacity: 0; visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .modal.open { opacity: 1; visibility: visible; }
+        .modal-content {
+            background: white; padding: 25px; border-radius: 10px;
+            width: 90%; max-width: 550px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            transform: scale(0.9); transition: transform 0.3s ease;
+        }
+        .modal.open .modal-content { transform: scale(1); }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 600; color: #374151; }
+        .form-group input, .form-group select {
+            width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #d1d5db;
+            border-radius: 6px; box-sizing: border-box; 
+        }
+
+        @media (max-width: 768px) {
+            .custom-table thead { display: none; }
+            .custom-table tbody tr { display: block; margin-bottom: 1rem; border: 1px solid #e5e7eb; }
+            .custom-table td {
+                display: flex; justify-content: space-between; align-items: center;
+                padding: 0.75rem 1rem; border-bottom: 1px solid #f3f4f6; text-align: right;
+            }
+            .custom-table td:last-child { border-bottom: none; }
+            .custom-table td::before {
+                content: attr(data-label); font-weight: bold; color: #4b5563;
+                text-transform: uppercase; font-size: 0.8rem; text-align: left; margin-right: 1rem;
+            }
+        }
+    </style>
+</head>
+<body class="p-5">
+
+<div class="container mx-auto max-w-7xl bg-white p-8 rounded-xl shadow-2xl">
+    
+    <div class="flex flex-col md:flex-row justify-between items-center border-b-2 border-gray-200 pb-4 mb-6">
+        <h1 class="text-3xl font-bold text-gray-800 m-0 p-0 border-none text-left">
+            Superintendent Dashboard
+        </h1>
+        <div class="text-right">
+            <p class="text-gray-600">Welcome, <strong id="superName" class="text-orange-600">Loading...</strong></p>
+        </div>
+    </div>
+
+    <div class="mb-6 border-b border-gray-200">
+        <nav class="flex flex-wrap -mb-px" aria-label="Tabs">
+            <button class="tab-button active w-1/2 sm:w-auto text-center border-b-2 font-medium text-sm py-4 px-6 text-gray-500 hover:text-gray-700 hover:border-gray-300" data-tab="students">
+                Student Management
+            </button>
+            <button class="tab-button w-1/2 sm:w-auto text-center border-b-2 font-medium text-sm py-4 px-6 text-gray-500 hover:text-gray-700 hover:border-gray-300" data-tab="meals">
+                Meal Preferences
+            </button>
+            <button class="tab-button w-1/2 sm:w-auto text-center border-b-2 font-medium text-sm py-4 px-6 text-gray-500 hover:text-gray-700 hover:border-gray-300" data-tab="meal-counts">
+                Daily Meal Counts
+            </button>
+            <button class="tab-button w-1/2 sm:w-auto text-center border-b-2 font-medium text-sm py-4 px-6 text-gray-500 hover:text-gray-700 hover:border-gray-300" data-tab="attendance">
+                Attendance
+            </button>
+            <button class="tab-button w-1/2 sm:w-auto text-center border-b-2 font-medium text-sm py-4 px-6 text-gray-500 hover:text-gray-700 hover:border-gray-300" data-tab="leaves">
+                Leave Requests
+            </button>
+        </nav>
+    </div>
+
+    <div>
+        <div id="students" class="tab-content active">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
+                <h2 class="text-xl font-semibold text-gray-700">All Students</h2>
+                <div class="flex items-center space-x-2">
+                    <input type="text" id="studentSearch" placeholder="Search by name..." class="p-2 border rounded-md w-64">
+                    <button id="createUser" class="action-button bg-orange-600 text-white table-btn" onclick="openStudentModal()">Create Student</button>
+                </div>
+            </div>
+            <table class="custom-table" id="studentTable">
+                <thead>
+                    <tr><th>Username</th><th>Full Name</th><th>Roll No.</th><th>Department</th><th>Year</th><th>Actions</th></tr>
+                </thead>
+                <tbody id="studentTableBody"></tbody>
+            </table>
+            <p id="studentLoadingMessage" class="empty-state">Loading student data...</p>
+        </div>
+
+        <div id="meals" class="tab-content">
+            <div class="col-span-1">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
+                    <h2 class="text-xl font-semibold text-gray-700">All Student Choices (Full Week)</h2>
+                    <div class="flex items-center space-x-2 flex-wrap">
+                        <input type="text" id="mealsSearch" placeholder="Search by name..." class="p-2 border rounded-md w-48">
+                        <select id="mealsFilterField" class="p-2 border rounded-md w-32">
+                            <option value="">All Meals</option>
+                            <option value="day">Day</option>
+                            <option value="night1">Night1</option>
+                            <option value="night2">Night2</option>
+                            <option value="sunday_day">Sunday Day</option>
+                            <option value="sunday_night">Sunday Night</option>
+                        </select>
+                        <input type="text" id="mealsFilterValue" placeholder="Preference..." class="p-2 border rounded-md w-32">
+                        <button id="exportFullMeals" class="action-button bg-orange-600 text-white table-btn">Export All Meals</button>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="custom-table" id="fullMealTable">
+                        <thead>
+                            <tr><th>Username</th><th>Full Name</th><th>Day Meal</th><th>Night Main</th><th>Night Carb</th><th>Sunday Day</th><th>Sunday Night</th></tr>
+                        </thead>
+                        <tbody id="fullMealTableBody"></tbody>
+                    </table>
+                    <p id="fullMealLoadingMessage" class="empty-state">Loading meal data...</p>
+                </div>
+            </div>
+        </div>
+        
+        <div id="meal-counts" class="tab-content">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="col-span-1">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-semibold text-gray-700" id="primaryMealTitle">Loading Primary Meal...</h2>
+                        <button id="exportPrimaryCounts" class="action-button bg-orange-600 text-white table-btn">Export Day Meal</button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="custom-table w-full" id="mealCountTablePrimary">
+                            <thead>
+                                <tr><th>Meal Option</th><th>Count</th></tr>
+                            </thead>
+                            <tbody id="mealCountsTableBodyPrimary"></tbody>
+                        </table>
+                        <p id="primaryCountLoadingMessage" class="empty-state">Calculating...</p>
+                    </div>
+                </div>
+
+                <div class="col-span-1">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-semibold text-gray-700" id="secondaryMealTitle">Loading Secondary Meal...</h2>
+                        <button id="exportSecondaryCounts" class="action-button bg-orange-600 text-white table-btn">Export Night Meal</button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="custom-table w-full" id="mealCountTableSecondary">
+                            <thead>
+                                <tr><th>Meal Option</th><th>Count</th></tr>
+                            </thead>
+                            <tbody id="mealCountsTableBodySecondary"></tbody>
+                        </table>
+                        <p id="secondaryCountLoadingMessage" class="empty-state">Calculating...</p>
+                    </div>
+                </div>
+                <div class="col-span-1">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-semibold text-gray-700" id="secondary2MealTitle">Loading Secondary Meal...</h2>
+                        <button id="exportSecondary2Counts" class="action-button bg-orange-600 text-white table-btn">Export Night Meal</button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="custom-table w-full" id="mealCountTableSecondary2">
+                            <thead>
+                                <tr><th>Meal Option</th><th>Count</th></tr>
+                            </thead>
+                            <tbody id="mealCountsTableBodySecondary2"></tbody>
+                        </table>
+                        <p id="secondaryCountLoadingMessage2" class="empty-state">Calculating...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="attendance" class="tab-content">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
+                <h2 class="text-xl font-semibold text-gray-700">Current Attendance Status</h2>
+                <div class="flex items-center space-x-2 flex-wrap">
+                    <input type="text" id="attendanceSearch" placeholder="Search by name..." class="p-2 border rounded-md w-48">
+                    <select id="attendanceFilter" class="p-2 border rounded-md w-32">
+                        <option value="">All Status</option>
+                        <option value="present">Present</option>
+                        <option value="absent">Absent</option>
+                    </select>
+                </div>
+            </div>
+            <table class="custom-table" id="attendanceTable">
+                <thead>
+                    <tr><th>Username</th><th>Full Name</th><th>Roll No.</th><th>Status</th><th>Note</th></tr>
+                </thead>
+                <tbody id="attendanceTableBody"></tbody>
+            </table>
+            <p id="attendanceLoadingMessage" class="empty-state">Loading attendance...</p>
+        </div>
+
+        <div id="leaves" class="tab-content">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">Pending Leave Requests</h2>
+            <div id="leaveRequestsContainer" class="space-y-4"></div>
+            <p id="leaveLoadingMessage" class="empty-state">Loading leave requests...</p>
+        </div>
+    </div>
+</div>
+
+<div id="customAlertModal" class="modal"><div class="modal-content"><h3 id="modalTitle" class="text-lg font-bold"></h3><p id="modalMessage" class="my-4"></p><div id="modalButtons" class="flex justify-end space-x-3"></div></div></div>
+<div id="studentUpsertModal" class="modal"><div class="modal-content"><h3 id="upsertModalTitle" class="text-lg font-bold mb-5"></h3><form id="studentForm" onsubmit="event.preventDefault(); saveStudent();"><input type="hidden" id="formStudentId"><div class="form-group"><label for="formUsername">Username</label><input type="text" id="formUsername" required></div><div class="form-group"><label for="formFullName">Full Name</label><input type="text" id="formFullName" required></div><div class="form-group"><label for="formEmail">Email</label><input type="email" id="formEmail" required></div><div class="form-group"><label for="formRoll">Roll Number</label><input type="text" id="formRoll" required></div><div class="form-group"><label for="formDepartment">Department</label><input type="text" id="formDepartment" required></div><div class="form-group"><label for="formYear">Year</label><input type="text" id="formYear" required min="1" max="5"></div><div class="form-group"><label for="formPassword">Password</label><input type="password" id="formPassword"></div><div class="flex justify-end space-x-3 mt-5"><button type="button" onclick="closeStudentModal()" class="px-4 py-2 bg-gray-300 rounded-md">Cancel</button><button type="submit" id="saveButton" class="px-4 py-2 bg-orange-600 text-white rounded-md">Save</button></div></form></div></div>
+<div id="studentDetailModal" class="modal"><div class="modal-content"><h3 class="text-xl font-bold mb-5">Student Profile</h3><div class="mb-6"><h4 class="text-lg font-semibold border-b pb-2 mb-3">Personal Details</h4><p><strong>Username:</strong> <span id="detailUsername"></span></p><p><strong>Full Name:</strong> <span id="detailFullName"></span></p><p><strong>Roll No:</strong> <span id="detailRoll"></span></p><p><strong>Department:</strong> <span id="detailDepartment"></span></p><p><strong>Year:</strong> <span id="detailYear"></span></p></div><div><h4 class="text-lg font-semibold border-b pb-2 mb-3">Meal Preferences</h4><p><strong>Day Meal:</strong> <span id="detailMealDay" class="capitalize"></span></p><p><strong>Night Main:</strong> <span id="detailMealNightMain" class="capitalize"></span></p><p><strong>Night Carb:</strong> <span id="detailMealNightCarb" class="capitalize"></span></p><p><strong>Sunday Day:</strong> <span id="detailMealSundayDay" class="capitalize"></span></p><p><strong>Sunday Night:</strong> <span id="detailMealSundayNight" class="capitalize"></span></p></div><div class="flex justify-end mt-6"><button type="button" onclick="closeDetailModal()" class="px-5 py-2 bg-gray-500 text-white rounded-md">Close</button></div></div></div>
+
+<script>
+    const BACKEND_BASE_URL = "http://localhost:5000";
+    const API_URL = `${BACKEND_BASE_URL}/superintendent`;
+    let allStudentsData = [];
+    let attendanceMap = {};
+
+    async function renewAccessToken() {
+        const refreshToken = localStorage.getItem('refreshToken');
+        if (!refreshToken) { window.location.href = 'login.html'; return null; }
+        try {
+            const response = await fetch(`${BACKEND_BASE_URL}/auth/refresh`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${refreshToken}` }
+            });
+            if (response.ok) {
+                const data = await response.json();
+                localStorage.setItem('accessToken', data.access);
+                return data.access;
+            } else {
+                window.location.href = 'login.html'; return null;
+            }
+        } catch (error) { console.error("Token renewal error:", error); return null; }
+    }
+
+    async function authenticatedFetch(url, options = {}, retry = true) {
+        let accessToken = localStorage.getItem('accessToken');
+        if (!accessToken) { window.location.href = 'login.html'; return null; }
+        options.headers = { ...options.headers, 'Authorization': `Bearer ${accessToken}` };
+        let response = await fetch(url, options);
+        if ((response.status === 401 || response.status === 403) && retry) {
+            const newAccessToken = await renewAccessToken();
+            if (newAccessToken) {
+                options.headers['Authorization'] = `Bearer ${newAccessToken}`;
+                response = await authenticatedFetch(url, options, false);
+            } else { return null; }
+        }
+        if (!response || response.status === 401 || response.status === 403) {
+            if (response) window.location.href = 'login.html';
+            return null;
+        }
+        return response;
+    }
+
+    const customAlertModal = document.getElementById('customAlertModal');
+    const studentUpsertModal = document.getElementById('studentUpsertModal');
+    const studentDetailModal = document.getElementById('studentDetailModal');
+    
+    function showMessage(title, message) {
+        alert(`${title}\n${message}`);
+    }
+    
+    document.querySelectorAll('.tab-button').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.tab-button').forEach(item => item.classList.remove('active'));
+            tab.classList.add('active');
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(tab.dataset.tab).classList.add('active');
+            
+            if (tab.dataset.tab === 'meal-counts') {
+                fetchDualMealCounts();
+            }
+        });
+    });
+
+    const studentTableBody = document.getElementById('studentTableBody');
+    const studentLoadingMessage = document.getElementById('studentLoadingMessage');
+
+    function openStudentModal(student = null) {
+        const form = document.getElementById('studentForm');
+        form.reset();
+        document.getElementById('formStudentId').value = '';
+        const title = document.getElementById('upsertModalTitle');
+        
+        if (student) {
+            title.textContent = `Edit Student: ${student.username}`;
+            document.getElementById('formStudentId').value = student.userId;
+            document.getElementById('formUsername').value = student.username;
+            document.getElementById('formUsername').disabled = true;
+            document.getElementById('formFullName').value = student.fullName;
+            document.getElementById('formEmail').value = student.email;
+            document.getElementById('formRoll').value = student.roll;
+            document.getElementById('formDepartment').value = student.department;
+            document.getElementById('formYear').value = student.year;
+            document.getElementById('formPassword').placeholder = "Leave blank to keep unchanged";
+            document.getElementById('formPassword').required = false;
+        } else {
+            title.textContent = 'Create New Student';
+            document.getElementById('formUsername').disabled = false;
+            document.getElementById('formPassword').placeholder = "Enter Password";
+            document.getElementById('formPassword').required = true;
+        }
+        studentUpsertModal.classList.add('open');
+    }
+    function closeStudentModal() { studentUpsertModal.classList.remove('open'); }
+    
+    async function saveStudent() {
+        const studentId = document.getElementById('formStudentId').value;
+        const isUpdate = !!studentId;
+        const studentData = {
+            username: document.getElementById('formUsername').value,
+            full_name: document.getElementById('formFullName').value,
+            email: document.getElementById('formEmail').value,
+            roll: document.getElementById('formRoll').value,
+            department: document.getElementById('formDepartment').value,
+            year: document.getElementById('formYear').value,
+        };
+        const password = document.getElementById('formPassword').value;
+        if (password) {
+            studentData.password = password;
+        }
+        let body = {};
+        if (isUpdate) {
+            body = {
+                full_name: studentData.full_name,
+                roll: studentData.roll,
+                department: studentData.department,
+                year: studentData.year,
+            };
+            if(studentData.password) body.password = studentData.password;
+        } else {
+             body = {
+                username: studentData.username,
+                fullName: studentData.full_name,
+                email: studentData.email,
+                roll: studentData.roll,
+                department: studentData.department,
+                year: studentData.year,
+                password: studentData.password,
+               }
+        }
+        const url = isUpdate ? `${API_URL}/users/${studentId}` : `${API_URL}/user`;
+        const method = isUpdate ? 'PUT' : 'POST';
+        const response = await authenticatedFetch(url, {
+            method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+        if (response && response.ok) {
+            alert(`Student ${isUpdate ? 'updated' : 'created'} successfully!`);
+            closeStudentModal();
+            fetchAllData();
+        } else {
+            const err = await response.json();
+            alert(`Error: ${err.message || err.error || 'An unknown error occurred.'}`);
+        }
+    }
+
+    async function deleteStudent(studentId, username) {
+        if (!confirm(`Are you sure you want to delete ${username}?`)) return;
+        const response = await authenticatedFetch(`${API_URL}/user/${studentId}`, { method: 'DELETE' });
+        if (response && response.ok) {
+            alert('Student deleted successfully.');
+            fetchAllData();
+        } else {
+            const err = await response.json();
+            alert(`Error: ${err.message || err.error || 'Failed to delete user.'}`);
+        }
+    }
+
+    function openDetailModal(student) {
+        document.getElementById('detailUsername').textContent = student.username;
+        document.getElementById('detailFullName').textContent = student.fullName;
+        document.getElementById('detailRoll').textContent = student.roll || 'N/A';
+        document.getElementById('detailDepartment').textContent = student.department || 'N/A';
+        document.getElementById('detailYear').textContent = student.year || 'N/A';
+        const meals = student.mealPreferences || {};
+        document.getElementById('detailMealDay').textContent = meals.day || 'Not Set';
+        document.getElementById('detailMealNightMain').textContent = meals.night1 || 'Not Set';
+        document.getElementById('detailMealNightCarb').textContent = meals.night2 || 'Not Set';
+        document.getElementById('detailMealSundayDay').textContent = meals.sunday_day || 'Not Set';
+        document.getElementById('detailMealSundayNight').textContent = meals.sunday_night || 'Not Set';
+        studentDetailModal.classList.add('open');
+    }
+    function closeDetailModal() { studentDetailModal.classList.remove('open'); }
+
+    const fullMealTableBody = document.getElementById('fullMealTableBody');
+    const fullMealLoadingMessage = document.getElementById('fullMealLoadingMessage');
+    const exportFullMealsButton = document.getElementById('exportFullMeals');
+
+    function populateMealsTable(students) {
+        fullMealTableBody.innerHTML = '';
+        if (students.length > 0) {
+            const dataToExport = [];
+            students.forEach(student => {
+                const meal = student.mealPreferences || {};
+                const tr = document.createElement('tr');
+                tr.dataset.row = student.username;
+                tr.innerHTML = `
+                    <td data-label="Username">${student.username}</td>
+                    <td data-label="Full Name">${student.fullName}</td>
+                    <td data-label="Day Meal" class="capitalize">${meal.day || 'N/A'}</td>
+                    <td data-label="Night Main" class="capitalize">${meal.night1 || 'N/A'}</td>
+                    <td data-label="Night Carb" class="capitalize">${meal.night2 || 'N/A'}</td>
+                    <td data-label="Sunday Day" class="capitalize">${meal.sunday_day || 'N/A'}</td>
+                    <td data-label="Sunday Night" class="capitalize">${meal.sunday_night || 'N/A'}</td>
+                `;
+                fullMealTableBody.appendChild(tr);
+
+                 dataToExport.push({
+                    'Username': student.username,
+                    'Full Name': student.fullName,
+                    'Day Meal': meal.day || 'N/A',
+                    'Night Main': meal.night1 || 'N/A',
+                    'Night Carb': meal.night2 || 'N/A',
+                    'Sunday Day': meal.sunday_day || 'N/A',
+                    'Sunday Night': meal.sunday_night || 'N/A',
+                });
+            });
+            exportFullMealsButton.onclick = () => exportToExcel(dataToExport, 'all_student_meals.xlsx');
+            fullMealLoadingMessage.style.display = 'none';
+
+            if (!window.mealsFilterAdded) {
+                const mealsSearch = document.getElementById('mealsSearch');
+                const mealsFilterField = document.getElementById('mealsFilterField');
+                const mealsFilterValue = document.getElementById('mealsFilterValue');
+                function filterMeals() {
+                    const search = mealsSearch.value.toLowerCase();
+                    const field = mealsFilterField.value;
+                    const value = mealsFilterValue.value.toLowerCase();
+                    allStudentsData.forEach(student => {
+                        const row = document.querySelector(`tr[data-row="${student.username}"]`);
+                        if (!row) return;
+                        let show = true;
+                        if (search && !student.fullName.toLowerCase().includes(search)) show = false;
+                        const pref = student.mealPreferences ? student.mealPreferences[field] || '' : '';
+                        if (field && value && !pref.toLowerCase().includes(value)) show = false;
+                        row.style.display = show ? '' : 'none';
+                    });
+                }
+                mealsSearch.addEventListener('input', filterMeals);
+                mealsFilterField.addEventListener('change', filterMeals);
+                mealsFilterValue.addEventListener('input', filterMeals);
+                window.mealsFilterAdded = true;
+            }
+        } else {
+            fullMealLoadingMessage.textContent = 'No meal data found.';
+        }
+    }
+
+    const mealCountTableBodyPrimary = document.getElementById('mealCountsTableBodyPrimary');
+    const mealCountTableBodySecondary = document.getElementById('mealCountsTableBodySecondary');
+    const primaryCountLoadingMessage = document.getElementById('primaryCountLoadingMessage');
+    const secondaryCountLoadingMessage = document.getElementById('secondaryCountLoadingMessage');
+    const secondary2CountLoadingMessage = document.getElementById('secondaryCountLoadingMessage2');
+    const primaryMealTitle = document.getElementById('primaryMealTitle');
+    const secondaryMealTitle = document.getElementById('secondaryMealTitle');
+    const secondary2MealTitle = document.getElementById('secondary2MealTitle');
+    const exportPrimaryCountsButton = document.getElementById('exportPrimaryCounts');
+    const exportSecondaryCountsButton = document.getElementById('exportSecondaryCounts');
+
+    function getDualMealCounts() {
+        const now = new Date();
+        const day = now.getDay();
+        const hour = now.getHours(); 
+        
+        const SHIFT_HOUR_DAY = 7;
+        const SHIFT_HOUR_NIGHT =12;
+        
+        const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+        const MEAL_MAP = {
+            day: { field: 'day', description: 'Day Meal (Lunch)' },
+            night1: { field: 'night1', description: 'Night Main (Veg/Egg)' }, 
+            night2: { field: 'night2', description: 'Night Meal (Dinner)' }, 
+            sunday_day: { field: 'sunday_day', description: 'Sunday Day Meal' },
+            sunday_night: { field: 'sunday_night', description: 'Sunday Night Meal' }
+        };
+
+        let primaryDayIndex = day;
+        let secondaryDayIndex = day;
+        let primaryMealField = 'day'; 
+        let secondaryMealField = 'night1'; 
+        let secondaryMealField2 = 'night2'; 
+        
+        if (day >= 1 && day <= 5) {
+            if (hour < SHIFT_HOUR_DAY) {
+                primaryMealField = 'day';
+                secondaryMealField = 'night1';
+                secondaryMealField2='night2';
+                primaryDayIndex = day;
+                secondaryDayIndex = day;
+            }  else {
+                primaryDayIndex = (day + 1) % 7;
+                secondaryDayIndex = (day + 1) % 7;
+                
+                if (primaryDayIndex === 6) {
+                    primaryDayIndex = 0;
+                    secondaryDayIndex = 0;
+                    primaryMealField = 'sunday_day';
+                    secondaryMealField = 'sunday_night';
+                    secondaryMealField2 = null;
+                } else {
+                    primaryMealField = 'day';
+                    secondaryMealField = 'night1';
+                    secondaryMealField2='night2';
+                }
+            }
+        }
+        else if (day === 6) {
+            if (hour < SHIFT_HOUR_DAY) {
+                primaryMealField = 'day';
+                secondaryMealField = 'night1';
+                secondaryMealField2='night2';
+                primaryDayIndex = 6;
+                secondaryDayIndex = 6;
+            } else {
+                primaryDayIndex = 0;
+                secondaryDayIndex = 0;
+                primaryMealField = 'sunday_day';
+                secondaryMealField = 'sunday_night';
+                secondaryMealField2 = null;
+            }
+        } else if (day === 0) {
+            if (hour < SHIFT_HOUR_DAY) {
+                primaryMealField = 'sunday_day';
+                secondaryMealField = 'sunday_night';
+                secondaryMealField2 = null;
+                primaryDayIndex = 0;
+                secondaryDayIndex = 0;
+            } else {
+                primaryDayIndex = 1;
+                secondaryDayIndex = 1;
+                primaryMealField = 'day';
+                secondaryMealField = 'night1';
+                secondaryMealField2='night2';
+            }
+        }
+        
+        const secondary2Info = secondaryMealField2 ? {
+            title: `${DAY_NAMES[secondaryDayIndex]} ${MEAL_MAP[secondaryMealField2].description}`, 
+            field: secondaryMealField2, 
+            date: DAY_NAMES[secondaryDayIndex]
+        } : null;
+        
+        return {
+            primary: { 
+                title: `${DAY_NAMES[primaryDayIndex]} ${MEAL_MAP[primaryMealField].description}`, 
+                field: primaryMealField, 
+                date: DAY_NAMES[primaryDayIndex]
+            },
+            secondary: { 
+                title: `${DAY_NAMES[secondaryDayIndex]} ${MEAL_MAP[secondaryMealField].description}`, 
+                field: secondaryMealField, 
+                date: DAY_NAMES[secondaryDayIndex]
+            },
+            secondary2: secondary2Info
+        };
+    }
+
+    async function renderMealCountTable(mealInfo, tableBodyId, titleId, exportBtnId) {
+        const tableBody = document.getElementById(tableBodyId);
+        let loadingEl;
+        if (tableBodyId === 'mealCountsTableBodyPrimary') {
+            loadingEl = primaryCountLoadingMessage;
+        } else if (tableBodyId === 'mealCountsTableBodySecondary') {
+            loadingEl = secondaryCountLoadingMessage;
+        } else if (tableBodyId === 'mealCountsTableBodySecondary2') {
+            loadingEl = secondary2CountLoadingMessage;
+        }
+        const titleEl = document.getElementById(titleId);
+        const exportEl = document.getElementById(exportBtnId);
+
+        if (!mealInfo) {
+            titleEl.textContent = 'No Secondary Carb Meal Applicable';
+            loadingEl.textContent = 'N/A for this day';
+            loadingEl.style.display = 'block';
+            tableBody.innerHTML = '';
+            return;
+        }
+
+        titleEl.textContent = `${mealInfo.title}`;
+        loadingEl.textContent = 'Loading counts...';
+        loadingEl.style.display = 'block';
+        tableBody.innerHTML = '';
+        
+        const response = await authenticatedFetch(`${API_URL}/meal-counts?mealField=${mealInfo.field}`);
+        
+        if (!response || !response.ok) {
+            titleEl.textContent = `${mealInfo.title}`;
+            loadingEl.textContent = 'Failed to load counts.';
+            return;
+        }
+
+        const mealCounts = await response.json();
+        const countsData = mealCounts.counts || {};
+        
+        titleEl.textContent = `${mealInfo.title}`;
+
+        if (Object.keys(countsData).length > 0) {
+            const dataToExport = [];
+            for (const preference in countsData) {
+                const count = countsData[preference];
+                
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td data-label="Meal Type" class="capitalize">${preference}</td>
+                    <td data-label="Count">${count}</td>
+                `;
+                tableBody.appendChild(tr);
+
+                dataToExport.push({ 'Meal Type': preference, 'Count': count });
+            }
+            exportEl.onclick = () => exportToExcel(dataToExport, `${mealInfo.date}_${mealInfo.field}_Counts.xlsx`);
+            loadingEl.style.display = 'none';
+        } else {
+            loadingEl.textContent = `No data set for ${mealInfo.title}.`;
+            loadingEl.style.display = 'block';
+        }
+    }
+
+    async function fetchDualMealCounts() {
+        const dualCounts = getDualMealCounts();
+
+        renderMealCountTable(
+            dualCounts.primary, 
+            'mealCountsTableBodyPrimary', 
+            'primaryMealTitle', 
+            'exportPrimaryCounts'
+        );
+
+        renderMealCountTable(
+            dualCounts.secondary,
+            'mealCountsTableBodySecondary', 
+            'secondaryMealTitle', 
+            'exportSecondaryCounts'
+        );
+        renderMealCountTable(
+            dualCounts.secondary2,
+            'mealCountsTableBodySecondary2', 
+            'secondary2MealTitle', 
+            'exportSecondary2Counts'
+        );
+    }
+    
+    const attendanceTableBody = document.getElementById('attendanceTableBody');
+    const attendanceLoadingMessage = document.getElementById('attendanceLoadingMessage');
+
+    async function fetchAttendance() {
+        attendanceLoadingMessage.textContent = 'Loading attendance...';
+        attendanceLoadingMessage.style.display = 'block';
+        attendanceTableBody.innerHTML = '';
+
+        const response = await authenticatedFetch(`${API_URL}/student-attendance`);
+        if (!response || !response.ok) {
+            attendanceLoadingMessage.textContent = 'Failed to load attendance data.';
+            return;
+        }
+        const attendanceData = await response.json(); 
+        
+        attendanceMap = {};
+        (attendanceData || []).forEach(att => {
+            attendanceMap[att.username] = att.status;
+        });
+
+        allStudentsData.forEach(student => {
+            const status = attendanceMap[student.username] || 'present';
+            const tr = document.createElement('tr');
+            tr.dataset.row = student.username;
+            tr.dataset.status = status;
+            tr.innerHTML = `
+                <td data-label="Username">${student.username}</td>
+                <td data-label="Full Name">${student.fullName}</td>
+                <td data-label="Roll No.">${student.roll}</td>
+                <td data-label="Status" class="${status === 'present' ? 'text-green-600 font-medium' : 'text-red-600 font-medium'} capitalize">
+                    ${status === 'present' ? '✓ Present' : '✗ Absent'}
+                </td>
+                <td data-label="Note">
+                    <span class="text-gray-500 text-sm italic">Auto-calculated</span>
+                </td>
+            `;
+            attendanceTableBody.appendChild(tr);
+        });
+        attendanceLoadingMessage.style.display = 'none';
+
+        if (!window.attendanceFilterAdded) {
+            const attendanceSearch = document.getElementById('attendanceSearch');
+            const attendanceFilter = document.getElementById('attendanceFilter');
+            function filterAttendance() {
+                const search = attendanceSearch.value.toLowerCase();
+                const fStatus = attendanceFilter.value;
+                [...attendanceTableBody.children].forEach(row => {
+                    const fullName = row.cells[1].textContent.toLowerCase();
+                    const status = row.dataset.status;
+                    let show = true;
+                    if (search && !fullName.includes(search)) show = false;
+                    if (fStatus && status !== fStatus) show = false;
+                    row.style.display = show ? '' : 'none';
+                });
+            }
+            attendanceSearch.addEventListener('input', filterAttendance);
+            attendanceFilter.addEventListener('change', filterAttendance);
+            window.attendanceFilterAdded = true;
+        }
+    }
+
+    const leaveContainer = document.getElementById('leaveRequestsContainer');
+    const leaveLoadingMessage = document.getElementById('leaveLoadingMessage');
+
+    async function fetchLeaveRequests() {
+        leaveLoadingMessage.textContent = 'Loading leave requests...';
+        leaveContainer.innerHTML = '';
+
+        const response = await authenticatedFetch(`${API_URL}/leaves`);
+        if(!response || !response.ok) {
+            leaveLoadingMessage.textContent = 'Failed to load leave requests.';
+            return;
+        }
+        
+        const requests = await response.json();
+        if (requests && requests.length > 0) {
+            requests.forEach(req => {
+                const card = document.createElement('div');
+                card.className = 'bg-white p-4 rounded-lg shadow-md flex justify-between items-center';
+                card.id = `leave-${req.id}`;
+                card.innerHTML = `
+                    <div>
+                        <p class="font-bold text-gray-800">${req.studentName}</p>
+                        <p class="text-sm text-gray-600"><strong>From:</strong> ${req.from} <strong>To:</strong> ${req.to}</p>
+                        <p class="text-sm text-gray-500 mt-1"><strong>Reason:</strong> ${req.reason}</p>
+                    </div>  
+                    <div class="flex-shrink-0">
+                        <button class="table-btn approve-btn" onclick="handleLeave('${req.id}', true)">Approve</button>
+                        <button class="table-btn reject-btn" onclick="handleLeave('${req.id}', false)">Reject</button>
+                    </div>
+                `;
+                leaveContainer.appendChild(card);
+            });
+            leaveLoadingMessage.style.display = 'none';
+        } else {
+            leaveLoadingMessage.textContent = 'No pending leave requests.';
+        }
+    }
+
+    async function handleLeave(leaveId, isApproved) {
+        const response = await authenticatedFetch(`${API_URL}/leaves/${leaveId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: isApproved ? 'approved' : 'rejected' })
+        });
+
+        if(response && response.ok) {
+            document.getElementById(`leave-${leaveId}`).remove();
+            if (leaveContainer.children.length === 0) {
+                leaveLoadingMessage.textContent = 'No pending leave requests.';
+                leaveLoadingMessage.style.display = 'block';
+            }
+            fetchAttendance();
+        } else {
+            alert('Failed to update leave request.');
+        }
+    }
+
+    function exportToExcel(data, filename) {
+        const worksheet = XLSX.utils.json_to_sheet(data);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+        XLSX.writeFile(workbook, filename);
+    }
+
+    async function fetchAllData() {
+        studentLoadingMessage.textContent = 'Loading student data...';
+
+        const response = await authenticatedFetch(API_URL);
+        if (!response || !response.ok) {
+            studentLoadingMessage.textContent = 'Failed to load data. Please log in again.';
+            return;
+        }
+        const data = await response.json();
+        allStudentsData = data.users || [];
+        document.getElementById('superName').textContent = data.superintendent_name || 'Superintendent';
+
+        studentTableBody.innerHTML = '';
+        if (allStudentsData.length > 0) {
+            allStudentsData.forEach(student => {
+                const tr = document.createElement('tr');
+                tr.dataset.studentId = student.userId;
+                tr.innerHTML = `
+                    <td data-label="Username">${student.username}</td>
+                    <td data-label="Full Name">${student.fullName}</td>
+                    <td data-label="Roll No.">${student.roll}</td>
+                    <td data-label="Department">${student.department}</td>
+                    <td data-label="Year">${student.year}</td>
+                    <td data-label="Actions" class="whitespace-nowrap">
+                        <button class="table-btn view-btn" onclick="openDetailModal(allStudentsData.find(s => s.userId === '${student.userId}'))">View</button>
+                        <button class="table-btn edit-btn" onclick="openStudentModal(allStudentsData.find(s => s.userId === '${student.userId}'))">Edit</button>
+                        <button class="table-btn delete-btn" onclick="deleteStudent('${student.userId}', '${student.username}')">Delete</button>
+                    </td>
+                `;
+                studentTableBody.appendChild(tr);
+            });
+            studentLoadingMessage.style.display = 'none';
+
+            if (!window.studentsFilterAdded) {
+                const studentSearch = document.getElementById('studentSearch');
+                function filterStudents() {
+                    const search = studentSearch.value.toLowerCase();
+                    allStudentsData.forEach(student => {
+                        const row = document.querySelector(`tr[data-student-id="${student.userId}"]`);
+                        row.style.display = student.fullName.toLowerCase().includes(search) ? '' : 'none';
+                    });
+                }
+                studentSearch.addEventListener('input', filterStudents);
+                window.studentsFilterAdded = true;
+            }
+        } else {
+            studentLoadingMessage.textContent = 'No students found.';
+        }
+
+        populateMealsTable(allStudentsData);
+    }
+    
+    document.addEventListener('DOMContentLoaded', () => {
+        fetchAllData(); 
+        fetchLeaveRequests(); 
+        fetchAttendance();
+
+        const mealInfo = getDualMealCounts();
+        primaryMealTitle.textContent = `${mealInfo.primary.title}`;
+        secondaryMealTitle.textContent = `${mealInfo.secondary.title}`;
+        if (mealInfo.secondary2) {
+            secondary2MealTitle.textContent = `${mealInfo.secondary2.title}`;
+        } else {
+            secondary2MealTitle.textContent = 'No Secondary Carb Meal Applicable';
+            document.getElementById('secondaryCountLoadingMessage2').textContent = 'N/A for this day';
+            document.getElementById('secondaryCountLoadingMessage2').style.display = 'block';
+        }
+    });
+</script>
+
+</body>
+</html>

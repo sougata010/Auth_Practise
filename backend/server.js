@@ -11,6 +11,7 @@ import adminRoute from "./controllers/admin.controllers.js"
 import superRoute from "./controllers/superintendent.controllers.js"
 import superauth from "./utils/supermiddleware.js";
 import adminauth from "./utils/adminmiddleware.js";
+import leaveRoute from "./controllers/leave.controllers.js";
 dotenv.config();
 const app = express();
 DataBase();
@@ -24,7 +25,8 @@ app.use("/auth", registerRoute);
 app.use("/user-details", auth, userDetailsRoute); 
 app.use("/meal", auth, mealRoute); 
 app.use("/superintendent",[auth,superauth],superRoute);
-app.use("/admin",[auth,adminauth],adminRoute)
+app.use("/admin",[auth,adminauth],adminRoute);
+app.use("/leave",auth,leaveRoute);
 
 app.listen(process.env.PORT, () => {
   console.log(`The app is listening on port ${process.env.PORT}`);

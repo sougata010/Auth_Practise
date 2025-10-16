@@ -32,7 +32,7 @@ router.get("/users/:id", async (req, res) => {
 // Create new user
 router.post("/users", async (req, res) => {
     try {
-        const { username, email, password, fullName, roles, department, year } = req.body;
+        const { roll,username, email, password, fullName, roles, department, year } = req.body;
         if (!username || !email || !password || !roles) {
             return res.status(400).json({ error: "Required fields missing" });
         }
@@ -48,9 +48,11 @@ router.post("/users", async (req, res) => {
             email,
             password: hashedPassword,
             fullName,
+            roll,
             roles,
             department,
-            year
+            year,
+            
         });
 
         await newUser.save();

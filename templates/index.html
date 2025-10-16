@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ramakrishna Mission Vidyamandira</title>
+  <style>
+    /* Basic Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      color: #222;
+      background: #f8f4f1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      scroll-behavior: smooth;
+    }
+
+    /* Header */
+    header {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: rgba(255, 255, 255, 0);
+      box-shadow: none;
+      transition: all 0.4s ease;
+      z-index: 1000;
+    }
+
+    header.scrolled {
+      background-color: rgba(255, 255, 255, 0.95);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    header h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #e77224;
+      transition: color 0.3s ease;
+    }
+
+    /* Navigation */
+    nav {
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+    }
+
+    nav a {
+      text-decoration: none;
+      color: #333;
+      font-weight: 500;
+      transition: color 0.3s ease;
+    }
+
+    nav a:hover {
+      color: orangered;
+    }
+
+    /* Hamburger Icon */
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      justify-content: space-between;
+      width: 25px;
+      height: 20px;
+      cursor: pointer;
+      z-index: 1100;
+    }
+
+    .hamburger span {
+      display: block;
+      height: 3px;
+      width: 100%;
+      background: #e77224;
+      border-radius: 3px;
+      transition: 0.3s;
+    }
+
+    /* Morphing into X animation */
+    .hamburger.open span:nth-child(1) {
+      transform: rotate(45deg) translate(5px, 5px);
+    }
+
+    .hamburger.open span:nth-child(2) {
+      opacity: 0;
+    }
+
+    .hamburger.open span:nth-child(3) {
+      transform: rotate(-45deg) translate(5px, -5px);
+    }
+
+    /* Mobile Navigation Menu */
+    .mobile-nav {
+      display: none;
+      flex-direction: column;
+      position: absolute;
+      top: 60px;
+      right: 20px;
+      background: rgba(255, 255, 255, 0.98);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .mobile-nav a {
+      padding: 1rem 1.5rem;
+      text-decoration: none;
+      color: #333;
+      border-bottom: 1px solid #eee;
+      text-align: right;
+    }
+
+    .mobile-nav a:hover {
+      background-color: #ffe7d0;
+      color: orangered;
+    }
+
+    .mobile-nav.active {
+      display: flex;
+      animation: slideDown 0.3s ease;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Hero Section (Full Screen) */
+    .hero-section {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 2rem 1rem;
+      background: linear-gradient(
+          rgba(248, 244, 241, 0.85),
+          rgba(180, 136, 15, 0.6)
+        ),
+        url("https://upload.wikimedia.org/wikipedia/commons/1/1b/Ramakrishna_Mission_Vidyamandira_Main_Building.jpg")
+          center/cover no-repeat;
+      background-attachment: fixed;
+    }
+
+    .hero-section h2 {
+      font-size: 3rem;
+      font-weight: 800;
+      margin-bottom: 1rem;
+      color: #111827;
+    }
+
+    .hero-section p {
+      font-size: 1.2rem;
+      color: #333;
+      max-width: 650px;
+      margin-bottom: 2rem;
+      line-height: 1.6;
+    }
+
+    /* Button Group */
+    .btn-group {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .btn-login,
+    .btn-get-started {
+      background-color: orangered;
+      color: white;
+      padding: 0.8rem 2rem;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    .btn-login:hover,
+    .btn-get-started:hover {
+      background-color: rgb(236, 33, 7);
+      transform: translateY(-2px);
+    }
+
+    /* Secondary Section */
+    .info-section {
+      background-color: #fff8e1;
+      padding: 4rem 2rem;
+      text-align: center;
+    }
+
+    .info-section h3 {
+      font-size: 2rem;
+      color: #e77224;
+      margin-bottom: 1rem;
+    }
+
+    .info-section p {
+      max-width: 700px;
+      margin: 0 auto;
+      color: #444;
+      font-size: 1.05rem;
+      line-height: 1.6;
+    }
+
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      background-color: #eeda81;
+      border-top: 1px solid #e5e7eb;
+      color: #6b7280;
+      font-size: 0.9rem;
+    }
+
+    /* Responsive Styles */
+    @media (max-width: 768px) {
+      nav {
+        display: none;
+      }
+
+      .hamburger {
+        display: flex;
+      }
+
+      .hero-section h2 {
+        font-size: 2rem;
+      }
+
+      .btn-group {
+        flex-direction: column;
+        width: 100%;
+        align-items: center;
+      }
+
+      .btn-login,
+      .btn-get-started {
+        width: 80%;
+      }
+    }
+
+    /* discourage selection/editing */
+* {
+  -webkit-user-select: none; /* Safari/Chrome */
+  -moz-user-select: none;    /* Firefox */
+  -ms-user-select: none;     /* IE/Edge */
+  user-select: none;
+  -webkit-touch-callout: none; /* prevent iOS callout menu */
+}
+
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header id="main-header">
+    <h1>Ramakrishna Mission Vidyamandira</h1>
+
+    <!-- Desktop Navigation -->
+    <nav>
+      <a href="https://vidyamandira.ac.in">Vidyamandira</a>
+      <a href="#about">About</a>
+      <a href="#contact">Contact</a>
+    </nav>
+
+    <!-- Hamburger Icon -->
+    <div class="hamburger" id="hamburger">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+
+    <!-- Mobile Navigation -->
+    <div class="mobile-nav" id="mobileNav">
+      <a href="https://vidyamandira.ac.in">Vidyamandira</a>
+      <a href="#about">About</a>
+      <a href="#contact">Contact</a>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <h2>Welcome to Vidyamandira Parivar</h2>
+    <p>
+      A platform dedicated to the ideals of Sri Ramakrishna, Swami Vivekananda,
+      and the great tradition of Vidyamandira. Explore, connect, and grow.
+    </p>
+
+    <div class="btn-group">
+      <button class="btn-login" onclick="login()">Login</button>
+      <button class="btn-get-started" onclick="register()">Signup</button>
+    </div>
+  </section>
+
+  <!-- Secondary Section -->
+  <section class="info-section" id="about">
+    <h3>About the Institution</h3>
+    <p>
+      Ramakrishna Mission Vidyamandira is a premier residential autonomous
+      college under the University of Calcutta, run by the Ramakrishna Mission.
+      It stands for academic excellence blended with spiritual and cultural
+      values. Our aim is to form a community of scholars dedicated to knowledge,
+      service, and character building.
+    </p>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    © <span id="year"></span> Vidyamandira Tech Society. All &reg; rights reserved.
+  </footer>
+
+  <script>
+    // Set current year
+    document.getElementById("year").textContent = new Date().getFullYear();
+
+    // Dummy login function
+    function login() {
+      window.location.href='login.html'
+    }
+
+    // Dummy register function
+    function register() {
+      window.location.href='register.html'
+    }
+
+    // Header scroll effect
+    const header = document.getElementById("main-header");
+    window.addEventListener("scroll", () => {
+      if (window.scrollY > 50) {
+        header.classList.add("scrolled");
+      } else {
+        header.classList.remove("scrolled");
+      }
+    });
+
+    // Hamburger menu toggle
+    const hamburger = document.getElementById("hamburger");
+    const mobileNav = document.getElementById("mobileNav");
+
+    hamburger.addEventListener("click", () => {
+      mobileNav.classList.toggle("active");
+      hamburger.classList.toggle("open");
+    });
+
+    // 1. Disable right-click context menu
+window.addEventListener('contextmenu', function(e) {
+  e.preventDefault();
+}, { passive: false });
+
+// 2. Block common developer hotkeys (F12, Ctrl+Shift+I/J/C, Ctrl+U, Ctrl+Shift+C)
+window.addEventListener('keydown', function(e) {
+  // F12
+  if (e.key === 'F12') {
+    e.preventDefault();
+    return false;
+  }
+  // Ctrl+Shift+I / Ctrl+Shift+J / Ctrl+Shift+C / Ctrl+U
+  if (e.ctrlKey && e.shiftKey && ['I','J','C'].includes((e.key || '').toUpperCase())) {
+    e.preventDefault();
+    return false;
+  }
+  if (e.ctrlKey && (e.key || '').toUpperCase() === 'U') { // view source
+    e.preventDefault();
+    return false;
+  }
+  // Ctrl+Shift+K on some browsers
+  if (e.ctrlKey && e.shiftKey && (e.key || '').toUpperCase() === 'K') {
+    e.preventDefault();
+    return false;
+  }
+}, { passive: false });
+
+// 3. Prevent selecting, copying, cutting, pasting (optional, may hinder UX)
+document.addEventListener('selectstart', e => e.preventDefault());
+document.addEventListener('copy', e => e.preventDefault());
+document.addEventListener('cut', e => e.preventDefault());
+document.addEventListener('paste', e => e.preventDefault());
+
+// 4. Disable drag of images / links
+document.addEventListener('dragstart', e => e.preventDefault());
+
+// 5. Make sure inline-editable elements can't be edited accidentally
+document.querySelectorAll('[contenteditable]').forEach(el => el.setAttribute('contenteditable', 'false'));
+
+// 6. Optionally show a friendly message when someone tries developer shortcuts
+let attempts = 0;
+function friendlyWarn() {
+  attempts++;
+  if (attempts === 1) {
+    // show a non-blocking message once
+    console.info('For security, developer tools and editing are discouraged on this site.');
+  }
+}
+window.addEventListener('keydown', friendlyWarn);
+
+// 7. Close mobile virtual keyboard shortcuts (some attempts)
+window.addEventListener('gesturestart', e => e.preventDefault());
+
+// 8. When the mobile nav links are clicked, close the menu (already in your script, keep it)
+document.querySelectorAll('.mobile-nav a').forEach(a => {
+  a.addEventListener('click', () => {
+    const mobileNav = document.getElementById('mobileNav');
+    const hamburger = document.getElementById('hamburger');
+    if (mobileNav) mobileNav.classList.remove('active');
+    if (hamburger) hamburger.classList.remove('open');
+  });
+});
+
+// deterrent-devtools.js
+(function detectDevTools() {
+  const threshold = 160;
+  setInterval(() => {
+    if (window.outerWidth - window.innerWidth > threshold || 
+        window.outerHeight - window.innerHeight > threshold) {
+      document.body.innerHTML = "<h1>DevTools detected. Access restricted.</h1>";
+    }
+  }, 1000);
+})()
+  </script>
+  
+</body>
+</html>

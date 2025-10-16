@@ -10,7 +10,6 @@ const jwt = jsonwebtoken;
 const router = express.Router();
 
 function genRefresh(user) {
-    const userRoles = user.roles || ["student"];
     return jwt.sign({ username: user.username}, process.env.SECRET_KEY, { expiresIn: "7d" });
 }
 
@@ -53,7 +52,7 @@ router.post("/login", async (req, res) => {
         user.refreshToken = refresh;
         await user.save();
 
-        res.status(200).json({ access, refresh, roles: user.roles});
+        res.status(200).json({ access,roles: user.roles});
 
     } catch (error) {
         console.error("Login Error:", error);

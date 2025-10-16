@@ -19,7 +19,6 @@ router.get("/", async (req, res) => {
         const decoded = jsonwebtoken.verify(token, process.env.SECRET_KEY);
         const usernameFromToken = decoded.username; 
         const user = await User.findOne({ username: usernameFromToken }).select('username fullName roll department year'); 
-
         if (!user) {
             return res.status(404).json({ error: "User not found." });
         }

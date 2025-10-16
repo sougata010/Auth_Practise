@@ -13,8 +13,7 @@ const userSchema = mongoose.Schema({
     },
     email:{
         type:String,
-        required:true,
-        unique:true
+        required:true
     },
     refreshToken:{
         type:String
@@ -33,6 +32,9 @@ const userSchema = mongoose.Schema({
     },
     department:{
         type:String
+    },
+    present:{
+        type:Boolean
     }
 })
 

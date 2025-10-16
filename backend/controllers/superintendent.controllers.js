@@ -3,10 +3,19 @@ import Meal from "../model/Meal.model.js";
 import dotenv from "dotenv";
 import User from "../model/User.model.js";
 import bcrypt from "bcrypt";
+import Leave from "../model/Leave.model.js";
+import Attendance from "../model/Attendance.model.js";
+
 
 dotenv.config();
 
 const router = express.Router();
+function getCurrentTimeString() {
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    return `${hours}:${minutes}`;
+}
 
 router.get("/",async(req,res)=>{
     try {
@@ -88,6 +97,10 @@ router.put("/users/:id", async (req, res) => {
     try {
         const { id } = req.params;
         const updateData = req.body;
+        const salt=await bcrypt.genSalt(7);
+        if(updateData.password){
+            updateData.password =await bcrypt.hash(updateData.password,salt)
+        }
         const updatedUser = await User.findByIdAndUpdate(id, {
             fullName: updateData.full_name,
             roll: updateData.roll,
@@ -102,8 +115,142 @@ router.put("/users/:id", async (req, res) => {
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
+router.get("/meal-counts", async (req, res) => {
+    try {
+        const { mealField } = req.query;
+        if (!mealField || !['day', 'night1', 'night2', 'sunday_day', 'sunday_night'].includes(mealField)) {
+            return res.status(400).json({ error: "Invalid or missing mealField parameter." });
+        }
 
+        const meals = await Meal.find({}).select(mealField);
 
+        const counts = meals.reduce((acc, meal) => {
+            const preference = meal[mealField] || 'Not Set';
+            if (preference && preference !== 'Not Set') { 
+                acc[preference] = (acc[preference] || 0) + 1;
+            }
+            return acc;
+        }, {});
+
+        res.status(200).json({ counts });
+    } catch (error) {
+        console.error("Error fetching meal counts:", error);
+        res.status(500).json({ error: "Internal Server Error during meal counting." });
+    }
+});
+router.get("/leaves",async(req,res)=>{
+    try {
+        const leaves = await Leave.find({status:"pending"});
+        const formattedLeaves = leaves.map(leave => ({
+            id: leave._id,
+            studentName: leave.fullName,
+            from: leave.departureDate,
+            to: leave.arrivalDate,
+            reason: leave.reason,
+            status: leave.status
+        }));
+        res.status(200).json(formattedLeaves);
+    } catch (error) {
+        res.status(500).json({error:'Internal Server Error'});
+    }
+});
+router.put("/leaves/:id",async(req,res)=>{
+    const { id } = req.params;
+    const { status } = req.body;
+    const leave = await Leave.findById(id);
+    if(!leave){
+        return res.status(400).json({error:"Leave acceptation unsuccessfull"});
+
+    }
+    if(status === "approved" || status === "rejected"){
+        leave.status = status;
+        await leave.save();
+        res.status(201).json({message:"Leave accepted successfully"});
+    }else{
+        res.status(400).json({error:'Leave request unsuccessfull'});
+        
+    }
+});
+router.get('/student-attendance', async(req, res) => {
+    try {
+        const now = new Date();
+        const currentDateStr = now.toISOString().split('T')[0];
+        const currentTime = getCurrentTimeString();
+
+        const students = await User.find({ roles: 'student' }).select('username fullName');
+
+        const statusUpdatePromises = students.map(async (user) => {
+            const activeLeaves = await Leave.find({
+                username: user.username,
+                status: 'approved'
+            });
+
+            let finalStatus = 'present';
+            
+            for (const leave of activeLeaves) {
+                const depDate = new Date(leave.departureDate);
+                const arrDate = new Date(leave.arrivalDate);
+                const depDateOnly = new Date(depDate.toISOString().split('T')[0]);
+                const arrDateOnly = new Date(arrDate.toISOString().split('T')[0]);
+                const currentDate = new Date(currentDateStr + 'T00:00:00.000Z');
+                
+                if (currentDate >= depDateOnly && currentDate <= arrDateOnly) {
+                    
+                    if (currentDate.getTime() === depDateOnly.getTime()) {
+                        const depTime = depDate.toISOString().split('T')[1].substring(0, 5);
+                        if (currentTime >= depTime) {
+                            finalStatus = 'absent';
+                            break;
+                        }
+                    }
+                    
+                    else if (currentDate.getTime() === arrDateOnly.getTime()) {
+                        const arrTime = arrDate.toISOString().split('T')[1].substring(0, 5);
+                        if (currentTime < arrTime) {
+                            finalStatus = 'absent';
+                        } else {
+                            finalStatus = 'present';
+                        }
+                        break;
+                    }
+                    
+                    else {
+                        finalStatus = 'absent';
+                        break;
+                    }
+                }
+            }
+
+            await Attendance.findOneAndUpdate(
+                { username: user.username },
+                { 
+                    status: finalStatus,
+                    fullName: user.fullName,
+                    username: user.username
+                },
+                { new: true, upsert: true }
+            );
+        });
+
+        await Promise.all(statusUpdatePromises);
+
+        const finalAttendance = await Attendance.find({});
+        res.status(200).json(finalAttendance);
+
+    } catch (error) {
+        console.error("Master Attendance Error:", error);
+        res.status(500).json({ error: 'Internal Server Error during attendance fetch.' });
+    }
+});
+
+router.post("/attendance",async(req,res)=>{
+    try {
+        const students=await Attendance.find({})
+        res.status(200).json({username:students.username,fullName:students.fullName,status:students.status});
+    } catch (error) {
+        res.status(500).json({error:'Internal server error'});
+    }
+})
 
 
 export default router;

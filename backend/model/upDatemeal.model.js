@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const mealSchema= mongoose.Schema({
+const updatemealSchema= mongoose.Schema({
     username:{
         type:String
     },
@@ -26,5 +26,5 @@ const mealSchema= mongoose.Schema({
         type:String
     }
 })
-const Meal =mongoose.model('Meal',mealSchema);
-export default Meal
+const Updatemeal =mongoose.model('updatemeal',updatemealSchema);
+export default Updatemeal

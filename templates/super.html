@@ -52,7 +52,7 @@
             transition: box-shadow 0.2s;
         }
         .custom-table tbody tr:hover {
-             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
         .table-btn {
             color: white;
@@ -136,6 +136,9 @@
             </button>
             <button class="tab-button w-1/2 sm:w-auto text-center border-b-2 font-medium text-sm py-4 px-6 text-gray-500 hover:text-gray-700 hover:border-gray-300" data-tab="leaves">
                 Leave Requests
+            </button>
+            <button class="tab-button w-1/2 sm:w-auto text-center border-b-2 font-medium text-sm py-4 px-6 text-gray-500 hover:text-gray-700 hover:border-gray-300" data-tab="meal-requests">
+                Meal Change Requests
             </button>
         </nav>
     </div>
@@ -265,7 +268,13 @@
             <div id="leaveRequestsContainer" class="space-y-4"></div>
             <p id="leaveLoadingMessage" class="empty-state">Loading leave requests...</p>
         </div>
-    </div>
+        
+        <div id="meal-requests" class="tab-content">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">Pending Meal Change Requests</h2>
+            <div id="mealRequestsContainer" class="space-y-4"></div>
+            <p id="mealRequestLoadingMessage" class="empty-state">Loading meal change requests...</p>
+        </div>
+        </div>
 </div>
 
 <div id="customAlertModal" class="modal"><div class="modal-content"><h3 id="modalTitle" class="text-lg font-bold"></h3><p id="modalMessage" class="my-4"></p><div id="modalButtons" class="flex justify-end space-x-3"></div></div></div>
@@ -332,12 +341,16 @@
             
             if (tab.dataset.tab === 'meal-counts') {
                 fetchDualMealCounts();
+            } else if (tab.dataset.tab === 'meal-requests') { // New function call
+                fetchMealRequests();
             }
         });
     });
 
     const studentTableBody = document.getElementById('studentTableBody');
     const studentLoadingMessage = document.getElementById('studentLoadingMessage');
+    const mealRequestContainer = document.getElementById('mealRequestsContainer');
+    const mealRequestLoadingMessage = document.getElementById('mealRequestLoadingMessage');
 
     function openStudentModal(student = null) {
         const form = document.getElementById('studentForm');
@@ -470,7 +483,7 @@
                 `;
                 fullMealTableBody.appendChild(tr);
 
-                 dataToExport.push({
+                dataToExport.push({
                     'Username': student.username,
                     'Full Name': student.fullName,
                     'Day Meal': meal.day || 'N/A',
@@ -513,6 +526,7 @@
 
     const mealCountTableBodyPrimary = document.getElementById('mealCountsTableBodyPrimary');
     const mealCountTableBodySecondary = document.getElementById('mealCountsTableBodySecondary');
+    const mealCountTableBodySecondary2 = document.getElementById('mealCountsTableBodySecondary2');
     const primaryCountLoadingMessage = document.getElementById('primaryCountLoadingMessage');
     const secondaryCountLoadingMessage = document.getElementById('secondaryCountLoadingMessage');
     const secondary2CountLoadingMessage = document.getElementById('secondaryCountLoadingMessage2');
@@ -521,105 +535,70 @@
     const secondary2MealTitle = document.getElementById('secondary2MealTitle');
     const exportPrimaryCountsButton = document.getElementById('exportPrimaryCounts');
     const exportSecondaryCountsButton = document.getElementById('exportSecondaryCounts');
+    const exportSecondary2CountsButton = document.getElementById('exportSecondary2Counts');
 
+    // --- MEAL COUNT LOGIC FIX ---
     function getDualMealCounts() {
         const now = new Date();
-        const day = now.getDay();
-        const hour = now.getHours(); 
+        const day = now.getDay(); // 0 for Sunday, 1 for Monday, ..., 6 for Saturday
+        const hour = now.getHours();
+
+        const SHIFT_HOUR = 9; // 9 AM
+        const isAfterShiftTime = hour >= SHIFT_HOUR;
         
-        const SHIFT_HOUR_DAY = 7;
-        const SHIFT_HOUR_NIGHT =12;
+        let targetDayIndex = day;
         
+        // Logic: If it is 9 AM or later, shift the target day to tomorrow.
+        if (isAfterShiftTime) {
+            targetDayIndex = (day + 1) % 7;
+        }
+
         const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
         const MEAL_MAP = {
             day: { field: 'day', description: 'Day Meal (Lunch)' },
-            night1: { field: 'night1', description: 'Night Main (Veg/Egg)' }, 
-            night2: { field: 'night2', description: 'Night Meal (Dinner)' }, 
+            night1: { field: 'night1', description: 'Night Main (Veg/Egg)' },
+            night2: { field: 'night2', description: 'Night Carb (Roti/Rice)' },
             sunday_day: { field: 'sunday_day', description: 'Sunday Day Meal' },
             sunday_night: { field: 'sunday_night', description: 'Sunday Night Meal' }
         };
 
-        let primaryDayIndex = day;
-        let secondaryDayIndex = day;
-        let primaryMealField = 'day'; 
-        let secondaryMealField = 'night1'; 
-        let secondaryMealField2 = 'night2'; 
+        let primaryMealField = 'day';
+        let secondaryMealField = 'night1';
+        let secondaryMealField2 = 'night2';
         
-        if (day >= 1 && day <= 5) {
-            if (hour < SHIFT_HOUR_DAY) {
-                primaryMealField = 'day';
-                secondaryMealField = 'night1';
-                secondaryMealField2='night2';
-                primaryDayIndex = day;
-                secondaryDayIndex = day;
-            }  else {
-                primaryDayIndex = (day + 1) % 7;
-                secondaryDayIndex = (day + 1) % 7;
-                
-                if (primaryDayIndex === 6) {
-                    primaryDayIndex = 0;
-                    secondaryDayIndex = 0;
-                    primaryMealField = 'sunday_day';
-                    secondaryMealField = 'sunday_night';
-                    secondaryMealField2 = null;
-                } else {
-                    primaryMealField = 'day';
-                    secondaryMealField = 'night1';
-                    secondaryMealField2='night2';
-                }
-            }
-        }
-        else if (day === 6) {
-            if (hour < SHIFT_HOUR_DAY) {
-                primaryMealField = 'day';
-                secondaryMealField = 'night1';
-                secondaryMealField2='night2';
-                primaryDayIndex = 6;
-                secondaryDayIndex = 6;
-            } else {
-                primaryDayIndex = 0;
-                secondaryDayIndex = 0;
-                primaryMealField = 'sunday_day';
-                secondaryMealField = 'sunday_night';
-                secondaryMealField2 = null;
-            }
-        } else if (day === 0) {
-            if (hour < SHIFT_HOUR_DAY) {
-                primaryMealField = 'sunday_day';
-                secondaryMealField = 'sunday_night';
-                secondaryMealField2 = null;
-                primaryDayIndex = 0;
-                secondaryDayIndex = 0;
-            } else {
-                primaryDayIndex = 1;
-                secondaryDayIndex = 1;
-                primaryMealField = 'day';
-                secondaryMealField = 'night1';
-                secondaryMealField2='night2';
-            }
+        // Check the target day to determine the meal set
+        if (targetDayIndex === 0) { // Target is Sunday
+            primaryMealField = 'sunday_day';
+            secondaryMealField = 'sunday_night';
+            secondaryMealField2 = null; // Sunday night has no secondary carb selection
+        } else { // Target is Monday through Saturday
+            primaryMealField = 'day';
+            secondaryMealField = 'night1';
+            secondaryMealField2 = 'night2';
         }
         
         const secondary2Info = secondaryMealField2 ? {
-            title: `${DAY_NAMES[secondaryDayIndex]} ${MEAL_MAP[secondaryMealField2].description}`, 
+            title: `${DAY_NAMES[targetDayIndex]} ${MEAL_MAP[secondaryMealField2].description}`, 
             field: secondaryMealField2, 
-            date: DAY_NAMES[secondaryDayIndex]
+            date: DAY_NAMES[targetDayIndex]
         } : null;
-        
+
         return {
             primary: { 
-                title: `${DAY_NAMES[primaryDayIndex]} ${MEAL_MAP[primaryMealField].description}`, 
+                title: `${DAY_NAMES[targetDayIndex]} ${MEAL_MAP[primaryMealField].description}`, 
                 field: primaryMealField, 
-                date: DAY_NAMES[primaryDayIndex]
+                date: DAY_NAMES[targetDayIndex]
             },
             secondary: { 
-                title: `${DAY_NAMES[secondaryDayIndex]} ${MEAL_MAP[secondaryMealField].description}`, 
+                title: `${DAY_NAMES[targetDayIndex]} ${MEAL_MAP[secondaryMealField].description}`, 
                 field: secondaryMealField, 
-                date: DAY_NAMES[secondaryDayIndex]
+                date: DAY_NAMES[targetDayIndex]
             },
             secondary2: secondary2Info
         };
     }
+    // --- END MEAL COUNT LOGIC FIX ---
 
     async function renderMealCountTable(mealInfo, tableBodyId, titleId, exportBtnId) {
         const tableBody = document.getElementById(tableBodyId);
@@ -639,6 +618,7 @@
             loadingEl.textContent = 'N/A for this day';
             loadingEl.style.display = 'block';
             tableBody.innerHTML = '';
+            exportEl.onclick = null; // Disable export button
             return;
         }
 
@@ -791,7 +771,7 @@
                         <p class="font-bold text-gray-800">${req.studentName}</p>
                         <p class="text-sm text-gray-600"><strong>From:</strong> ${req.from} <strong>To:</strong> ${req.to}</p>
                         <p class="text-sm text-gray-500 mt-1"><strong>Reason:</strong> ${req.reason}</p>
-                    </div>  
+                    </div>  
                     <div class="flex-shrink-0">
                         <button class="table-btn approve-btn" onclick="handleLeave('${req.id}', true)">Approve</button>
                         <button class="table-btn reject-btn" onclick="handleLeave('${req.id}', false)">Reject</button>
@@ -823,6 +803,79 @@
             alert('Failed to update leave request.');
         }
     }
+    
+    // --- NEW MEAL CHANGE REQUEST FUNCTIONS ---
+    async function fetchMealRequests() {
+        mealRequestLoadingMessage.textContent = 'Loading meal change requests...';
+        mealRequestContainer.innerHTML = '';
+
+        const response = await authenticatedFetch(`${API_URL}/meal-request`);
+        if(!response || !response.ok) {
+            mealRequestLoadingMessage.textContent = 'Failed to load meal change requests.';
+            return;
+        }
+        
+        const data = await response.json();
+        const requests = data.mealUpdate || [];
+        
+        if (requests.length > 0) {
+            requests.forEach(req => {
+                const card = document.createElement('div');
+                card.className = 'bg-white p-4 rounded-lg shadow-md flex flex-col md:flex-row justify-between items-start md:items-center';
+                card.id = `meal-request-${req._id}`;
+
+                // Format the request details
+                let mealDetails = `
+                    <p class="text-sm text-gray-600"><strong>Requested by:</strong> ${req.fullName} (${req.username})</p>
+                    <ul class="text-xs text-gray-500 mt-2 space-y-1 pl-4 list-disc">
+                        <li>Day: <span class="capitalize">${req.day || 'N/A'}</span></li>
+                        <li>Night Main: <span class="capitalize">${req.night1 || 'N/A'}</span></li>
+                        <li>Night Carb: <span class="capitalize">${req.night2 || 'N/A'}</span></li>
+                        <li>Sun Day: <span class="capitalize">${req.sunday_day || 'N/A'}</span></li>
+                        <li>Sun Night: <span class="capitalize">${req.sunday_night || 'N/A'}</span></li>
+                    </ul>
+                `;
+
+                card.innerHTML = `
+                    <div class="mb-3 md:mb-0">
+                        <p class="font-bold text-gray-800">Meal Change Request</p>
+                        ${mealDetails}
+                    </div>  
+                    <div class="flex-shrink-0 flex space-x-2 mt-3 md:mt-0">
+                        <button class="table-btn approve-btn" onclick="handleMealRequest('${req._id}', true)">Approve</button>
+                        <button class="table-btn reject-btn" onclick="handleMealRequest('${req._id}', false)">Reject</button>
+                    </div>
+                `;
+                mealRequestContainer.appendChild(card);
+            });
+            mealRequestLoadingMessage.style.display = 'none';
+        } else {
+            mealRequestLoadingMessage.textContent = 'No pending meal change requests.';
+        }
+    }
+
+    async function handleMealRequest(requestId, isApproved) {
+        const response = await authenticatedFetch(`${API_URL}/meal-request/${requestId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: isApproved ? 'approved' : 'rejected' })
+        });
+
+        if(response && response.ok) {
+            alert(`Meal request ${isApproved ? 'approved' : 'rejected'} successfully.`);
+            document.getElementById(`meal-request-${requestId}`).remove();
+            if (mealRequestContainer.children.length === 0) {
+                mealRequestLoadingMessage.textContent = 'No pending meal change requests.';
+                mealRequestLoadingMessage.style.display = 'block';
+            }
+            // Also refresh student and meal data since a meal preference might have changed
+            fetchAllData(); 
+        } else {
+            const err = await response.json();
+            alert(`Failed to update meal request: ${err.error || 'An unknown error occurred.'}`);
+        }
+    }
+    // --- END NEW MEAL CHANGE REQUEST FUNCTIONS ---
 
     function exportToExcel(data, filename) {
         const worksheet = XLSX.utils.json_to_sheet(data);
@@ -887,6 +940,7 @@
         fetchAllData(); 
         fetchLeaveRequests(); 
         fetchAttendance();
+        fetchMealRequests(); // <-- New call on load
 
         const mealInfo = getDualMealCounts();
         primaryMealTitle.textContent = `${mealInfo.primary.title}`;

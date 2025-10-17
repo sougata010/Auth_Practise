@@ -5,6 +5,7 @@ import User from "../model/User.model.js";
 import bcrypt from "bcrypt";
 import Leave from "../model/Leave.model.js";
 import Attendance from "../model/Attendance.model.js";
+import Updatemeal from "../model/upDatemeal.model.js";
 
 
 dotenv.config();
@@ -17,15 +18,15 @@ function getCurrentTimeString() {
     return `${hours}:${minutes}`;
 }
 
-router.get("/",async(req,res)=>{
+router.get("/", async (req, res) => {
     try {
-        const user=await User.find({ roles: 'student'});
-        const user_data=await Promise.all(user.map(async(user)=>{
+        const user = await User.find({ roles: 'student' });
+        const user_data = await Promise.all(user.map(async (user) => {
             const meal = await Meal.findOne({ username: user.username });
-           return {
+            return {
                 userId: user._id,
                 username: user.username,
-                fullName: user.fullName, 
+                fullName: user.fullName,
                 email: user.email,
                 roll: user.roll,
                 department: user.department,
@@ -39,40 +40,40 @@ router.get("/",async(req,res)=>{
                 } : null
             }
         }))
-       res.json({ users: user_data, superintendent_name: req.user.username });
+        res.json({ users: user_data, superintendent_name: req.user.username });
     } catch (error) {
-        res.status(500).json({error:error})
+        res.status(500).json({ error: error })
     }
 })
 
-router.delete("/user/:userId",async(req,res)=>{
+router.delete("/user/:userId", async (req, res) => {
     try {
-        const {userId} = req.params
-        const validuser = await User.findById({_id:userId});
+        const { userId } = req.params
+        const validuser = await User.findById({ _id: userId });
         const user = await User.deleteOne({ _id: userId });
-        await Meal.deleteOne({username: validuser.username});
-        if(user.deletedCount === 0){
-            return res.status(400).json({error:"Meal deletion unsuccessfull"});
+        await Meal.deleteOne({ username: validuser.username });
+        if (user.deletedCount === 0) {
+            return res.status(400).json({ error: "Meal deletion unsuccessfull" });
         }
-        res.status(201).json({message:"student deleted successfully"});
+        res.status(201).json({ message: "student deleted successfully" });
     } catch (error) {
         res.status(500).json({ error: "Internal Server Error during deletion." });
     }
 })
 router.post("/user", async (req, res) => {
     try {
-        const { username, roll, department, year, full_name,password,email } = req.body;
-        
+        const { username, roll, department, year, full_name, password, email } = req.body;
+
 
         if (!username || !roll || !department || !year || !password || !email || !full_name) {
-             return res.status(400).json({ error: "All meal fields and a username are required for creation." });
+            return res.status(400).json({ error: "All meal fields and a username are required for creation." });
         }
-        const existingUser =await User.findOne({username});
-        if(existingUser){
-            return res.status(400).json({error:`User with ${username} already exists kindly use update`});
+        const existingUser = await User.findOne({ username });
+        if (existingUser) {
+            return res.status(400).json({ error: `User with ${username} already exists kindly use update` });
         }
-        const salt =await bcrypt.genSalt(7)
-        const hashedPassword = await bcrypt.hash(password,salt)
+        const salt = await bcrypt.genSalt(7)
+        const hashedPassword = await bcrypt.hash(password, salt)
         const newUser = new User({
             username,
             email,
@@ -86,7 +87,7 @@ router.post("/user", async (req, res) => {
 
         await newUser.save();
         res.status(201).json({ message: "User created successfully", userId: newUser._id });
-        
+
     } catch (error) {
         console.error("Error creating meal preference:", error);
         res.status(500).json({ error: "Internal Server Error during creation." });
@@ -97,9 +98,9 @@ router.put("/users/:id", async (req, res) => {
     try {
         const { id } = req.params;
         const updateData = req.body;
-        const salt=await bcrypt.genSalt(7);
-        if(updateData.password){
-            updateData.password =await bcrypt.hash(updateData.password,salt)
+        const salt = await bcrypt.genSalt(7);
+        if (updateData.password) {
+            updateData.password = await bcrypt.hash(updateData.password, salt)
         }
         const updatedUser = await User.findByIdAndUpdate(id, {
             fullName: updateData.full_name,
@@ -126,7 +127,7 @@ router.get("/meal-counts", async (req, res) => {
 
         const counts = meals.reduce((acc, meal) => {
             const preference = meal[mealField] || 'Not Set';
-            if (preference && preference !== 'Not Set') { 
+            if (preference && preference !== 'Not Set') {
                 acc[preference] = (acc[preference] || 0) + 1;
             }
             return acc;
@@ -138,9 +139,9 @@ router.get("/meal-counts", async (req, res) => {
         res.status(500).json({ error: "Internal Server Error during meal counting." });
     }
 });
-router.get("/leaves",async(req,res)=>{
+router.get("/leaves", async (req, res) => {
     try {
-        const leaves = await Leave.find({status:"pending"});
+        const leaves = await Leave.find({ status: "pending" });
         const formattedLeaves = leaves.map(leave => ({
             id: leave._id,
             studentName: leave.fullName,
@@ -151,27 +152,27 @@ router.get("/leaves",async(req,res)=>{
         }));
         res.status(200).json(formattedLeaves);
     } catch (error) {
-        res.status(500).json({error:'Internal Server Error'});
+        res.status(500).json({ error: 'Internal Server Error' });
     }
 });
-router.put("/leaves/:id",async(req,res)=>{
+router.put("/leaves/:id", async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
     const leave = await Leave.findById(id);
-    if(!leave){
-        return res.status(400).json({error:"Leave acceptation unsuccessfull"});
+    if (!leave) {
+        return res.status(400).json({ error: "Leave acceptation unsuccessfull" });
 
     }
-    if(status === "approved" || status === "rejected"){
+    if (status === "approved" || status === "rejected") {
         leave.status = status;
         await leave.save();
-        res.status(201).json({message:"Leave accepted successfully"});
-    }else{
-        res.status(400).json({error:'Leave request unsuccessfull'});
-        
+        res.status(201).json({ message: "Leave accepted successfully" });
+    } else {
+        res.status(400).json({ error: 'Leave request unsuccessfull' });
+
     }
 });
-router.get('/student-attendance', async(req, res) => {
+router.get('/student-attendance', async (req, res) => {
     try {
         const now = new Date();
         const currentDateStr = now.toISOString().split('T')[0];
@@ -186,16 +187,16 @@ router.get('/student-attendance', async(req, res) => {
             });
 
             let finalStatus = 'present';
-            
+
             for (const leave of activeLeaves) {
                 const depDate = new Date(leave.departureDate);
                 const arrDate = new Date(leave.arrivalDate);
                 const depDateOnly = new Date(depDate.toISOString().split('T')[0]);
                 const arrDateOnly = new Date(arrDate.toISOString().split('T')[0]);
                 const currentDate = new Date(currentDateStr + 'T00:00:00.000Z');
-                
+
                 if (currentDate >= depDateOnly && currentDate <= arrDateOnly) {
-                    
+
                     if (currentDate.getTime() === depDateOnly.getTime()) {
                         const depTime = depDate.toISOString().split('T')[1].substring(0, 5);
                         if (currentTime >= depTime) {
@@ -203,7 +204,7 @@ router.get('/student-attendance', async(req, res) => {
                             break;
                         }
                     }
-                    
+
                     else if (currentDate.getTime() === arrDateOnly.getTime()) {
                         const arrTime = arrDate.toISOString().split('T')[1].substring(0, 5);
                         if (currentTime < arrTime) {
@@ -213,7 +214,7 @@ router.get('/student-attendance', async(req, res) => {
                         }
                         break;
                     }
-                    
+
                     else {
                         finalStatus = 'absent';
                         break;
@@ -223,7 +224,7 @@ router.get('/student-attendance', async(req, res) => {
 
             await Attendance.findOneAndUpdate(
                 { username: user.username },
-                { 
+                {
                     status: finalStatus,
                     fullName: user.fullName,
                     username: user.username
@@ -243,14 +244,48 @@ router.get('/student-attendance', async(req, res) => {
     }
 });
 
-router.post("/attendance",async(req,res)=>{
+router.post("/attendance", async (req, res) => {
     try {
-        const students=await Attendance.find({})
-        res.status(200).json({username:students.username,fullName:students.fullName,status:students.status});
+        const students = await Attendance.find({})
+        res.status(200).json({ username: students.username, fullName: students.fullName, status: students.status });
     } catch (error) {
-        res.status(500).json({error:'Internal server error'});
+        res.status(500).json({ error: 'Internal server error' });
     }
-})
+});
+
+router.get("/meal-request", async (req, res) => {
+    const mealUpdate = await Updatemeal.find({ status: 'pending' });
+    res.status(200).json({ mealUpdate })
+});
+router.put("/meal-request/:id", async (req, res) => {
+    const { id } = req.params;
+    const { status } = req.body;
+    const updatemeal = await Updatemeal.findById(id);
+    const newmeal = {
+        username: updatemeal.username,
+        fullName: updatemeal.fullName,
+        day: updatemeal.day,
+        night1: updatemeal.night1,
+        night2: updatemeal.night2,
+        sunday_day: updatemeal.sunday_day,
+        sunday_night: updatemeal.sunday_night,
+    }
+    if (!updatemeal) {
+        return res.status(400).json({ error: "Meal change unsuccessfull" });
+
+    }
+    if (status === "approved" || status === "rejected") {
+        if (status === "approved") {
+            await Meal.findOneAndUpdate({ username: updatemeal.username }, {$set:newmeal},{new:true,upsert:true});
+        }
+        updatemeal.status = status;
+        await updatemeal.save();
+        res.status(201).json({ message: "Leave accepted successfully" });
+    } else {
+        res.status(400).json({ error: 'Leave request unsuccessfull' });
+
+    }
+});
 
 
 export default router;

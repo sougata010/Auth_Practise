@@ -87,6 +87,13 @@
             transition: transform 0.3s ease;
         }
 
+        /* NEW max-width for notification modal */
+        #notificationModal .modal-content {
+            max-width: 450px;
+        }
+
+        /* END NEW max-width for notification modal */
+
         .modal.open .modal-content {
             transform: scale(1);
         }
@@ -98,7 +105,7 @@
             border: 1px solid #ccc;
             background: #fff;
             padding: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
             z-index: 1000;
             border-radius: 8px;
         }
@@ -121,7 +128,8 @@
             width: 100%;
         }
 
-        th, td {
+        th,
+        td {
             border: 1px solid #ddd;
             padding: 8px;
             text-align: center;
@@ -145,25 +153,30 @@
             background-color: #e9ecef;
         }
     </style>
-      <style>
+    <style>
         body {
             font-family: 'Inter', sans-serif;
             background-color: #fff7ed;
         }
+
         .tab-button {
             transition: all 0.2s ease-in-out;
         }
+
         .tab-button.active {
             color: #f97316;
             border-bottom-color: #f97316;
             font-weight: 600;
         }
+
         .tab-content {
             display: none;
         }
+
         .tab-content.active {
             display: block;
         }
+
         .status-badge {
             padding: 4px 12px;
             border-radius: 9999px;
@@ -171,25 +184,58 @@
             font-weight: 600;
             text-transform: uppercase;
         }
-        .status-pending { background-color: #f59e0b; color: white; }
-        .status-approved { background-color: #10b981; color: white; }
-        .status-rejected { background-color: #ef4444; color: white; }
+
+        .status-pending {
+            background-color: #f59e0b;
+            color: white;
+        }
+
+        .status-approved {
+            background-color: #10b981;
+            color: white;
+        }
+
+        .status-rejected {
+            background-color: #ef4444;
+            color: white;
+        }
 
         /* Modal Styles */
         .modal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(0, 0, 0, 0.6); display: flex;
-            justify-content: center; align-items: center; z-index: 1000;
-            opacity: 0; visibility: hidden;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
             transition: opacity 0.3s ease, visibility 0.3s ease;
         }
-        .modal.open { opacity: 1; visibility: visible; }
-        .modal-content {
-            background: white; padding: 25px; border-radius: 10px;
-            width: 90%; max-width: 400px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-            transform: scale(0.9); transition: transform 0.3s ease;
+
+        .modal.open {
+            opacity: 1;
+            visibility: visible;
         }
-        .modal.open .modal-content { transform: scale(1); }
+
+        .modal-content {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .modal.open .modal-content {
+            transform: scale(1);
+        }
 
         /* --- MODERN DATE/TIME INPUT STYLING --- */
         /* Hides the default calendar icon from date inputs */
@@ -203,41 +249,65 @@
             left: 0;
             top: 0;
         }
+
         /* Ensures the inputs look like clean text fields */
-        input[type="date"], input[type="time"] {
+        input[type="date"],
+        input[type="time"] {
             appearance: none;
             position: relative;
         }
+
         /* Adds the custom calendar/clock icon inside the inputs */
         .date-time-input-wrapper {
             position: relative;
         }
+
         .date-time-input-wrapper .icon {
             position: absolute;
             right: 12px;
             top: 50%;
             transform: translateY(-50%);
-            pointer-events: none; /* Icon shouldn't interfere with the picker click area */
-            color: #4b5563; /* Gray-600 */
+            pointer-events: none;
+            /* Icon shouldn't interfere with the picker click area */
+            color: #4b5563;
+            /* Gray-600 */
         }
+
         /* ------------------------------------- */
     </style>
 </head>
 
 <body class="p-4 sm:p-6">
 
+    <button id="notificationButton" onclick="openNotificationModal()"
+        class="fixed top-4 right-4 sm:top-6 sm:right-8 p-2 rounded-full bg-orange-600 text-white hover:bg-orange-700 transition z-50 shadow-lg">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="w-6 h-6">
+            <path d="M10 20.25a2 2 0 0 0 4 0" />
+            <path
+                d="M18 8a6 6 0 0 0-12 0c0 1.28.18 2.51.52 3.59L3 17h18l-1.52-5.41c.34-1.08.52-2.31.52-3.59Z" />
+            <path d="M19.7 4.5c.78.78.78 2.05 0 2.83l-1.42 1.42" />
+            <path d="M4.3 4.5c-.78.78-.78 2.05 0 2.83l-1.42 1.42" />
+        </svg>
+        <span id="notificationBadge"
+            class="hidden absolute top-0 right-0 inline-flex items-center justify-center p-1 text-xs font-bold leading-none text-red-100 transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">0</span>
+    </button>
     <div class="main-container mx-auto max-w-4xl">
 
         <div class="bg-white p-6 rounded-xl shadow-lg mb-6">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center">
                 <div>
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/e/e4/Emblem-Ramakrishna-Mission-Transparent.png" alt="Ramakrishna Mission Vidyamandira Logo" class="mx-auto mb-4 h-20 w-auto sm:mx-0">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/e/e4/Emblem-Ramakrishna-Mission-Transparent.png"
+                        alt="Ramakrishna Mission Vidyamandira Logo" class="mx-auto mb-4 h-20 w-auto sm:mx-0">
                     <h1 class="text-3xl font-extrabold text-gray-800">Student Dashboard</h1>
                     <p class="text-gray-500 mt-1">Manage your weekly meals and leave requests.</p>
                 </div>
                 <div id="user-profile-info"
-                    class="mt-4 sm:mt-0 text-left sm:text-right bg-orange-50 p-4 rounded-lg border">
-                    <p class="font-semibold text-gray-600"><strong id="fullName" class="text-orange-600">Loading...</strong></p>
+                    class="mt-4 sm:mt-0 text-left sm:text-right bg-orange-50 p-4 rounded-lg border flex flex-col items-end">
+
+                    <p class="font-semibold text-gray-600"><strong id="fullName"
+                            class="text-orange-600">Loading...</strong></p>
                     <p class="font-semibold text-gray-600" id="userName">...</p>
                     <p class="font-semibold text-gray-600" id="userRoll">Roll: ...</p>
                     <p class="font-semibold text-gray-600" id="userDept">Department: ...</p>
@@ -335,7 +405,8 @@
                                         onfocus="showDatePicker(this)" onkeydown="return false;"
                                         class="w-full p-3 pr-10 border border-gray-300 rounded-lg shadow-sm focus:ring-orange-500 focus:border-orange-500 appearance-none bg-white">
                                     <svg class="icon h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                     </svg>
                                 </div>
                                 <div>
@@ -344,13 +415,13 @@
                                         <select id="departure-hour" required
                                             class="flex-1 p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-orange-500 focus:border-orange-500">
                                             <option value="">HH</option>
-                                            <script>for(let i=0; i<24; i++) { document.write(`<option value="${i.toString().padStart(2,'0')}">${i.toString().padStart(2,'0')}</option>`); }</script>
+                                            <script>for (let i = 0; i < 24; i++) { document.write(`<option value="${i.toString().padStart(2, '0')}">${i.toString().padStart(2, '0')}</option>`); }</script>
                                         </select>
                                         <span class="self-center text-gray-500">:</span>
                                         <select id="departure-minute" required
                                             class="flex-1 p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-orange-500 focus:border-orange-500">
                                             <option value="">MM</option>
-                                            <script>for(let i=0; i<60; i+=5) { document.write(`<option value="${i.toString().padStart(2,'0')}">${i.toString().padStart(2,'0')}</option>`); }</script>
+                                            <script>for (let i = 0; i < 60; i += 5) { document.write(`<option value="${i.toString().padStart(2, '0')}">${i.toString().padStart(2, '0')}</option>`); }</script>
                                         </select>
                                     </div>
                                 </div>
@@ -374,7 +445,8 @@
                                         onfocus="showDatePicker(this)" onkeydown="return false;"
                                         class="w-full p-3 pr-10 border border-gray-300 rounded-lg shadow-sm focus:ring-orange-500 focus:border-orange-500 appearance-none bg-white">
                                     <svg class="icon h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                     </svg>
                                 </div>
                                 <div>
@@ -383,13 +455,13 @@
                                         <select id="arrival-hour" required
                                             class="flex-1 p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-orange-500 focus:border-orange-500">
                                             <option value="">HH</option>
-                                            <script>for(let i=0; i<24; i++) { document.write(`<option value="${i.toString().padStart(2,'0')}">${i.toString().padStart(2,'0')}</option>`); }</script>
+                                            <script>for (let i = 0; i < 24; i++) { document.write(`<option value="${i.toString().padStart(2, '0')}">${i.toString().padStart(2, '0')}</option>`); }</script>
                                         </select>
                                         <span class="self-center text-gray-500">:</span>
                                         <select id="arrival-minute" required
                                             class="flex-1 p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-orange-500 focus:border-orange-500">
                                             <option value="">MM</option>
-                                            <script>for(let i=0; i<60; i+=5) { document.write(`<option value="${i.toString().padStart(2,'0')}">${i.toString().padStart(2,'0')}</option>`); }</script>
+                                            <script>for (let i = 0; i < 60; i += 5) { document.write(`<option value="${i.toString().padStart(2, '0')}">${i.toString().padStart(2, '0')}</option>`); }</script>
                                         </select>
                                     </div>
                                 </div>
@@ -460,12 +532,35 @@
             <h3 id="modalTitle" class="text-xl font-bold mb-3 text-gray-800">Notification</h3>
             <p id="modalMessage" class="mb-5 text-gray-600">Message</p>
             <div class="flex justify-end">
-                <button class="px-4 py-2 bg-orange-600 text-white font-semibold rounded-md hover:bg-orange-700 transition"
+                <button
+                    class="px-4 py-2 bg-orange-600 text-white font-semibold rounded-md hover:bg-orange-700 transition"
                     onclick="hideModal()">OK</button>
             </div>
         </div>
     </div>
 
+    <div id="notificationModal" class="modal">
+        <div class="modal-content">
+            <h3 class="text-xl font-bold mb-5 text-gray-800 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="w-6 h-6 mr-2 text-orange-600">
+                    <path d="M10 20.25a2 2 0 0 0 4 0" />
+                    <path d="M18 8a6 6 0 0 0-12 0c0 1.28.18 2.51.52 3.59L3 17h18l-1.52-5.41c.34-1.08.52-2.31.52-3.59Z" />
+                    <path d="M19.7 4.5c.78.78.78 2.05 0 2.83l-1.42 1.42" />
+                    <path d="M4.3 4.5c-.78.78-.78 2.05 0 2.83l-1.42 1.42" />
+                </svg>
+                Request Statuses
+            </h3>
+            <div id="notificationContent" class="space-y-4">
+                <p class="text-gray-500 text-center" id="notificationLoading">Loading statuses...</p>
+            </div>
+            <div class="flex justify-end mt-6">
+                <button class="px-4 py-2 bg-gray-500 text-white font-semibold rounded-md hover:bg-gray-600 transition"
+                    onclick="closeNotificationModal()">Close</button>
+            </div>
+        </div>
+    </div>
     <script>
         const BACKEND_BASE_URL = "http://localhost:5000";
 
@@ -534,14 +629,30 @@
             window.location.href = 'login.html';
         }
 
-        // --- MODAL FUNCTIONS (NO CHANGE) ---
+        // --- MODAL FUNCTIONS (SLIGHTLY MODIFIED) ---
         const modal = document.getElementById('customAlertModal');
+        const notificationModal = document.getElementById('notificationModal');
+        const notificationContent = document.getElementById('notificationContent');
+        const notificationBadge = document.getElementById('notificationBadge');
+
         function hideModal() { modal.classList.remove('open'); }
         function showMessage(title, message) {
             document.getElementById('modalTitle').textContent = title;
             document.getElementById('modalMessage').textContent = message;
             modal.classList.add('open');
         }
+
+        // NEW Notification Modal functions
+        function openNotificationModal() {
+            notificationModal.classList.add('open');
+            // Refetch data when opening to ensure it's up to date
+            updateNotificationStatus();
+        }
+
+        function closeNotificationModal() {
+            notificationModal.classList.remove('open');
+        }
+        // END NEW Notification Modal functions
 
         // --- TAB SWITCHING LOGIC (NO CHANGE) ---
         const tabs = document.querySelectorAll('.tab-button');
@@ -560,7 +671,7 @@
             });
         });
 
-        // --- MEAL SELECTION LOGIC (SLIGHTLY MODIFIED) ---
+        // --- MEAL SELECTION LOGIC (NO CHANGE) ---
         const MEAL_FIELDS = { 'weekday-day-main': 'day', 'weekday-night-main': 'night1', 'weekday-night-carb': 'night2', 'sunday-day': 'sunday_day', 'sunday-night': 'sunday_night' };
         async function submitMealSelections() {
             // NOTE: The keys here must match the keys the backend is expecting from req.body 
@@ -589,7 +700,8 @@
                 if (!response) return;
 
                 if (response.ok) {
-                    showMessage('Success! 🎉', 'Meal choices saved successfully!');
+                    showMessage('Success! 🎉', 'Meal change request submitted. Please check the notifications for status.');
+                    updateNotificationStatus(); // Update badge after submission
                 } else {
                     const errorData = await response.json();
                     const errorMessage = errorData.error || response.statusText;
@@ -597,7 +709,7 @@
                     if (errorMessage.includes("Max limit reached")) {
                         showMessage('Limit Reached 🛑', errorMessage + " Please select an alternative option.");
                     } else {
-                        showMessage("Error", errorMessage || "Failed to save meal choices.");
+                        showMessage("Error", errorMessage || "Failed to submit meal change request.");
                     }
                 }
             } catch (error) {
@@ -605,7 +717,7 @@
             }
         }
 
-        // --- LEAVE APPLICATION LOGIC (MODIFIED FOR CUSTOM INPUTS) ---
+        // --- LEAVE APPLICATION LOGIC (MODIFIED FOR REUSABLE HISTORY FETCH) ---
         const leaveForm = document.getElementById('leaveForm');
         leaveForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -658,8 +770,8 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        username:username,
-                        fullName:fullName,
+                        username: username,
+                        fullName: fullName,
                         departure: departureDateTime,
                         arrival: arrivalDateTime,
                         reason: reason,
@@ -673,9 +785,10 @@
                 if (!response) return;
 
                 if (response.ok) {
-                    showMessage('Success', 'Leave request submitted successfully.');
+                    showMessage('Success', 'Leave request submitted successfully. Please check the notifications for status.');
                     leaveForm.reset();
-                    fetchLeaveHistory(); // Refresh the history
+                    fetchLeaveHistory(); // Refresh the history tab
+                    updateNotificationStatus(); // Update badge
                 } else {
                     const errorData = await response.json();
                     showMessage("Submission Error", errorData.error || "Failed to submit leave request.");
@@ -684,38 +797,134 @@
                 showMessage("Network Error", "Could not submit your request.");
             }
         }
-        async function fetchLeaveHistory() {
+
+        // Modified to be reusable for notifications
+        async function fetchLeaveHistory(renderToTab = true) {
             const historyContainer = document.getElementById('leave-history');
             try {
-                historyContainer.innerHTML = `<p id="leave-history-loading" class="text-gray-500 text-center">Loading leave history...</p>`;
-
+                if (renderToTab) {
+                    historyContainer.innerHTML = `<p id="leave-history-loading" class="text-gray-500 text-center">Loading leave history...</p>`;
+                }
                 const response = await authenticatedFetch(`${BACKEND_BASE_URL}/leave/history`);
                 if (!response) {
-                    historyContainer.innerHTML = '<p class="text-red-500 text-center">Could not load history.</p>';
-                    return;
+                    if (renderToTab) historyContainer.innerHTML = '<p class="text-red-500 text-center">Could not load history.</p>';
+                    return [];
                 }
                 const history = await response.json();
-                historyContainer.innerHTML = '';
 
-                if (history.length === 0) {
-                    historyContainer.innerHTML = `<p class="text-gray-500 text-center">You have not applied for any leave yet.</p>`;
-                } else {
-                    history.forEach(leave => {
-                        const statusClass = `status-${leave.status.toLowerCase()}`;
-                        const card = document.createElement('div');
-                        card.className = 'border rounded-lg p-4 flex justify-between items-center bg-orange-50 hover:shadow-md transition';
-                        card.innerHTML = `
-                            <div>
-                                <p class="font-semibold text-gray-800">From: ${leave.from} To: ${leave.to}</p>
-                                <p class="text-sm text-gray-600">${leave.reason}</p>
-                            </div>
-                            <span class="status-badge ${statusClass}">${leave.status}</span>
-                        `;
-                        historyContainer.appendChild(card);
-                    });
+                if (renderToTab) {
+                    historyContainer.innerHTML = '';
+                    if (history.length === 0) {
+                        historyContainer.innerHTML = `<p class="text-gray-500 text-center">You have not applied for any leave yet.</p>`;
+                    } else {
+                        history.forEach(leave => {
+                            const statusClass = `status-${leave.status.toLowerCase()}`;
+                            const card = document.createElement('div');
+                            card.className = 'border rounded-lg p-4 flex justify-between items-center bg-orange-50 hover:shadow-md transition';
+                            card.innerHTML = `
+                                <div>
+                                    <p class="font-semibold text-gray-800">From: ${leave.from.substring(0, 10)} To: ${leave.to.substring(0, 10)}</p>
+                                    <p class="text-sm text-gray-600">${leave.reason}</p>
+                                </div>
+                                <span class="status-badge ${statusClass}">${leave.status}</span>
+                            `;
+                            historyContainer.appendChild(card);
+                        });
+                    }
                 }
+                // Return history for use in notification function
+                return history;
+
             } catch (error) {
-                historyContainer.innerHTML = `<p class="text-red-500 text-center">Failed to load leave history.</p>`;
+                if (renderToTab) historyContainer.innerHTML = `<p class="text-red-500 text-center">Failed to load leave history.</p>`;
+                return [];
+            }
+        }
+
+
+        // --- NEW MEAL REQUEST HISTORY FETCH ---
+        async function fetchMealRequestHistory() {
+            try {
+                // Using the new endpoint /meal/history
+                const response = await authenticatedFetch(`${BACKEND_BASE_URL}/meal/history`);
+                if (!response) return [];
+                const history = await response.json();
+                return history;
+            } catch (error) {
+                console.error("Failed to fetch meal request history:", error);
+                return [];
+            }
+        }
+
+        // --- CONSOLIDATED STATUS UPDATE / NOTIFICATION LOGIC ---
+        async function updateNotificationStatus() {
+            notificationContent.innerHTML = `<p class="text-gray-500 text-center" id="notificationLoading">Loading statuses...</p>`;
+
+            // Fetch histories without rendering to the tabs
+            const [leaveHistory, mealHistory] = await Promise.all([
+                fetchLeaveHistory(false),
+                fetchMealRequestHistory()
+            ]);
+
+            notificationContent.innerHTML = '';
+            let unreadCount = 0;
+
+            // 1. Leave Status
+            if (leaveHistory.length > 0) {
+                const latestLeave = leaveHistory[0]; // Assuming history is returned newest first
+                const status = latestLeave.status.toLowerCase();
+                const statusClass = `status-${status}`;
+                const leaveCard = document.createElement('div');
+                leaveCard.className = 'border rounded-lg p-4 bg-gray-50';
+                leaveCard.innerHTML = `
+                    <p class="font-bold text-gray-800 mb-1 flex justify-between items-center">
+                        <span class="flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 mr-2 text-red-500">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 01.92 0m-.92 0a.75.75 0 00.92 0M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 3a.75.75 0 00.75-.75V9.75M12 9h.008v.008H12V9z" />
+                            </svg>
+                            Leave Request 
+                        </span>
+                        <span class="status-badge ${statusClass}">${latestLeave.status}</span>
+                    </p>
+                    <p class="text-sm text-gray-600">Latest request: ${latestLeave.from.substring(0, 10)} to ${latestLeave.to.substring(0, 10)}</p>
+                `;
+                notificationContent.appendChild(leaveCard);
+                if (status === 'pending') unreadCount++;
+            }
+
+            // 2. Meal Change Status
+            if (mealHistory.length > 0) {
+                const latestMeal = mealHistory[0];
+                const status = latestMeal.status.toLowerCase();
+                const statusClass = `status-${status}`;
+                const mealCard = document.createElement('div');
+                mealCard.className = 'border rounded-lg p-4 bg-gray-50';
+                mealCard.innerHTML = `
+                    <p class="font-bold text-gray-800 mb-1 flex justify-between items-center">
+                        <span class="flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 mr-2 text-orange-500">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1.5m0 15V21m9-9h-1.5M4.5 12H3m18 0a9 9 0 11-18 0 9 9 0 0118 0zm-7.5-6h-3M15 15.75h-3M9 12h.008v.008H9V12zm3 0h.008v.008H12V12z" />
+                            </svg>
+                            Meal Change Request
+                        </span>
+                        <span class="status-badge ${statusClass}">${latestMeal.status}</span>
+                    </p>
+                    <p class="text-sm text-gray-600">Status for new choices: Day: ${latestMeal.day}, Night: ${latestMeal.night1}/${latestMeal.night2}</p>
+                `;
+                notificationContent.appendChild(mealCard);
+                if (status === 'pending') unreadCount++;
+            }
+
+            if (leaveHistory.length === 0 && mealHistory.length === 0) {
+                notificationContent.innerHTML = `<p class="text-gray-500 text-center">No pending requests found.</p>`;
+            }
+
+            // Update badge count
+            if (unreadCount > 0) {
+                notificationBadge.textContent = unreadCount;
+                notificationBadge.classList.remove('hidden');
+            } else {
+                notificationBadge.classList.add('hidden');
             }
         }
 
@@ -729,13 +938,10 @@
                 if (response.ok) {
                     const data = await response.json();
 
-                    // ===========================================
-                    // 🌟 FIX: POPULATING ALL USER PROFILE DETAILS
-                    // ===========================================
+                    // Populating all user profile details
                     document.getElementById('userName').textContent = `username: ${data.username || 'N/A'}`;
                     document.getElementById('fullName').textContent = `Fullname: ${data.fullName || 'N/A'}`;
                     document.getElementById('userRoll').textContent = `Roll: ${data.roll || 'N/A'}`;
-                    // FIX: Populate Department and Year
                     document.getElementById('userDept').textContent = `Department: ${data.department || 'N/A'}`;
                     document.getElementById('userYear').textContent = `Year: ${data.year || 'N/A'}`;
 
@@ -806,11 +1012,11 @@
                 nextMonth = 0;
             }
             var tbl = "<div class='calendarMonth'><a href='#inv' onclick='return showMonth(\"" + calendarDestId + "\", \"" + dateInputId + "\", " + previousMonth + ", " + previousYear + ");'>&lt;&lt;</a>" +
-                      " " + monthNames[month] + " " + year + " " +
-                      "<a href='#inv' onclick='return showMonth(\"" + calendarDestId + "\", \"" + dateInputId + "\", " + nextMonth + ", " + nextYear + ");'>&gt;&gt;</a></div>" +
-                      "<table>" +
-                      "<tr><th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th></tr>" +
-                      "<tr>";
+                " " + monthNames[month] + " " + year + " " +
+                "<a href='#inv' onclick='return showMonth(\"" + calendarDestId + "\", \"" + dateInputId + "\", " + nextMonth + ", " + nextYear + ");'>&gt;&gt;</a></div>" +
+                "<table>" +
+                "<tr><th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th></tr>" +
+                "<tr>";
             var dow = firstOfMonth.getDay();
             for (var i = 0; i < firstOfMonth.getDay(); i++) {
                 tbl += "<td></td>";
@@ -904,6 +1110,9 @@
         document.addEventListener('DOMContentLoaded', () => {
             fetchInitialData();
             fetchLeaveHistory();
+            updateNotificationStatus(); // Initial check for notifications
+            // Set an interval to refresh the notifications periodically
+            setInterval(updateNotificationStatus, 60000); // refresh every minute
         });
     </script>
 

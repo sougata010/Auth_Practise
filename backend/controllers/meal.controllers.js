@@ -2,6 +2,7 @@ import express, { response } from "express";
 import Meal from "../model/Meal.model.js";
 import User from "../model/User.model.js";
 import dotenv from "dotenv";
+import Updatemeal from "../model/upDatemeal.model.js";
 
 dotenv.config();
 
@@ -19,8 +20,8 @@ router.post("/", async (req, res) => {
             sunday_day: sundayDayMain,
             sunday_night: sundayNightMain,
             fullName:user.fullName,
-            username:usernameFromToken
-
+            username:usernameFromToken,
+            status:'pending'
         };
         const roti_limit=40;
         const veg_limit=30;
@@ -39,8 +40,7 @@ router.post("/", async (req, res) => {
             }
             
         }
-            
-        const updatedMeal = await Meal.findOneAndUpdate(
+        const updatedMeal = await Updatemeal.findOneAndUpdate(
             { username: usernameFromToken },
             { $set: mealData},
             { 
@@ -53,11 +53,23 @@ router.post("/", async (req, res) => {
             return res.status(500).json({ error: "Failed to save or update meal plan." });
         }
 
-        res.status(200).json({ message: "Meal plan saved successfully." });
+        res.status(200).json({username:updatedMeal.username,fullName:updatedMeal.fullName,status:updatedMeal.status});
         
     } catch (error) {
         res.status(500).json({ error: "Internal server error." });
     }
 });
-
+router.get("/history", async (req, res) => {
+    try {
+        const usernameFromToken = req.user.username;
+        const mealRequest = await Updatemeal.findOne({ username: usernameFromToken })
+            .select('day night1 night2 sunday_day sunday_night status updatedAt');
+        const history = mealRequest ? [mealRequest] : [];
+        
+        res.status(200).json(history);
+        
+    } catch (error) {
+        res.status(500).json({ error: "Internal server error during meal request status fetch." });
+    }
+});
 export default router;

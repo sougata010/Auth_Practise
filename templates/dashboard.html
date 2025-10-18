@@ -568,8 +568,8 @@
         // --- COMPLETE AUTHENTICATION SERVICE (NO CHANGE) ---
         // ===================================
         async function renewAccessToken() {
-            const refreshToken = localStorage.getItem('refreshToken');
-            if (!refreshToken) {
+            const accessToken = localStorage.getItem('accessToken');
+            if (!accessToken) {
                 window.location.href = 'login.html';
                 return null;
             }
@@ -578,7 +578,7 @@
                 const response = await fetch(`${BACKEND_BASE_URL}/auth/refresh`, {
                     method: 'POST',
                     headers: {
-                        'Authorization': `Bearer ${refreshToken}`
+                        'Authorization': `Bearer ${accessToken}`
                     }
                 });
 
@@ -625,7 +625,7 @@
         }
 
         // --- Ensure authentication on load ---
-        if (!localStorage.getItem('refreshToken')) {
+        if (!localStorage.getItem('accessToken')) {
             window.location.href = 'login.html';
         }
 

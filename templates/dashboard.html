@@ -279,20 +279,28 @@
 
 <body class="p-4 sm:p-6">
 
-    <button id="notificationButton" onclick="openNotificationModal()"
-        class="fixed top-4 right-4 sm:top-6 sm:right-8 p-2 rounded-full bg-orange-600 text-white hover:bg-orange-700 transition z-50 shadow-lg">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-            class="w-6 h-6">
-            <path d="M10 20.25a2 2 0 0 0 4 0" />
-            <path
-                d="M18 8a6 6 0 0 0-12 0c0 1.28.18 2.51.52 3.59L3 17h18l-1.52-5.41c.34-1.08.52-2.31.52-3.59Z" />
-            <path d="M19.7 4.5c.78.78.78 2.05 0 2.83l-1.42 1.42" />
-            <path d="M4.3 4.5c-.78.78-.78 2.05 0 2.83l-1.42 1.42" />
-        </svg>
-        <span id="notificationBadge"
-            class="hidden absolute top-0 right-0 inline-flex items-center justify-center p-1 text-xs font-bold leading-none text-red-100 transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">0</span>
-    </button>
+    <div class="fixed top-4 right-4 sm:top-6 sm:right-8 flex space-x-2 z-50">
+        <button id="notificationButton" onclick="openNotificationModal()"
+            class="p-2 rounded-full bg-orange-600 text-white hover:bg-orange-700 transition shadow-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6">
+                <path d="M10 20.25a2 2 0 0 0 4 0" />
+                <path d="M18 8a6 6 0 0 0-12 0c0 1.28.18 2.51.52 3.59L3 17h18l-1.52-5.41c.34-1.08.52-2.31.52-3.59Z" />
+                <path d="M19.7 4.5c.78.78.78 2.05 0 2.83l-1.42 1.42" />
+                <path d="M4.3 4.5c-.78.78-.78 2.05 0 2.83l-1.42 1.42" />
+            </svg>
+            <span id="notificationBadge"
+                class="hidden absolute top-0 right-0 inline-flex items-center justify-center p-1 text-xs font-bold leading-none text-red-100 transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">0</span>
+        </button>
+        <button onclick="logout()" class="p-2 rounded-full bg-red-600 text-white hover:bg-red-700 transition shadow-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                <polyline points="16,17 21,12 16,7" />
+                <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+        </button>
+    </div>
     <div class="main-container mx-auto max-w-4xl">
 
         <div class="bg-white p-6 rounded-xl shadow-lg mb-6">
@@ -304,7 +312,7 @@
                     <p class="text-gray-500 mt-1">Manage your weekly meals and leave requests.</p>
                 </div>
                 <div id="user-profile-info"
-                    class="mt-4 sm:mt-0 text-left sm:text-right bg-orange-50 p-4 rounded-lg border flex flex-col items-end">
+                    class="mt-4 sm:mt-0 text-left sm:text-right bg-orange-50 p-4 rounded-lg border flex flex-col items-start">
 
                     <p class="font-semibold text-gray-600"><strong id="fullName"
                             class="text-orange-600">Loading...</strong></p>
@@ -546,7 +554,8 @@
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                     class="w-6 h-6 mr-2 text-orange-600">
                     <path d="M10 20.25a2 2 0 0 0 4 0" />
-                    <path d="M18 8a6 6 0 0 0-12 0c0 1.28.18 2.51.52 3.59L3 17h18l-1.52-5.41c.34-1.08.52-2.31.52-3.59Z" />
+                    <path
+                        d="M18 8a6 6 0 0 0-12 0c0 1.28.18 2.51.52 3.59L3 17h18l-1.52-5.41c.34-1.08.52-2.31.52-3.59Z" />
                     <path d="M19.7 4.5c.78.78.78 2.05 0 2.83l-1.42 1.42" />
                     <path d="M4.3 4.5c-.78.78-.78 2.05 0 2.83l-1.42 1.42" />
                 </svg>
@@ -1105,6 +1114,28 @@
                 calendarDiv.parentElement.removeChild(calendarDiv);
             }
             document.removeEventListener("mousedown", dismissCalendar);
+        }
+
+        async function logout() {
+            try {
+                const accessToken = localStorage.getItem('accessToken');
+                const response = await authenticatedFetch(`${BACKEND_BASE_URL}/logout`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${accessToken}`
+                        }
+
+                    });
+                if (response && response.ok) {
+                    localStorage.clear();
+                    window.location.href = 'login.html';
+                } else {
+                    showMessage("Logout Error", "Failed to logout. Please try again.");
+                }
+            } catch (error) {
+                showMessage("Network Error", "Could not connect to the server for logout.");
+            }
         }
 
         document.addEventListener('DOMContentLoaded', () => {

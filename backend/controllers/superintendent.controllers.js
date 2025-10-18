@@ -122,16 +122,64 @@ router.get("/meal-counts", async (req, res) => {
         if (!mealField || !['day', 'night1', 'night2', 'sunday_day', 'sunday_night'].includes(mealField)) {
             return res.status(400).json({ error: "Invalid or missing mealField parameter." });
         }
-
-        const meals = await Meal.find({}).select(mealField);
-
-        const counts = meals.reduce((acc, meal) => {
+        const meals = await Meal.find({}).select(`${mealField} username`);
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const tomorrowDateStr = tomorrow.toISOString().split('T')[0];
+        const tomorrowDate = new Date(tomorrowDateStr + 'T00:00:00.000Z');
+        const counts = {};
+        for (const meal of meals) {
             const preference = meal[mealField] || 'Not Set';
-            if (preference && preference !== 'Not Set') {
-                acc[preference] = (acc[preference] || 0) + 1;
+            if (!preference || preference === 'Not Set') continue;
+            const approvedLeaves = await Leave.find({
+                username: meal.username,
+                status: 'approved'
+            });
+
+            let shouldCountMeal = true;
+            let isDayMeal = mealField === 'day' || mealField === 'sunday_day';
+
+            for (const leave of approvedLeaves) {
+                const depDate = new Date(leave.departureDate);
+                const arrDate = new Date(leave.arrivalDate);
+                const depDateOnly = new Date(depDate.toISOString().split('T')[0]);
+                const arrDateOnly = new Date(arrDate.toISOString().split('T')[0]);
+                if (tomorrowDate >= depDateOnly && tomorrowDate <= arrDateOnly) {
+                    if (tomorrowDate.getTime() === depDateOnly.getTime()) {
+                        if (isDayMeal) {
+                            if (leave.dayMealBefore === false) {
+                                shouldCountMeal = false;
+                            }
+                        } else {
+                            if (leave.nightMealBefore === false) {
+                                shouldCountMeal = false;
+                            }
+                        }
+                        break;
+                    }
+                    else if (tomorrowDate.getTime() === arrDateOnly.getTime()) {
+                        if (isDayMeal) {
+                            if (leave.dayMealAfter === false) {
+                                shouldCountMeal = false;
+                            }
+                        } else {
+                            if (leave.nightMealAfter === false) {
+                                shouldCountMeal = false;
+                            }
+                        }
+                        break;
+                    }
+                    else {
+                        shouldCountMeal = false;
+                        break;
+                    }
+                }
             }
-            return acc;
-        }, {});
+
+            if (shouldCountMeal) {
+                counts[preference] = (counts[preference] || 0) + 1;
+            }
+        }
 
         res.status(200).json({ counts });
     } catch (error) {
@@ -276,7 +324,7 @@ router.put("/meal-request/:id", async (req, res) => {
     }
     if (status === "approved" || status === "rejected") {
         if (status === "approved") {
-            await Meal.findOneAndUpdate({ username: updatemeal.username }, {$set:newmeal},{new:true,upsert:true});
+            await Meal.findOneAndUpdate({ username: updatemeal.username }, { $set: newmeal }, { new: true, upsert: true });
         }
         updatemeal.status = status;
         await updatemeal.save();

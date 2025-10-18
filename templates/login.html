@@ -68,16 +68,17 @@
             });
 
             const data = await res.json();
-            
+              console.log("Login response:", data);
+                console.log("Roles value:", data.roles);
             if (res.ok && data.access) { 
                 localStorage.setItem("accessToken", data.access);
-                if(data.roles=="student"){
+                if(data.roles && data.roles.includes("student")){
                     window.location.href = "dashboard.html";
                 }
-                else if(data.roles=="superintendent"){
+                else if(data.roles==="superintendent"){
                     window.location.href="super.html"
                 }
-                else if(data.roles=="admin"){
+                else if(data.roles==="admin"){
                      window.location.href="admin.html"
                 }
             } else {

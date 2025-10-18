@@ -52,7 +52,7 @@ router.post("/login", async (req, res) => {
         user.refreshToken = refresh;
         await user.save();
 
-        res.status(200).json({ access,roles: user.roles});
+        res.status(200).json({ access,roles:user.roles});
 
     } catch (error) {
         console.error("Login Error:", error);

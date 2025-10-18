@@ -108,6 +108,17 @@
     </style>
 </head>
 <body class="p-5">
+    <div class="fixed top-4 right-4 sm:top-6 sm:right-8 flex space-x-2 z-50">
+        <button onclick="logout()" class="p-2 rounded-full bg-red-600 text-white hover:bg-red-700 transition shadow-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="w-6 h-6">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                <polyline points="16,17 21,12 16,7" />
+                <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+        </button>
+    </div>
 
 <div class="container mx-auto max-w-7xl bg-white p-8 rounded-xl shadow-2xl">
     
@@ -288,12 +299,12 @@
     let attendanceMap = {};
 
     async function renewAccessToken() {
-        const refreshToken = localStorage.getItem('refreshToken');
-        if (!refreshToken) { window.location.href = 'login.html'; return null; }
+        const accessToken= localStorage.getItem('accessToken');
+        if (!accessToken) { window.location.href = 'login.html'; return null; }
         try {
             const response = await fetch(`${BACKEND_BASE_URL}/auth/refresh`, {
                 method: 'POST',
-                headers: { 'Authorization': `Bearer ${refreshToken}` }
+                headers: { 'Authorization': `Bearer ${accessToken}` }
             });
             if (response.ok) {
                 const data = await response.json();
@@ -537,7 +548,7 @@
     const exportSecondaryCountsButton = document.getElementById('exportSecondaryCounts');
     const exportSecondary2CountsButton = document.getElementById('exportSecondary2Counts');
 
-    // --- MEAL COUNT LOGIC FIX ---
+    // --- START UPDATED MEAL COUNT LOGIC ---
     function getDualMealCounts() {
         const now = new Date();
         const day = now.getDay(); // 0 for Sunday, 1 for Monday, ..., 6 for Saturday
@@ -559,8 +570,8 @@
             day: { field: 'day', description: 'Day Meal (Lunch)' },
             night1: { field: 'night1', description: 'Night Main (Veg/Egg)' },
             night2: { field: 'night2', description: 'Night Carb (Roti/Rice)' },
-            sunday_day: { field: 'sunday_day', description: 'Sunday Day Meal' },
-            sunday_night: { field: 'sunday_night', description: 'Sunday Night Meal' }
+            sunday_day: { field: 'sunday_day', description: 'Day Meal' },
+            sunday_night: { field: 'sunday_night', description: 'Night Meal' }
         };
 
         let primaryMealField = 'day';
@@ -577,28 +588,42 @@
             secondaryMealField = 'night1';
             secondaryMealField2 = 'night2';
         }
+
+        // Calculate the actual date for API call
+        let dayDifference = (targetDayIndex - day + 7) % 7; 
+        
+        const targetDate = new Date();
+        targetDate.setDate(targetDate.getDate() + dayDifference);
+        const targetDateStr = targetDate.toISOString().split('T')[0];
         
         const secondary2Info = secondaryMealField2 ? {
             title: `${DAY_NAMES[targetDayIndex]} ${MEAL_MAP[secondaryMealField2].description}`, 
             field: secondaryMealField2, 
-            date: DAY_NAMES[targetDayIndex]
+            date: DAY_NAMES[targetDayIndex],
+            dateStr: targetDateStr // Pass date string
         } : null;
 
+        const primaryInfo = { 
+            title: `${DAY_NAMES[targetDayIndex]} ${MEAL_MAP[primaryMealField].description}`, 
+            field: primaryMealField, 
+            date: DAY_NAMES[targetDayIndex],
+            dateStr: targetDateStr // Pass date string
+        };
+
+        const secondaryInfo = { 
+            title: `${DAY_NAMES[targetDayIndex]} ${MEAL_MAP[secondaryMealField].description}`, 
+            field: secondaryMealField, 
+            date: DAY_NAMES[targetDayIndex],
+            dateStr: targetDateStr // Pass date string
+        };
+
         return {
-            primary: { 
-                title: `${DAY_NAMES[targetDayIndex]} ${MEAL_MAP[primaryMealField].description}`, 
-                field: primaryMealField, 
-                date: DAY_NAMES[targetDayIndex]
-            },
-            secondary: { 
-                title: `${DAY_NAMES[targetDayIndex]} ${MEAL_MAP[secondaryMealField].description}`, 
-                field: secondaryMealField, 
-                date: DAY_NAMES[targetDayIndex]
-            },
+            primary: primaryInfo,
+            secondary: secondaryInfo,
             secondary2: secondary2Info
         };
     }
-    // --- END MEAL COUNT LOGIC FIX ---
+    // --- END UPDATED MEAL COUNT LOGIC ---
 
     async function renderMealCountTable(mealInfo, tableBodyId, titleId, exportBtnId) {
         const tableBody = document.getElementById(tableBodyId);
@@ -627,11 +652,15 @@
         loadingEl.style.display = 'block';
         tableBody.innerHTML = '';
         
-        const response = await authenticatedFetch(`${API_URL}/meal-counts?mealField=${mealInfo.field}`);
+        // *** CRITICAL FIX: Pass targetDateStr in the query ***
+        const response = await authenticatedFetch(
+            `${API_URL}/meal-counts?mealField=${mealInfo.field}&targetDateStr=${mealInfo.dateStr}`
+        );
+        // *****************************************************
         
         if (!response || !response.ok) {
             titleEl.textContent = `${mealInfo.title}`;
-            loadingEl.textContent = 'Failed to load counts.';
+            loadingEl.textContent = 'Failed to load counts (Server Error/Missing Data).';
             return;
         }
 
@@ -953,6 +982,28 @@
             document.getElementById('secondaryCountLoadingMessage2').style.display = 'block';
         }
     });
+
+      async function logout() {
+            try {
+                const accessToken = localStorage.getItem('accessToken');
+                const response = await authenticatedFetch(`${BACKEND_BASE_URL}/logout`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${accessToken}`
+                        }
+
+                    });
+                if (response && response.ok) {
+                    localStorage.clear();
+                    window.location.href = 'login.html';
+                } else {
+                    showMessage("Logout Error", "Failed to logout. Please try again.");
+                }
+            } catch (error) {
+                showMessage("Network Error", "Could not connect to the server for logout.");
+            }
+        }
 </script>
 
 </body>

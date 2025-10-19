@@ -3,6 +3,9 @@ import User from "../model/User.model.js";
 import Meal from "../model/Meal.model.js"; 
 import jsonwebtoken from "jsonwebtoken";
 import dotenv from "dotenv";
+import AttendanceTotal from "../model/AttendanceTotal.model.js";
+import Attendance from "../model/Attendance.model.js";
+import Announcement from "../model/Announcements.model.js";
 
 dotenv.config();
 
@@ -40,5 +43,27 @@ router.get("/", async (req, res) => {
         res.status(500).json({ error: "Internal server error." });
     }
 });
+router.get("/totalattendance",async(req,res)=>{
+    try {
+        const user = req.user.username;
+        const status = await AttendanceTotal.findOne({username:user});
+        if(!status){
+            return res.status(400).json({error:"No record found"});
+        }
+        res.status(200).json({status})
+    } catch (error) {
+        res.status(500).json({error:"Internal server error"});
+    }
+    
+});
+router.get("/announcement",async(req,res)=>{
+    try {
+        const fetchannouncement = await Announcement.find().sort({ createdAt: -1 });;
+        res.status(200).json({fetchannouncement});
+    } catch (error) {
+        res.status(500).json({error:"Internal server error"});
+    }
+})
+
 
 export default router;

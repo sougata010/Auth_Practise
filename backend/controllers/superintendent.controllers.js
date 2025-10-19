@@ -6,6 +6,8 @@ import bcrypt from "bcrypt";
 import Leave from "../model/Leave.model.js";
 import Attendance from "../model/Attendance.model.js";
 import Updatemeal from "../model/upDatemeal.model.js";
+import AttendanceTotal from "../model/AttendanceTotal.model.js";
+import Announcement from "../model/Announcements.model.js";
 
 
 dotenv.config();
@@ -269,7 +271,36 @@ router.get('/student-attendance', async (req, res) => {
                     }
                 }
             }
+            const existingRecord = await AttendanceTotal.findOne({ username: user.username });
+            const lastUpdated = existingRecord?.lastUpdatedDate?.toISOString().split('T')[0];
+            const shouldUpdate = lastUpdated !== currentDateStr;
 
+            if (shouldUpdate) {
+                if (finalStatus === "absent") {
+                    await AttendanceTotal.findOneAndUpdate(
+                        { username: user.username },
+                        {
+                            $inc: { absent: 1, totalDays: 1 },
+                            fullName: user.fullName,
+                            username: user.username,
+                            lastUpdatedDate: now
+                        },
+                        { new: true, upsert: true }
+                    );
+                }
+                else if (finalStatus === "present") {
+                    await AttendanceTotal.findOneAndUpdate(
+                        { username: user.username },
+                        {
+                            $inc: { present: 1, totalDays: 1 },
+                            fullName: user.fullName,
+                            username: user.username,
+                            lastUpdatedDate: now
+                        },
+                        { new: true, upsert: true }
+                    );
+                }
+            }
             await Attendance.findOneAndUpdate(
                 { username: user.username },
                 {
@@ -334,6 +365,25 @@ router.put("/meal-request/:id", async (req, res) => {
 
     }
 });
+
+router.post("/announcement", async (req, res) => {
+    try {
+        const {message,targetDate} = req.body;
+        if(!message || !targetDate){
+            return res.status(400).json({error:"Enter message anf date"});
+        }
+        const announcement= new Announcement({
+            message:message,
+            targetDate:targetDate,
+            createdAt:Date.now()
+        });
+        await announcement.save();
+        res.status(200).json({message:"Your Announcement Send Successfully"});
+    } catch (error) {
+        res.status(500).json({error:"Internal Server Error"});
+    }
+
+})
 
 
 export default router;

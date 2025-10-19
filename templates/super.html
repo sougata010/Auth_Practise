@@ -54,7 +54,7 @@
         .custom-table tbody tr:hover {
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
-        .table-btn {
+        .table-btn, .action-button { /* Added .action-button here */
             color: white;
             padding: 8px 12px;
             border: none;
@@ -87,10 +87,23 @@
         }
         .modal.open .modal-content { transform: scale(1); }
         .form-group label { display: block; margin-bottom: 5px; font-weight: 600; color: #374151; }
-        .form-group input, .form-group select {
+        .form-group input, .form-group select, .form-group textarea { /* Added textarea */
             width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #d1d5db;
-            border-radius: 6px; box-sizing: border-box; 
+            border-radius: 6px; box-sizing: border-box;
         }
+
+        /* Date Picker Styles */
+        #calendar { display: block; position: absolute; border: 1px solid #ccc; background: #fff; padding: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 1001; border-radius: 8px; }
+        .calendarMonth { text-align: center; margin-bottom: 10px; font-weight: bold; }
+        .calendarMonth a { text-decoration: none; color: #f97316; margin: 0 10px; cursor: pointer; }
+        #calendar table { border-collapse: collapse; width: 100%; }
+        #calendar th, #calendar td { border: 1px solid #ddd; padding: 8px; text-align: center; width: 14.28%; }
+        #calendar th { background-color: #f2f2f2; font-weight: bold; }
+        #calendar td a { text-decoration: none; color: #333; display: block; padding: 5px; cursor: pointer; }
+        #calendar td a:hover { background-color: #e9ecef; }
+        .date-input-wrapper { position: relative; } /* Wrapper for date input + icon */
+        .date-input-wrapper .icon { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; color: #4b5563; }
+
 
         @media (max-width: 768px) {
             .custom-table thead { display: none; }
@@ -121,7 +134,7 @@
     </div>
 
 <div class="container mx-auto max-w-7xl bg-white p-8 rounded-xl shadow-2xl">
-    
+
     <div class="flex flex-col md:flex-row justify-between items-center border-b-2 border-gray-200 pb-4 mb-6">
         <h1 class="text-3xl font-bold text-gray-800 m-0 p-0 border-none text-left">
             Superintendent Dashboard
@@ -160,7 +173,8 @@
                 <h2 class="text-xl font-semibold text-gray-700">All Students</h2>
                 <div class="flex items-center space-x-2">
                     <input type="text" id="studentSearch" placeholder="Search by name..." class="p-2 border rounded-md w-64">
-                    <button id="createUser" class="action-button bg-orange-600 text-white table-btn" onclick="openStudentModal()">Create Student</button>
+                    <button id="makeAnnouncementBtn" class="action-button bg-blue-600 text-white hover:bg-blue-700" onclick="openAnnouncementModal()">📢 Make Announcement</button>
+                    <button id="createUser" class="action-button bg-orange-600 text-white" onclick="openStudentModal()">Create Student</button>
                 </div>
             </div>
             <table class="custom-table" id="studentTable">
@@ -187,7 +201,7 @@
                             <option value="sunday_night">Sunday Night</option>
                         </select>
                         <input type="text" id="mealsFilterValue" placeholder="Preference..." class="p-2 border rounded-md w-32">
-                        <button id="exportFullMeals" class="action-button bg-orange-600 text-white table-btn">Export All Meals</button>
+                        <button id="exportFullMeals" class="action-button bg-orange-600 text-white">Export All Meals</button>
                     </div>
                 </div>
                 <div class="overflow-x-auto">
@@ -201,58 +215,22 @@
                 </div>
             </div>
         </div>
-        
-        <div id="meal-counts" class="tab-content">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="col-span-1">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-xl font-semibold text-gray-700" id="primaryMealTitle">Loading Primary Meal...</h2>
-                        <button id="exportPrimaryCounts" class="action-button bg-orange-600 text-white table-btn">Export Day Meal</button>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="custom-table w-full" id="mealCountTablePrimary">
-                            <thead>
-                                <tr><th>Meal Option</th><th>Count</th></tr>
-                            </thead>
-                            <tbody id="mealCountsTableBodyPrimary"></tbody>
-                        </table>
-                        <p id="primaryCountLoadingMessage" class="empty-state">Calculating...</p>
-                    </div>
-                </div>
 
-                <div class="col-span-1">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-xl font-semibold text-gray-700" id="secondaryMealTitle">Loading Secondary Meal...</h2>
-                        <button id="exportSecondaryCounts" class="action-button bg-orange-600 text-white table-btn">Export Night Meal</button>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="custom-table w-full" id="mealCountTableSecondary">
-                            <thead>
-                                <tr><th>Meal Option</th><th>Count</th></tr>
-                            </thead>
-                            <tbody id="mealCountsTableBodySecondary"></tbody>
-                        </table>
-                        <p id="secondaryCountLoadingMessage" class="empty-state">Calculating...</p>
-                    </div>
-                </div>
-                <div class="col-span-1">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-xl font-semibold text-gray-700" id="secondary2MealTitle">Loading Secondary Meal...</h2>
-                        <button id="exportSecondary2Counts" class="action-button bg-orange-600 text-white table-btn">Export Night Meal</button>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="custom-table w-full" id="mealCountTableSecondary2">
-                            <thead>
-                                <tr><th>Meal Option</th><th>Count</th></tr>
-                            </thead>
-                            <tbody id="mealCountsTableBodySecondary2"></tbody>
-                        </table>
-                        <p id="secondaryCountLoadingMessage2" class="empty-state">Calculating...</p>
-                    </div>
-                </div>
+        <div id="meal-counts" class="tab-content">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold text-gray-700" id="consolidatedMealTitle">Loading Meal Counts...</h2>
+                <button id="exportConsolidatedCounts" class="action-button bg-orange-600 text-white">Export Counts</button>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="custom-table w-full" id="consolidatedMealCountTable">
+                    <thead id="consolidatedMealCountTableHead">
+                        </thead>
+                    <tbody id="consolidatedMealCountTableBody">
+                        </tbody>
+                </table>
+                <p id="consolidatedCountLoadingMessage" class="empty-state">Calculating...</p>
             </div>
         </div>
-
         <div id="attendance" class="tab-content">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
                 <h2 class="text-xl font-semibold text-gray-700">Current Attendance Status</h2>
@@ -279,7 +257,7 @@
             <div id="leaveRequestsContainer" class="space-y-4"></div>
             <p id="leaveLoadingMessage" class="empty-state">Loading leave requests...</p>
         </div>
-        
+
         <div id="meal-requests" class="tab-content">
             <h2 class="text-xl font-semibold text-gray-700 mb-4">Pending Meal Change Requests</h2>
             <div id="mealRequestsContainer" class="space-y-4"></div>
@@ -291,6 +269,32 @@
 <div id="customAlertModal" class="modal"><div class="modal-content"><h3 id="modalTitle" class="text-lg font-bold"></h3><p id="modalMessage" class="my-4"></p><div id="modalButtons" class="flex justify-end space-x-3"></div></div></div>
 <div id="studentUpsertModal" class="modal"><div class="modal-content"><h3 id="upsertModalTitle" class="text-lg font-bold mb-5"></h3><form id="studentForm" onsubmit="event.preventDefault(); saveStudent();"><input type="hidden" id="formStudentId"><div class="form-group"><label for="formUsername">Username</label><input type="text" id="formUsername" required></div><div class="form-group"><label for="formFullName">Full Name</label><input type="text" id="formFullName" required></div><div class="form-group"><label for="formEmail">Email</label><input type="email" id="formEmail" required></div><div class="form-group"><label for="formRoll">Roll Number</label><input type="text" id="formRoll" required></div><div class="form-group"><label for="formDepartment">Department</label><input type="text" id="formDepartment" required></div><div class="form-group"><label for="formYear">Year</label><input type="text" id="formYear" required min="1" max="5"></div><div class="form-group"><label for="formPassword">Password</label><input type="password" id="formPassword"></div><div class="flex justify-end space-x-3 mt-5"><button type="button" onclick="closeStudentModal()" class="px-4 py-2 bg-gray-300 rounded-md">Cancel</button><button type="submit" id="saveButton" class="px-4 py-2 bg-orange-600 text-white rounded-md">Save</button></div></form></div></div>
 <div id="studentDetailModal" class="modal"><div class="modal-content"><h3 class="text-xl font-bold mb-5">Student Profile</h3><div class="mb-6"><h4 class="text-lg font-semibold border-b pb-2 mb-3">Personal Details</h4><p><strong>Username:</strong> <span id="detailUsername"></span></p><p><strong>Full Name:</strong> <span id="detailFullName"></span></p><p><strong>Roll No:</strong> <span id="detailRoll"></span></p><p><strong>Department:</strong> <span id="detailDepartment"></span></p><p><strong>Year:</strong> <span id="detailYear"></span></p></div><div><h4 class="text-lg font-semibold border-b pb-2 mb-3">Meal Preferences</h4><p><strong>Day Meal:</strong> <span id="detailMealDay" class="capitalize"></span></p><p><strong>Night Main:</strong> <span id="detailMealNightMain" class="capitalize"></span></p><p><strong>Night Carb:</strong> <span id="detailMealNightCarb" class="capitalize"></span></p><p><strong>Sunday Day:</strong> <span id="detailMealSundayDay" class="capitalize"></span></p><p><strong>Sunday Night:</strong> <span id="detailMealSundayNight" class="capitalize"></span></p></div><div class="flex justify-end mt-6"><button type="button" onclick="closeDetailModal()" class="px-5 py-2 bg-gray-500 text-white rounded-md">Close</button></div></div></div>
+
+<div id="announcementModal" class="modal">
+    <div class="modal-content">
+        <h3 class="text-xl font-bold mb-5">📢 Create Announcement</h3>
+        <form id="announcementForm" onsubmit="event.preventDefault(); sendAnnouncement();">
+            <div class="form-group">
+                <label for="announcementMessage">Message</label>
+                <textarea id="announcementMessage" rows="4" required placeholder="Enter the announcement message..."></textarea>
+            </div>
+            <div class="form-group date-input-wrapper">
+                <label for="announcementTargetDate">Target Date (Visible Until)</label>
+                 <input type="text" id="announcementTargetDate" required placeholder="YYYY-MM-DD"
+                       onfocus="showDatePicker(this)" onkeydown="return false;"
+                       class="w-full p-3 pr-10 border border-gray-300 rounded-lg shadow-sm focus:ring-orange-500 focus:border-orange-500 appearance-none bg-white">
+                 <svg class="icon h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                           d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                 </svg>
+            </div>
+            <div class="flex justify-end space-x-3 mt-5">
+                <button type="button" onclick="closeAnnouncementModal()" class="px-4 py-2 bg-gray-300 rounded-md hover:bg-gray-400 transition">Cancel</button>
+                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition">Send Announcement</button>
+            </div>
+        </form>
+    </div>
+</div>
 
 <script>
     const BACKEND_BASE_URL = "http://localhost:5000";
@@ -325,35 +329,53 @@
             const newAccessToken = await renewAccessToken();
             if (newAccessToken) {
                 options.headers['Authorization'] = `Bearer ${newAccessToken}`;
-                response = await authenticatedFetch(url, options, false);
-            } else { return null; }
+                response = await authenticatedFetch(url, options, false); // Pass false for retry on recursive call
+            } else {
+                 window.location.href = 'login.html'; // Redirect if refresh fails
+                 return null;
+             }
         }
-        if (!response || response.status === 401 || response.status === 403) {
-            if (response) window.location.href = 'login.html';
+         // Final check after potential retry
+         if (!response || response.status === 401 || response.status === 403) {
+             if (response) { // Only redirect if response exists (avoid multiple redirects)
+                 console.error(`Unauthorized fetch to ${url}. Status: ${response.status}. Redirecting.`);
+                 window.location.href = 'login.html';
+             } else {
+                console.error(`Unauthorized fetch to ${url}. No response received. Redirecting.`);
+                 window.location.href = 'login.html'; // Redirect even if no response
+            }
             return null;
-        }
+         }
         return response;
     }
+
 
     const customAlertModal = document.getElementById('customAlertModal');
     const studentUpsertModal = document.getElementById('studentUpsertModal');
     const studentDetailModal = document.getElementById('studentDetailModal');
-    
+    // *** ADD ANNOUNCEMENT MODAL ELEMENT ***
+    const announcementModal = document.getElementById('announcementModal');
+
     function showMessage(title, message) {
+        // Using alert for simplicity, replace with custom modal if preferred
         alert(`${title}\n${message}`);
     }
-    
+
     document.querySelectorAll('.tab-button').forEach(tab => {
         tab.addEventListener('click', () => {
             document.querySelectorAll('.tab-button').forEach(item => item.classList.remove('active'));
             tab.classList.add('active');
             document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
             document.getElementById(tab.dataset.tab).classList.add('active');
-            
+
             if (tab.dataset.tab === 'meal-counts') {
-                fetchDualMealCounts();
-            } else if (tab.dataset.tab === 'meal-requests') { // New function call
+                fetchConsolidatedMealCounts();
+            } else if (tab.dataset.tab === 'meal-requests') {
                 fetchMealRequests();
+            } else if (tab.dataset.tab === 'leaves') { // Fetch leave requests when tab is clicked
+                fetchLeaveRequests();
+            } else if (tab.dataset.tab === 'attendance') { // Fetch attendance when tab is clicked
+                fetchAttendance();
             }
         });
     });
@@ -368,7 +390,7 @@
         form.reset();
         document.getElementById('formStudentId').value = '';
         const title = document.getElementById('upsertModalTitle');
-        
+
         if (student) {
             title.textContent = `Edit Student: ${student.username}`;
             document.getElementById('formStudentId').value = student.userId;
@@ -390,7 +412,7 @@
         studentUpsertModal.classList.add('open');
     }
     function closeStudentModal() { studentUpsertModal.classList.remove('open'); }
-    
+
     async function saveStudent() {
         const studentId = document.getElementById('formStudentId').value;
         const isUpdate = !!studentId;
@@ -403,20 +425,24 @@
             year: document.getElementById('formYear').value,
         };
         const password = document.getElementById('formPassword').value;
-        if (password) {
+        if (password && !isUpdate) { // Only require password for creation
             studentData.password = password;
+        } else if (password && isUpdate) { // Add password only if provided for update
+             studentData.password = password;
         }
+
         let body = {};
         if (isUpdate) {
             body = {
-                full_name: studentData.full_name,
+                // For update, only send fields that can be changed
+                fullName: studentData.full_name, // Adjusted key to match backend expectation if needed
                 roll: studentData.roll,
                 department: studentData.department,
                 year: studentData.year,
             };
-            if(studentData.password) body.password = studentData.password;
+            if(studentData.password) body.password = studentData.password; // Add password if provided
         } else {
-             body = {
+             body = { // For creation, send all required fields
                 username: studentData.username,
                 fullName: studentData.full_name,
                 email: studentData.email,
@@ -426,38 +452,84 @@
                 password: studentData.password,
                }
         }
-        const url = isUpdate ? `${API_URL}/users/${studentId}` : `${API_URL}/user`;
+        // Ensure required fields are present for creation
+         if (!isUpdate && (!body.username || !body.fullName || !body.email || !body.roll || !body.department || !body.year || !body.password)) {
+            alert('Error: All fields including password are required for creating a new student.');
+             return;
+         }
+
+        const url = isUpdate ? `${API_URL}/user/${studentId}` : `${API_URL}/user`; // Corrected update URL
         const method = isUpdate ? 'PUT' : 'POST';
-        const response = await authenticatedFetch(url, {
-            method,
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body)
-        });
-        if (response && response.ok) {
-            alert(`Student ${isUpdate ? 'updated' : 'created'} successfully!`);
-            closeStudentModal();
-            fetchAllData();
-        } else {
-            const err = await response.json();
-            alert(`Error: ${err.message || err.error || 'An unknown error occurred.'}`);
+        console.log("Sending data:", method, url, JSON.stringify(body)); // Debug log
+
+
+        try {
+            const response = await authenticatedFetch(url, {
+                method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+
+             if (!response) {
+                alert('Error: No response from server.');
+                return;
+            }
+
+            if (response.ok) {
+                alert(`Student ${isUpdate ? 'updated' : 'created'} successfully!`);
+                closeStudentModal();
+                fetchAllData(); // Refresh data
+            } else {
+                const err = await response.json().catch(() => ({ error: 'Failed to parse error response' })); // Catch JSON parsing errors
+                console.error("Save student error:", response.status, err); // Log detailed error
+                alert(`Error: ${err.message || err.error || 'An unknown error occurred.'}`);
+            }
+        } catch(error) {
+             console.error("Network error saving student:", error);
+             alert('Network error. Could not save student.');
         }
+
     }
+
 
     async function deleteStudent(studentId, username) {
-        if (!confirm(`Are you sure you want to delete ${username}?`)) return;
-        const response = await authenticatedFetch(`${API_URL}/user/${studentId}`, { method: 'DELETE' });
-        if (response && response.ok) {
-            alert('Student deleted successfully.');
-            fetchAllData();
-        } else {
-            const err = await response.json();
-            alert(`Error: ${err.message || err.error || 'Failed to delete user.'}`);
-        }
+        if (!confirm(`Are you sure you want to delete ${username}? This action cannot be undone.`)) return; // Added stronger confirmation
+         try {
+             const response = await authenticatedFetch(`${API_URL}/user/${studentId}`, { method: 'DELETE' });
+
+             if (!response) {
+                alert('Error: No response from server during delete.');
+                 return;
+             }
+
+             if (response.ok) {
+                alert('Student deleted successfully.');
+                fetchAllData(); // Refresh the list
+             } else {
+                 // Try to get error message from response body
+                let err = { error: `Failed to delete student (Status: ${response.status})` };
+                 try {
+                     err = await response.json();
+                 } catch (e) {
+                     console.warn("Could not parse JSON error response on delete.");
+                 }
+                 console.error("Delete student error:", response.status, err);
+                 alert(`Error: ${err.message || err.error || 'Failed to delete user.'}`);
+             }
+         } catch (error) {
+             console.error("Network error deleting student:", error);
+            alert('Network error. Could not delete student.');
+         }
     }
 
+
     function openDetailModal(student) {
-        document.getElementById('detailUsername').textContent = student.username;
-        document.getElementById('detailFullName').textContent = student.fullName;
+         if (!student) {
+             console.error("Attempted to open detail modal with invalid student data.");
+             return;
+        }
+        document.getElementById('detailUsername').textContent = student.username || 'N/A';
+        document.getElementById('detailFullName').textContent = student.fullName || 'N/A';
         document.getElementById('detailRoll').textContent = student.roll || 'N/A';
         document.getElementById('detailDepartment').textContent = student.department || 'N/A';
         document.getElementById('detailYear').textContent = student.year || 'N/A';
@@ -471,21 +543,68 @@
     }
     function closeDetailModal() { studentDetailModal.classList.remove('open'); }
 
+    // *** ADD ANNOUNCEMENT MODAL FUNCTIONS ***
+    function openAnnouncementModal() {
+        document.getElementById('announcementForm').reset(); // Clear form
+        announcementModal.classList.add('open');
+    }
+    function closeAnnouncementModal() {
+        announcementModal.classList.remove('open');
+    }
+    async function sendAnnouncement() {
+        const message = document.getElementById('announcementMessage').value.trim();
+        const targetDate = document.getElementById('announcementTargetDate').value;
+
+        if (!message || !targetDate) {
+            showMessage("Error", "Please enter both an announcement message and a target date.");
+            return;
+        }
+
+        try {
+            const response = await authenticatedFetch(`${API_URL}/announcement`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: message, targetDate: targetDate })
+            });
+
+             if (!response) {
+                 alert('Error: No response from server when sending announcement.');
+                return;
+             }
+
+            if (response.ok) {
+                const result = await response.json();
+                showMessage('Success', result.message || 'Announcement sent successfully!');
+                closeAnnouncementModal();
+            } else {
+                const err = await response.json().catch(() => ({ error: 'Failed to parse error response' }));
+                 console.error("Send announcement error:", response.status, err);
+                showMessage("Error", err.error || `Failed to send announcement (Status: ${response.status})`);
+            }
+        } catch (error) {
+             console.error("Network error sending announcement:", error);
+            showMessage("Network Error", "Could not send announcement.");
+        }
+    }
+    // *** END ANNOUNCEMENT MODAL FUNCTIONS ***
+
+
     const fullMealTableBody = document.getElementById('fullMealTableBody');
     const fullMealLoadingMessage = document.getElementById('fullMealLoadingMessage');
     const exportFullMealsButton = document.getElementById('exportFullMeals');
 
     function populateMealsTable(students) {
         fullMealTableBody.innerHTML = '';
-        if (students.length > 0) {
+        if (students && students.length > 0) { // Added null check for students
             const dataToExport = [];
             students.forEach(student => {
+                 if (!student || !student.username) return; // Skip if student data is invalid
                 const meal = student.mealPreferences || {};
                 const tr = document.createElement('tr');
-                tr.dataset.row = student.username;
+                tr.dataset.row = student.username; // Use username for unique row identifier
                 tr.innerHTML = `
                     <td data-label="Username">${student.username}</td>
-                    <td data-label="Full Name">${student.fullName}</td>
+                    <td data-label="Full Name">${student.fullName || 'N/A'}</td>
                     <td data-label="Day Meal" class="capitalize">${meal.day || 'N/A'}</td>
                     <td data-label="Night Main" class="capitalize">${meal.night1 || 'N/A'}</td>
                     <td data-label="Night Carb" class="capitalize">${meal.night2 || 'N/A'}</td>
@@ -496,7 +615,7 @@
 
                 dataToExport.push({
                     'Username': student.username,
-                    'Full Name': student.fullName,
+                    'Full Name': student.fullName || 'N/A',
                     'Day Meal': meal.day || 'N/A',
                     'Night Main': meal.night1 || 'N/A',
                     'Night Carb': meal.night2 || 'N/A',
@@ -507,214 +626,122 @@
             exportFullMealsButton.onclick = () => exportToExcel(dataToExport, 'all_student_meals.xlsx');
             fullMealLoadingMessage.style.display = 'none';
 
+            // Ensure filters are added only once
             if (!window.mealsFilterAdded) {
                 const mealsSearch = document.getElementById('mealsSearch');
                 const mealsFilterField = document.getElementById('mealsFilterField');
                 const mealsFilterValue = document.getElementById('mealsFilterValue');
+
                 function filterMeals() {
                     const search = mealsSearch.value.toLowerCase();
                     const field = mealsFilterField.value;
                     const value = mealsFilterValue.value.toLowerCase();
-                    allStudentsData.forEach(student => {
-                        const row = document.querySelector(`tr[data-row="${student.username}"]`);
-                        if (!row) return;
-                        let show = true;
-                        if (search && !student.fullName.toLowerCase().includes(search)) show = false;
-                        const pref = student.mealPreferences ? student.mealPreferences[field] || '' : '';
-                        if (field && value && !pref.toLowerCase().includes(value)) show = false;
-                        row.style.display = show ? '' : 'none';
+
+                     // Iterate through table rows directly for filtering display
+                     Array.from(fullMealTableBody.querySelectorAll('tr')).forEach(row => {
+                         const username = row.dataset.row;
+                         const studentData = allStudentsData.find(s => s.username === username); // Find original data if needed
+
+                         if (!studentData) { // Should not happen if populated correctly
+                             row.style.display = 'none';
+                            return;
+                         }
+
+                         let show = true;
+
+                         // Filter by name (use studentData for accuracy)
+                        if (search && !(studentData.fullName || '').toLowerCase().includes(search)) {
+                             show = false;
+                         }
+
+                         // Filter by meal preference (use studentData for accuracy)
+                        if (field && value) {
+                             const pref = (studentData.mealPreferences && studentData.mealPreferences[field]) ? studentData.mealPreferences[field].toLowerCase() : '';
+                            if (!pref.includes(value)) {
+                                 show = false;
+                            }
+                        }
+
+                         row.style.display = show ? '' : 'none'; // Use '' for default display
                     });
                 }
+
                 mealsSearch.addEventListener('input', filterMeals);
                 mealsFilterField.addEventListener('change', filterMeals);
                 mealsFilterValue.addEventListener('input', filterMeals);
-                window.mealsFilterAdded = true;
+                window.mealsFilterAdded = true; // Set flag
             }
         } else {
-            fullMealLoadingMessage.textContent = 'No meal data found.';
+            fullMealLoadingMessage.textContent = 'No meal data found or students array is empty.';
+             fullMealLoadingMessage.style.display = 'block'; // Ensure message is visible
         }
     }
 
-    const mealCountTableBodyPrimary = document.getElementById('mealCountsTableBodyPrimary');
-    const mealCountTableBodySecondary = document.getElementById('mealCountsTableBodySecondary');
-    const mealCountTableBodySecondary2 = document.getElementById('mealCountsTableBodySecondary2');
-    const primaryCountLoadingMessage = document.getElementById('primaryCountLoadingMessage');
-    const secondaryCountLoadingMessage = document.getElementById('secondaryCountLoadingMessage');
-    const secondary2CountLoadingMessage = document.getElementById('secondaryCountLoadingMessage2');
-    const primaryMealTitle = document.getElementById('primaryMealTitle');
-    const secondaryMealTitle = document.getElementById('secondaryMealTitle');
-    const secondary2MealTitle = document.getElementById('secondary2MealTitle');
-    const exportPrimaryCountsButton = document.getElementById('exportPrimaryCounts');
-    const exportSecondaryCountsButton = document.getElementById('exportSecondaryCounts');
-    const exportSecondary2CountsButton = document.getElementById('exportSecondary2Counts');
 
-    // --- START UPDATED MEAL COUNT LOGIC ---
+    const consolidatedMealCountTableHead = document.getElementById('consolidatedMealCountTableHead');
+    const consolidatedMealCountTableBody = document.getElementById('consolidatedMealCountTableBody');
+    const consolidatedCountLoadingMessage = document.getElementById('consolidatedCountLoadingMessage');
+    const consolidatedMealTitle = document.getElementById('consolidatedMealTitle');
+    const exportConsolidatedCountsButton = document.getElementById('exportConsolidatedCounts');
+
     function getDualMealCounts() {
         const now = new Date();
-        const day = now.getDay(); // 0 for Sunday, 1 for Monday, ..., 6 for Saturday
+        const day = now.getDay();
         const hour = now.getHours();
-
-        const SHIFT_HOUR = 9; // 9 AM
+        const SHIFT_HOUR = 9;
         const isAfterShiftTime = hour >= SHIFT_HOUR;
-        
         let targetDayIndex = day;
-        
-        // Logic: If it is 9 AM or later, shift the target day to tomorrow.
-        if (isAfterShiftTime) {
-            targetDayIndex = (day + 1) % 7;
-        }
-
+        if (isAfterShiftTime) targetDayIndex = (day + 1) % 7;
         const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-
-        const MEAL_MAP = {
-            day: { field: 'day', description: 'Day Meal (Lunch)' },
-            night1: { field: 'night1', description: 'Night Main (Veg/Egg)' },
-            night2: { field: 'night2', description: 'Night Carb (Roti/Rice)' },
-            sunday_day: { field: 'sunday_day', description: 'Day Meal' },
-            sunday_night: { field: 'sunday_night', description: 'Night Meal' }
-        };
-
-        let primaryMealField = 'day';
-        let secondaryMealField = 'night1';
-        let secondaryMealField2 = 'night2';
-        
-        // Check the target day to determine the meal set
-        if (targetDayIndex === 0) { // Target is Sunday
-            primaryMealField = 'sunday_day';
-            secondaryMealField = 'sunday_night';
-            secondaryMealField2 = null; // Sunday night has no secondary carb selection
-        } else { // Target is Monday through Saturday
-            primaryMealField = 'day';
-            secondaryMealField = 'night1';
-            secondaryMealField2 = 'night2';
-        }
-
-        // Calculate the actual date for API call
-        let dayDifference = (targetDayIndex - day + 7) % 7; 
-        
-        const targetDate = new Date();
-        targetDate.setDate(targetDate.getDate() + dayDifference);
+        const MEAL_MAP = { day: 'Day Meal', night1: 'Night Main', night2: 'Night Carb', sunday_day: 'Day Meal', sunday_night: 'Night Meal' };
+        let primaryMealField = 'day', secondaryMealField = 'night1', secondaryMealField2 = 'night2';
+        if (targetDayIndex === 0) { primaryMealField = 'sunday_day'; secondaryMealField = 'sunday_night'; secondaryMealField2 = null; }
+        let dayDifference = (targetDayIndex - day + 7) % 7;
+        const targetDate = new Date(); targetDate.setDate(targetDate.getDate() + dayDifference);
         const targetDateStr = targetDate.toISOString().split('T')[0];
-        
-        const secondary2Info = secondaryMealField2 ? {
-            title: `${DAY_NAMES[targetDayIndex]} ${MEAL_MAP[secondaryMealField2].description}`, 
-            field: secondaryMealField2, 
-            date: DAY_NAMES[targetDayIndex],
-            dateStr: targetDateStr // Pass date string
-        } : null;
-
-        const primaryInfo = { 
-            title: `${DAY_NAMES[targetDayIndex]} ${MEAL_MAP[primaryMealField].description}`, 
-            field: primaryMealField, 
-            date: DAY_NAMES[targetDayIndex],
-            dateStr: targetDateStr // Pass date string
-        };
-
-        const secondaryInfo = { 
-            title: `${DAY_NAMES[targetDayIndex]} ${MEAL_MAP[secondaryMealField].description}`, 
-            field: secondaryMealField, 
-            date: DAY_NAMES[targetDayIndex],
-            dateStr: targetDateStr // Pass date string
-        };
-
-        return {
-            primary: primaryInfo,
-            secondary: secondaryInfo,
-            secondary2: secondary2Info
-        };
+        const secondary2Info = secondaryMealField2 ? { field: secondaryMealField2, dateStr: targetDateStr } : null;
+        const primaryInfo = { title: `${DAY_NAMES[targetDayIndex]} Consolidated Counts`, field: primaryMealField, date: DAY_NAMES[targetDayIndex], dateStr: targetDateStr };
+        const secondaryInfo = { field: secondaryMealField, dateStr: targetDateStr };
+        return { primary: primaryInfo, secondary: secondaryInfo, secondary2: secondary2Info };
     }
-    // --- END UPDATED MEAL COUNT LOGIC ---
 
-    async function renderMealCountTable(mealInfo, tableBodyId, titleId, exportBtnId) {
-        const tableBody = document.getElementById(tableBodyId);
-        let loadingEl;
-        if (tableBodyId === 'mealCountsTableBodyPrimary') {
-            loadingEl = primaryCountLoadingMessage;
-        } else if (tableBodyId === 'mealCountsTableBodySecondary') {
-            loadingEl = secondaryCountLoadingMessage;
-        } else if (tableBodyId === 'mealCountsTableBodySecondary2') {
-            loadingEl = secondary2CountLoadingMessage;
-        }
-        const titleEl = document.getElementById(titleId);
-        const exportEl = document.getElementById(exportBtnId);
-
-        if (!mealInfo) {
-            titleEl.textContent = 'No Secondary Carb Meal Applicable';
-            loadingEl.textContent = 'N/A for this day';
-            loadingEl.style.display = 'block';
-            tableBody.innerHTML = '';
-            exportEl.onclick = null; // Disable export button
-            return;
-        }
-
-        titleEl.textContent = `${mealInfo.title}`;
-        loadingEl.textContent = 'Loading counts...';
-        loadingEl.style.display = 'block';
-        tableBody.innerHTML = '';
-        
-        // *** CRITICAL FIX: Pass targetDateStr in the query ***
-        const response = await authenticatedFetch(
-            `${API_URL}/meal-counts?mealField=${mealInfo.field}&targetDateStr=${mealInfo.dateStr}`
-        );
-        // *****************************************************
-        
-        if (!response || !response.ok) {
-            titleEl.textContent = `${mealInfo.title}`;
-            loadingEl.textContent = 'Failed to load counts (Server Error/Missing Data).';
-            return;
-        }
-
-        const mealCounts = await response.json();
-        const countsData = mealCounts.counts || {};
-        
-        titleEl.textContent = `${mealInfo.title}`;
-
-        if (Object.keys(countsData).length > 0) {
-            const dataToExport = [];
-            for (const preference in countsData) {
-                const count = countsData[preference];
-                
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td data-label="Meal Type" class="capitalize">${preference}</td>
-                    <td data-label="Count">${count}</td>
-                `;
-                tableBody.appendChild(tr);
-
-                dataToExport.push({ 'Meal Type': preference, 'Count': count });
-            }
-            exportEl.onclick = () => exportToExcel(dataToExport, `${mealInfo.date}_${mealInfo.field}_Counts.xlsx`);
-            loadingEl.style.display = 'none';
+    async function renderConsolidatedTable(mealInfo, dayCounts, night1Counts, night2Counts) {
+        consolidatedMealCountTableHead.innerHTML = ''; consolidatedMealCountTableBody.innerHTML = '';
+        let headers = [], bodyRow = [], dataToExport = {};
+        const isSunday = mealInfo.primary.field === 'sunday_day';
+        if (isSunday) {
+            const dayMeat = dayCounts.meat || 0, dayPanner = dayCounts.panner || 0, dayFish = dayCounts.fish || 0, totalDay = dayMeat + dayPanner + dayFish;
+            const totalNight = night1Counts.veg || 0;
+            headers = ['Total Day', 'Day (Meat)', 'Day (Panner)', 'Day (Fish)', 'Total Night']; bodyRow = [totalDay, dayMeat, dayPanner, dayFish, totalNight];
+            dataToExport = { 'Total Day': totalDay, 'Day (Meat)': dayMeat, 'Day (Panner)': dayPanner, 'Day (Fish)': dayFish, 'Total Night': totalNight };
         } else {
-            loadingEl.textContent = `No data set for ${mealInfo.title}.`;
-            loadingEl.style.display = 'block';
+            const dayVeg = dayCounts.veg || 0, dayFish = dayCounts.fish || 0, dayCurd = dayCounts.curd || 0, totalDay = dayVeg + dayFish + dayCurd;
+            const nightVeg = night1Counts.veg || 0, nightEgg = night1Counts.egg || 0, totalNight = nightVeg + nightEgg;
+            const nightRoti = night2Counts.roti || 0, nightRice = night2Counts.rice || 0;
+            headers = ['Total Day','Day (Veg)','Day (Fish)','Day (Curd)','Total Night','Night (Veg)','Night (Egg)','Night (Roti)','Night (Rice)'];
+            bodyRow = [totalDay, dayVeg, dayFish, dayCurd, totalNight, nightVeg, nightEgg, nightRoti, nightRice];
+            dataToExport = {'Total Day':totalDay,'Day (Veg)':dayVeg,'Day (Fish)':dayFish,'Day (Curd)':dayCurd,'Total Night':totalNight,'Night (Veg)':nightVeg,'Night (Egg)':nightEgg,'Night (Roti)':nightRoti,'Night (Rice)':nightRice};
         }
+        const trHead = document.createElement('tr'); trHead.innerHTML = headers.map(h => `<th>${h}</th>`).join(''); consolidatedMealCountTableHead.appendChild(trHead);
+        const trBody = document.createElement('tr'); trBody.innerHTML = bodyRow.map((d, i) => `<td data-label="${headers[i]}">${d}</td>`).join(''); consolidatedMealCountTableBody.appendChild(trBody);
+        exportConsolidatedCountsButton.onclick = () => exportToExcel([dataToExport], `${mealInfo.primary.date}_Consolidated_Counts.xlsx`);
+        consolidatedCountLoadingMessage.style.display = 'none';
     }
 
-    async function fetchDualMealCounts() {
-        const dualCounts = getDualMealCounts();
-
-        renderMealCountTable(
-            dualCounts.primary, 
-            'mealCountsTableBodyPrimary', 
-            'primaryMealTitle', 
-            'exportPrimaryCounts'
-        );
-
-        renderMealCountTable(
-            dualCounts.secondary,
-            'mealCountsTableBodySecondary', 
-            'secondaryMealTitle', 
-            'exportSecondaryCounts'
-        );
-        renderMealCountTable(
-            dualCounts.secondary2,
-            'mealCountsTableBodySecondary2', 
-            'secondary2MealTitle', 
-            'exportSecondary2Counts'
-        );
+    async function fetchConsolidatedMealCounts() {
+        consolidatedMealTitle.textContent = 'Loading Meal Counts...'; consolidatedCountLoadingMessage.textContent = 'Calculating...'; consolidatedCountLoadingMessage.style.display = 'block';
+        consolidatedMealCountTableHead.innerHTML = ''; consolidatedMealCountTableBody.innerHTML = '';
+        const mealInfo = getDualMealCounts(); consolidatedMealTitle.textContent = mealInfo.primary.title;
+        try {
+            const resDay = await authenticatedFetch(`${API_URL}/meal-counts?mealField=${mealInfo.primary.field}&targetDateStr=${mealInfo.primary.dateStr}`);
+            if (!resDay || !resDay.ok) throw new Error('Failed primary count fetch.'); const dayData = await resDay.json(); const dayCounts = dayData.counts || {};
+            const resNight1 = await authenticatedFetch(`${API_URL}/meal-counts?mealField=${mealInfo.secondary.field}&targetDateStr=${mealInfo.secondary.dateStr}`);
+            if (!resNight1 || !resNight1.ok) throw new Error('Failed secondary count fetch.'); const night1Data = await resNight1.json(); const night1Counts = night1Data.counts || {};
+            let night2Counts = {}; if (mealInfo.secondary2) { const resNight2 = await authenticatedFetch(`${API_URL}/meal-counts?mealField=${mealInfo.secondary2.field}&targetDateStr=${mealInfo.secondary2.dateStr}`); if (!resNight2 || !resNight2.ok) throw new Error('Failed tertiary count fetch.'); const night2Data = await resNight2.json(); night2Counts = night2Data.counts || {}; }
+            renderConsolidatedTable(mealInfo, dayCounts, night1Counts, night2Counts);
+        } catch (error) { console.error('Fetch counts error:', error); consolidatedMealTitle.textContent = 'Error'; consolidatedCountLoadingMessage.textContent = error.message || 'Failed.'; }
     }
-    
+
     const attendanceTableBody = document.getElementById('attendanceTableBody');
     const attendanceLoadingMessage = document.getElementById('attendanceLoadingMessage');
 
@@ -723,287 +750,502 @@
         attendanceLoadingMessage.style.display = 'block';
         attendanceTableBody.innerHTML = '';
 
-        const response = await authenticatedFetch(`${API_URL}/student-attendance`);
-        if (!response || !response.ok) {
-            attendanceLoadingMessage.textContent = 'Failed to load attendance data.';
-            return;
-        }
-        const attendanceData = await response.json(); 
-        
-        attendanceMap = {};
-        (attendanceData || []).forEach(att => {
-            attendanceMap[att.username] = att.status;
-        });
-
-        allStudentsData.forEach(student => {
-            const status = attendanceMap[student.username] || 'present';
-            const tr = document.createElement('tr');
-            tr.dataset.row = student.username;
-            tr.dataset.status = status;
-            tr.innerHTML = `
-                <td data-label="Username">${student.username}</td>
-                <td data-label="Full Name">${student.fullName}</td>
-                <td data-label="Roll No.">${student.roll}</td>
-                <td data-label="Status" class="${status === 'present' ? 'text-green-600 font-medium' : 'text-red-600 font-medium'} capitalize">
-                    ${status === 'present' ? '✓ Present' : '✗ Absent'}
-                </td>
-                <td data-label="Note">
-                    <span class="text-gray-500 text-sm italic">Auto-calculated</span>
-                </td>
-            `;
-            attendanceTableBody.appendChild(tr);
-        });
-        attendanceLoadingMessage.style.display = 'none';
-
-        if (!window.attendanceFilterAdded) {
-            const attendanceSearch = document.getElementById('attendanceSearch');
-            const attendanceFilter = document.getElementById('attendanceFilter');
-            function filterAttendance() {
-                const search = attendanceSearch.value.toLowerCase();
-                const fStatus = attendanceFilter.value;
-                [...attendanceTableBody.children].forEach(row => {
-                    const fullName = row.cells[1].textContent.toLowerCase();
-                    const status = row.dataset.status;
-                    let show = true;
-                    if (search && !fullName.includes(search)) show = false;
-                    if (fStatus && status !== fStatus) show = false;
-                    row.style.display = show ? '' : 'none';
-                });
+         try { // Added try...catch for fetchAttendance
+            const response = await authenticatedFetch(`${API_URL}/student-attendance`);
+            if (!response || !response.ok) {
+                throw new Error(`Failed to load attendance data (Status: ${response ? response.status : 'No Response'})`);
             }
-            attendanceSearch.addEventListener('input', filterAttendance);
-            attendanceFilter.addEventListener('change', filterAttendance);
-            window.attendanceFilterAdded = true;
+
+             // Check content type before parsing
+             const contentType = response.headers.get("content-type");
+             if (!contentType || !contentType.includes("application/json")) {
+                 throw new Error("Received invalid data format for attendance.");
+             }
+
+            const attendanceData = await response.json();
+
+            attendanceMap = {};
+             // Check if attendanceData is an array
+             if (Array.isArray(attendanceData)) {
+                 attendanceData.forEach(att => {
+                    // Only add if username and status exist
+                    if (att && att.username && att.status) {
+                         attendanceMap[att.username] = att.status;
+                     } else {
+                         console.warn("Skipping invalid attendance record:", att);
+                     }
+                 });
+             } else {
+                 console.warn("Attendance data received is not an array:", attendanceData);
+                 // Handle case where response is not an array (e.g., might be an error object)
+                 throw new Error("Attendance data is not in the expected format.");
+             }
+
+
+             // Check if allStudentsData is populated before iterating
+            if (!allStudentsData || allStudentsData.length === 0) {
+                 console.warn("Student data not yet loaded, cannot populate attendance table yet.");
+                 attendanceLoadingMessage.textContent = 'Waiting for student data...';
+                // Optionally, call fetchAllData here or ensure it runs first
+                return; // Exit if no student data
+            }
+
+
+            allStudentsData.forEach(student => {
+                 if (!student || !student.username) return; // Skip invalid student entries
+
+                const status = attendanceMap[student.username] || 'present'; // Default to 'present' if not in map
+                const tr = document.createElement('tr');
+                tr.dataset.row = student.username; // Use username for potential filtering later
+                tr.dataset.status = status;
+                tr.innerHTML = `
+                    <td data-label="Username">${student.username}</td>
+                    <td data-label="Full Name">${student.fullName || 'N/A'}</td>
+                    <td data-label="Roll No.">${student.roll || 'N/A'}</td>
+                    <td data-label="Status" class="${status === 'present' ? 'text-green-600 font-medium' : 'text-red-600 font-medium'} capitalize">
+                        ${status === 'present' ? '✓ Present' : '✗ Absent'}
+                    </td>
+                    <td data-label="Note">
+                        <span class="text-gray-500 text-sm italic">${status === 'present' ? '' : 'On Approved Leave'}</span>
+                         </td>
+                `;
+                 // Find appropriate place in DOM if needed, or just append
+                 attendanceTableBody.appendChild(tr);
+            });
+
+            attendanceLoadingMessage.style.display = 'none'; // Hide loading message on success
+
+            // Initialize filters only once after successful data load
+            if (!window.attendanceFilterAdded) {
+                const attendanceSearch = document.getElementById('attendanceSearch');
+                const attendanceFilter = document.getElementById('attendanceFilter');
+                function filterAttendance() {
+                    const search = attendanceSearch.value.toLowerCase();
+                    const fStatus = attendanceFilter.value; // 'present', 'absent', or ''
+
+                    Array.from(attendanceTableBody.children).forEach(row => {
+                         // Check if row has the necessary data attributes
+                         if (!row.dataset || !row.dataset.row || !row.dataset.status) return;
+
+                        const studentData = allStudentsData.find(s => s.username === row.dataset.row);
+                         const fullName = (studentData && studentData.fullName) ? studentData.fullName.toLowerCase() : ''; // Get full name for search
+                        const status = row.dataset.status;
+                        let show = true;
+
+                        if (search && !fullName.includes(search)) show = false;
+                        if (fStatus && status !== fStatus) show = false;
+
+                        row.style.display = show ? '' : 'none';
+                    });
+                }
+                attendanceSearch.addEventListener('input', filterAttendance);
+                attendanceFilter.addEventListener('change', filterAttendance);
+                window.attendanceFilterAdded = true;
+            }
+         } catch (error) {
+            console.error("Error in fetchAttendance:", error);
+            attendanceLoadingMessage.textContent = `Error: ${error.message || 'Failed to load attendance.'}`;
+            attendanceLoadingMessage.style.display = 'block'; // Ensure error is visible
         }
+
     }
+
 
     const leaveContainer = document.getElementById('leaveRequestsContainer');
     const leaveLoadingMessage = document.getElementById('leaveLoadingMessage');
 
     async function fetchLeaveRequests() {
         leaveLoadingMessage.textContent = 'Loading leave requests...';
+         leaveLoadingMessage.style.display = 'block'; // Ensure it's visible initially
         leaveContainer.innerHTML = '';
 
-        const response = await authenticatedFetch(`${API_URL}/leaves`);
-        if(!response || !response.ok) {
-            leaveLoadingMessage.textContent = 'Failed to load leave requests.';
-            return;
-        }
-        
-        const requests = await response.json();
-        if (requests && requests.length > 0) {
-            requests.forEach(req => {
-                const card = document.createElement('div');
-                card.className = 'bg-white p-4 rounded-lg shadow-md flex justify-between items-center';
-                card.id = `leave-${req.id}`;
-                card.innerHTML = `
-                    <div>
-                        <p class="font-bold text-gray-800">${req.studentName}</p>
-                        <p class="text-sm text-gray-600"><strong>From:</strong> ${req.from} <strong>To:</strong> ${req.to}</p>
-                        <p class="text-sm text-gray-500 mt-1"><strong>Reason:</strong> ${req.reason}</p>
-                    </div>  
-                    <div class="flex-shrink-0">
-                        <button class="table-btn approve-btn" onclick="handleLeave('${req.id}', true)">Approve</button>
-                        <button class="table-btn reject-btn" onclick="handleLeave('${req.id}', false)">Reject</button>
-                    </div>
-                `;
-                leaveContainer.appendChild(card);
-            });
-            leaveLoadingMessage.style.display = 'none';
-        } else {
-            leaveLoadingMessage.textContent = 'No pending leave requests.';
-        }
-    }
-
-    async function handleLeave(leaveId, isApproved) {
-        const response = await authenticatedFetch(`${API_URL}/leaves/${leaveId}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ status: isApproved ? 'approved' : 'rejected' })
-        });
-
-        if(response && response.ok) {
-            document.getElementById(`leave-${leaveId}`).remove();
-            if (leaveContainer.children.length === 0) {
-                leaveLoadingMessage.textContent = 'No pending leave requests.';
-                leaveLoadingMessage.style.display = 'block';
+         try {
+             const response = await authenticatedFetch(`${API_URL}/leaves`);
+            if(!response || !response.ok) {
+                 throw new Error(`Failed to load leave requests (Status: ${response ? response.status : 'No Response'})`);
             }
-            fetchAttendance();
-        } else {
-            alert('Failed to update leave request.');
+
+             const contentType = response.headers.get("content-type");
+             if (!contentType || !contentType.includes("application/json")) {
+                 throw new Error("Received invalid data format for leave requests.");
+             }
+
+            const requests = await response.json();
+
+            if (requests && Array.isArray(requests) && requests.length > 0) {
+                 requests.forEach(req => {
+                    // Basic validation of request object
+                    if (!req || !req.id || !req.studentName) {
+                        console.warn("Skipping invalid leave request:", req);
+                         return; // Skip this request
+                     }
+                    const card = document.createElement('div');
+                    card.className = 'bg-white p-4 rounded-lg shadow-md flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4'; // Added gap
+                    card.id = `leave-${req.id}`;
+                    card.innerHTML = `
+                         <div class="flex-grow"> {/* Allow text content to take space */}
+                             <p class="font-bold text-gray-800">${req.studentName}</p>
+                             {/* Safely format dates */}
+                             <p class="text-sm text-gray-600">
+                                <strong>From:</strong> ${req.from ? new Date(req.from).toLocaleString() : 'N/A'}
+                                <strong> To:</strong> ${req.to ? new Date(req.to).toLocaleString() : 'N/A'}
+                            </p>
+                            <p class="text-sm text-gray-500 mt-1 break-words"> {/* Allow reason to wrap */}
+                                <strong>Reason:</strong> ${req.reason || 'N/A'}
+                             </p>
+                         </div>
+                         <div class="flex-shrink-0 flex space-x-2 mt-2 sm:mt-0"> {/* Ensure buttons don't shrink */}
+                            <button class="table-btn approve-btn" onclick="handleLeave('${req.id}', true)">Approve</button>
+                             <button class="table-btn reject-btn" onclick="handleLeave('${req.id}', false)">Reject</button>
+                         </div>
+                     `;
+                    leaveContainer.appendChild(card);
+                 });
+                leaveLoadingMessage.style.display = 'none'; // Hide loading on success
+            } else {
+                leaveLoadingMessage.textContent = 'No pending leave requests.';
+                 leaveLoadingMessage.style.display = 'block'; // Ensure message is visible
+            }
+         } catch(error) {
+             console.error("Error fetching leave requests:", error);
+             leaveLoadingMessage.textContent = `Error: ${error.message || 'Failed to load leave requests.'}`;
+            leaveLoadingMessage.style.display = 'block'; // Ensure error is visible
         }
+
     }
-    
-    // --- NEW MEAL CHANGE REQUEST FUNCTIONS ---
+
+
+     async function handleLeave(leaveId, isApproved) {
+         if (!leaveId) {
+             console.error("handleLeave called with invalid leaveId");
+            return;
+         }
+         const action = isApproved ? 'approved' : 'rejected';
+         const cardElement = document.getElementById(`leave-${leaveId}`);
+
+         // Disable buttons temporarily
+        if (cardElement) {
+             cardElement.querySelectorAll('button').forEach(btn => btn.disabled = true);
+         }
+
+        try {
+             const response = await authenticatedFetch(`${API_URL}/leaves/${leaveId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: action })
+             });
+
+            if(!response) {
+                 throw new Error("No response received from server.");
+            }
+
+            if(response.ok) {
+                 // Remove the card from the UI
+                 if (cardElement) {
+                    cardElement.remove();
+                 }
+                // Check if the container is now empty
+                if (leaveContainer.children.length === 0) {
+                     leaveLoadingMessage.textContent = 'No pending leave requests.';
+                     leaveLoadingMessage.style.display = 'block';
+                 }
+                 // Refresh the main attendance table as leave affects it
+                await fetchAttendance(); // Use await to ensure it completes
+                 alert(`Leave request ${action} successfully.`); // Notify user after action
+            } else {
+                 const err = await response.json().catch(() => ({ error: `Failed to update leave request (Status: ${response.status})`}));
+                 throw new Error(err.message || err.error || `Failed to update leave request.`);
+             }
+        } catch (error) {
+            console.error(`Error handling leave ${leaveId}:`, error);
+             alert(`Error: ${error.message || 'Failed to update leave request.'}`);
+             // Re-enable buttons if the card still exists and update failed
+            if (cardElement) {
+                 cardElement.querySelectorAll('button').forEach(btn => btn.disabled = false);
+            }
+         }
+    }
+
+
     async function fetchMealRequests() {
         mealRequestLoadingMessage.textContent = 'Loading meal change requests...';
+         mealRequestLoadingMessage.style.display = 'block'; // Show loading
         mealRequestContainer.innerHTML = '';
 
-        const response = await authenticatedFetch(`${API_URL}/meal-request`);
-        if(!response || !response.ok) {
-            mealRequestLoadingMessage.textContent = 'Failed to load meal change requests.';
-            return;
-        }
-        
-        const data = await response.json();
-        const requests = data.mealUpdate || [];
-        
-        if (requests.length > 0) {
-            requests.forEach(req => {
-                const card = document.createElement('div');
-                card.className = 'bg-white p-4 rounded-lg shadow-md flex flex-col md:flex-row justify-between items-start md:items-center';
-                card.id = `meal-request-${req._id}`;
+        try {
+            const response = await authenticatedFetch(`${API_URL}/meal-request`);
+            if(!response || !response.ok) {
+                 throw new Error(`Failed to load meal requests (Status: ${response ? response.status : 'No Response'})`);
+            }
 
-                // Format the request details
-                let mealDetails = `
-                    <p class="text-sm text-gray-600"><strong>Requested by:</strong> ${req.fullName} (${req.username})</p>
-                    <ul class="text-xs text-gray-500 mt-2 space-y-1 pl-4 list-disc">
-                        <li>Day: <span class="capitalize">${req.day || 'N/A'}</span></li>
-                        <li>Night Main: <span class="capitalize">${req.night1 || 'N/A'}</span></li>
-                        <li>Night Carb: <span class="capitalize">${req.night2 || 'N/A'}</span></li>
-                        <li>Sun Day: <span class="capitalize">${req.sunday_day || 'N/A'}</span></li>
-                        <li>Sun Night: <span class="capitalize">${req.sunday_night || 'N/A'}</span></li>
-                    </ul>
-                `;
+             const contentType = response.headers.get("content-type");
+             if (!contentType || !contentType.includes("application/json")) {
+                 throw new Error("Received invalid data format for meal requests.");
+            }
 
-                card.innerHTML = `
-                    <div class="mb-3 md:mb-0">
-                        <p class="font-bold text-gray-800">Meal Change Request</p>
-                        ${mealDetails}
-                    </div>  
-                    <div class="flex-shrink-0 flex space-x-2 mt-3 md:mt-0">
-                        <button class="table-btn approve-btn" onclick="handleMealRequest('${req._id}', true)">Approve</button>
-                        <button class="table-btn reject-btn" onclick="handleMealRequest('${req._id}', false)">Reject</button>
-                    </div>
-                `;
-                mealRequestContainer.appendChild(card);
-            });
-            mealRequestLoadingMessage.style.display = 'none';
-        } else {
-            mealRequestLoadingMessage.textContent = 'No pending meal change requests.';
+            const data = await response.json();
+             // Expecting data like { mealUpdate: [...] }
+             const requests = (data && Array.isArray(data.mealUpdate)) ? data.mealUpdate : [];
+
+
+            if (requests.length > 0) {
+                requests.forEach(req => {
+                     // Validate basic request structure
+                    if (!req || !req._id || !req.username || !req.fullName) {
+                        console.warn("Skipping invalid meal request:", req);
+                        return; // Skip this one
+                    }
+                    const card = document.createElement('div');
+                     // Added gap for better spacing
+                    card.className = 'bg-white p-4 rounded-lg shadow-md flex flex-col md:flex-row justify-between items-start md:items-center gap-3';
+                    card.id = `meal-request-${req._id}`;
+
+                    let mealDetails = `
+                         <p class="text-sm text-gray-600"><strong>Requested by:</strong> ${req.fullName} (${req.username})</p>
+                         <ul class="text-xs text-gray-500 mt-2 space-y-1 pl-4 list-disc">
+                             <li>Day: <span class="capitalize">${req.day || 'N/A'}</span></li>
+                             <li>Night Main: <span class="capitalize">${req.night1 || 'N/A'}</span></li>
+                             <li>Night Carb: <span class="capitalize">${req.night2 || 'N/A'}</span></li>
+                            <li>Sun Day: <span class="capitalize">${req.sunday_day || 'N/A'}</span></li>
+                            <li>Sun Night: <span class="capitalize">${req.sunday_night || 'N/A'}</span></li>
+                        </ul>
+                    `;
+
+                    card.innerHTML = `
+                         <div class="flex-grow mb-3 md:mb-0"> {/* Allow text to grow */}
+                            <p class="font-bold text-gray-800">Meal Change Request</p>
+                             ${mealDetails}
+                         </div>
+                         <div class="flex-shrink-0 flex space-x-2 self-start md:self-center"> {/* Control button alignment */}
+                            <button class="table-btn approve-btn" onclick="handleMealRequest('${req._id}', true)">Approve</button>
+                             <button class="table-btn reject-btn" onclick="handleMealRequest('${req._id}', false)">Reject</button>
+                         </div>
+                    `;
+                    mealRequestContainer.appendChild(card);
+                });
+                mealRequestLoadingMessage.style.display = 'none'; // Hide loading
+            } else {
+                mealRequestLoadingMessage.textContent = 'No pending meal change requests.';
+                mealRequestLoadingMessage.style.display = 'block'; // Show message
+            }
+        } catch (error) {
+             console.error("Error fetching meal requests:", error);
+             mealRequestLoadingMessage.textContent = `Error: ${error.message || 'Failed to load meal requests.'}`;
+            mealRequestLoadingMessage.style.display = 'block'; // Show error
         }
+
     }
 
     async function handleMealRequest(requestId, isApproved) {
-        const response = await authenticatedFetch(`${API_URL}/meal-request/${requestId}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ status: isApproved ? 'approved' : 'rejected' })
-        });
+         if (!requestId) {
+             console.error("handleMealRequest called with invalid requestId");
+             return;
+         }
+        const action = isApproved ? 'approved' : 'rejected';
+         const cardElement = document.getElementById(`meal-request-${requestId}`);
 
-        if(response && response.ok) {
-            alert(`Meal request ${isApproved ? 'approved' : 'rejected'} successfully.`);
-            document.getElementById(`meal-request-${requestId}`).remove();
-            if (mealRequestContainer.children.length === 0) {
-                mealRequestLoadingMessage.textContent = 'No pending meal change requests.';
-                mealRequestLoadingMessage.style.display = 'block';
-            }
-            // Also refresh student and meal data since a meal preference might have changed
-            fetchAllData(); 
-        } else {
-            const err = await response.json();
-            alert(`Failed to update meal request: ${err.error || 'An unknown error occurred.'}`);
+         // Disable buttons
+         if (cardElement) {
+            cardElement.querySelectorAll('button').forEach(btn => btn.disabled = true);
         }
-    }
-    // --- END NEW MEAL CHANGE REQUEST FUNCTIONS ---
 
-    function exportToExcel(data, filename) {
-        const worksheet = XLSX.utils.json_to_sheet(data);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
-        XLSX.writeFile(workbook, filename);
-    }
-
-    async function fetchAllData() {
-        studentLoadingMessage.textContent = 'Loading student data...';
-
-        const response = await authenticatedFetch(API_URL);
-        if (!response || !response.ok) {
-            studentLoadingMessage.textContent = 'Failed to load data. Please log in again.';
-            return;
-        }
-        const data = await response.json();
-        allStudentsData = data.users || [];
-        document.getElementById('superName').textContent = data.superintendent_name || 'Superintendent';
-
-        studentTableBody.innerHTML = '';
-        if (allStudentsData.length > 0) {
-            allStudentsData.forEach(student => {
-                const tr = document.createElement('tr');
-                tr.dataset.studentId = student.userId;
-                tr.innerHTML = `
-                    <td data-label="Username">${student.username}</td>
-                    <td data-label="Full Name">${student.fullName}</td>
-                    <td data-label="Roll No.">${student.roll}</td>
-                    <td data-label="Department">${student.department}</td>
-                    <td data-label="Year">${student.year}</td>
-                    <td data-label="Actions" class="whitespace-nowrap">
-                        <button class="table-btn view-btn" onclick="openDetailModal(allStudentsData.find(s => s.userId === '${student.userId}'))">View</button>
-                        <button class="table-btn edit-btn" onclick="openStudentModal(allStudentsData.find(s => s.userId === '${student.userId}'))">Edit</button>
-                        <button class="table-btn delete-btn" onclick="deleteStudent('${student.userId}', '${student.username}')">Delete</button>
-                    </td>
-                `;
-                studentTableBody.appendChild(tr);
+         try {
+            const response = await authenticatedFetch(`${API_URL}/meal-request/${requestId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: action })
             });
-            studentLoadingMessage.style.display = 'none';
 
-            if (!window.studentsFilterAdded) {
-                const studentSearch = document.getElementById('studentSearch');
-                function filterStudents() {
-                    const search = studentSearch.value.toLowerCase();
-                    allStudentsData.forEach(student => {
-                        const row = document.querySelector(`tr[data-student-id="${student.userId}"]`);
-                        row.style.display = student.fullName.toLowerCase().includes(search) ? '' : 'none';
-                    });
-                }
-                studentSearch.addEventListener('input', filterStudents);
-                window.studentsFilterAdded = true;
+             if (!response) {
+                throw new Error("No response received from server.");
             }
-        } else {
-            studentLoadingMessage.textContent = 'No students found.';
-        }
 
-        populateMealsTable(allStudentsData);
+            if(response.ok) {
+                alert(`Meal request ${action} successfully.`);
+                if (cardElement) {
+                     cardElement.remove();
+                 }
+                if (mealRequestContainer.children.length === 0) {
+                     mealRequestLoadingMessage.textContent = 'No pending meal change requests.';
+                    mealRequestLoadingMessage.style.display = 'block';
+                }
+                 // Refresh student and meal data since a preference might have changed
+                 await fetchAllData(); // Use await if fetchAllData is async
+            } else {
+                 const err = await response.json().catch(() => ({ error: `Failed to update meal request (Status: ${response.status})` }));
+                 throw new Error(err.message || err.error || `Failed to update meal request.`);
+            }
+         } catch(error) {
+            console.error(`Error handling meal request ${requestId}:`, error);
+            alert(`Error: ${error.message || 'Failed to update meal request.'}`);
+            // Re-enable buttons if update failed
+            if (cardElement) {
+                cardElement.querySelectorAll('button').forEach(btn => btn.disabled = false);
+            }
+         }
+
     }
-    
-    document.addEventListener('DOMContentLoaded', () => {
-        fetchAllData(); 
-        fetchLeaveRequests(); 
-        fetchAttendance();
-        fetchMealRequests(); // <-- New call on load
 
-        const mealInfo = getDualMealCounts();
-        primaryMealTitle.textContent = `${mealInfo.primary.title}`;
-        secondaryMealTitle.textContent = `${mealInfo.secondary.title}`;
-        if (mealInfo.secondary2) {
-            secondary2MealTitle.textContent = `${mealInfo.secondary2.title}`;
-        } else {
-            secondary2MealTitle.textContent = 'No Secondary Carb Meal Applicable';
-            document.getElementById('secondaryCountLoadingMessage2').textContent = 'N/A for this day';
-            document.getElementById('secondaryCountLoadingMessage2').style.display = 'block';
+    function exportToExcel(data, filename = "Export.xlsx") { // Added default filename
+        if (!data || data.length === 0) {
+             console.warn("No data provided for Excel export.");
+             alert("No data available to export.");
+            return;
+         }
+        try {
+            const worksheet = XLSX.utils.json_to_sheet(data);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+            XLSX.writeFile(workbook, filename);
+         } catch (error) {
+            console.error("Error exporting to Excel:", error);
+            alert("An error occurred while exporting the data to Excel.");
         }
-    });
+    }
 
-      async function logout() {
-            try {
-                const accessToken = localStorage.getItem('accessToken');
-                const response = await authenticatedFetch(`${BACKEND_BASE_URL}/logout`,
-                    {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': `Bearer ${accessToken}`
-                        }
 
-                    });
-                if (response && response.ok) {
-                    localStorage.clear();
-                    window.location.href = 'login.html';
-                } else {
-                    showMessage("Logout Error", "Failed to logout. Please try again.");
-                }
-            } catch (error) {
-                showMessage("Network Error", "Could not connect to the server for logout.");
+     async function fetchAllData() {
+         console.log("Fetching all superintendent data..."); // Log start
+         studentLoadingMessage.textContent = 'Loading student data...';
+         studentLoadingMessage.style.display = 'block'; // Show loading
+
+        try {
+            const response = await authenticatedFetch(API_URL);
+            if (!response || !response.ok) {
+                throw new Error(`Failed to load data (Status: ${response ? response.status : 'No Response'}). Please log in again.`);
             }
+
+             const contentType = response.headers.get("content-type");
+             if (!contentType || !contentType.includes("application/json")) {
+                 throw new Error("Received invalid data format from server.");
+             }
+
+            const data = await response.json();
+             console.log("Superintendent data received:", data); // Log received data
+
+             // Validate received data structure
+             if (!data || typeof data !== 'object') {
+                throw new Error("Invalid data structure received.");
+             }
+
+             allStudentsData = data.users || []; // Default to empty array if users is missing
+            document.getElementById('superName').textContent = data.superintendent_name || 'Superintendent';
+
+            studentTableBody.innerHTML = ''; // Clear previous entries
+            if (allStudentsData.length > 0) {
+                allStudentsData.forEach(student => {
+                     // Basic validation for each student object
+                    if (!student || !student.userId || !student.username || !student.fullName) {
+                         console.warn("Skipping invalid student record:", student);
+                         return; // Skip rendering this student
+                    }
+
+                    const tr = document.createElement('tr');
+                    tr.dataset.studentId = student.userId; // Use userId for unique ID
+                    tr.innerHTML = `
+                         <td data-label="Username">${student.username}</td>
+                         <td data-label="Full Name">${student.fullName}</td>
+                         <td data-label="Roll No.">${student.roll || 'N/A'}</td>
+                         <td data-label="Department">${student.department || 'N/A'}</td>
+                         <td data-label="Year">${student.year || 'N/A'}</td>
+                         <td data-label="Actions" class="whitespace-nowrap">
+                             <button class="table-btn view-btn" onclick='openDetailModal(allStudentsData.find(s => s.userId === "${student.userId}"))'>View</button>
+                             <button class="table-btn edit-btn" onclick='openStudentModal(allStudentsData.find(s => s.userId === "${student.userId}"))'>Edit</button>
+                             <button class="table-btn delete-btn" onclick='deleteStudent("${student.userId}", "${student.username}")'>Delete</button>
+                         </td>
+                     `;
+                    studentTableBody.appendChild(tr);
+                });
+                studentLoadingMessage.style.display = 'none'; // Hide loading message
+
+                // Initialize student search filter only once after data is loaded
+                if (!window.studentsFilterAdded) {
+                    const studentSearch = document.getElementById('studentSearch');
+                    function filterStudents() {
+                        const search = studentSearch.value.toLowerCase();
+                        Array.from(studentTableBody.children).forEach(row => {
+                             if (!row.dataset.studentId) return; // Skip if row doesn't have ID
+                             const studentData = allStudentsData.find(s => s.userId === row.dataset.studentId);
+                             const studentName = (studentData && studentData.fullName) ? studentData.fullName.toLowerCase() : '';
+                            row.style.display = studentName.includes(search) ? '' : 'none';
+                        });
+                    }
+                    studentSearch.addEventListener('input', filterStudents);
+                    window.studentsFilterAdded = true;
+                }
+            } else {
+                studentLoadingMessage.textContent = 'No students found.';
+                studentLoadingMessage.style.display = 'block'; // Show "No students" message
+            }
+
+            // Populate meals table after student data is confirmed loaded
+            populateMealsTable(allStudentsData);
+
+             // Trigger fetching data for other initially hidden tabs if needed
+             // await fetchAttendance(); // Example: Pre-fetch attendance data
+
+         } catch (error) {
+             console.error("Error in fetchAllData:", error);
+             studentLoadingMessage.textContent = `Error: ${error.message || 'Failed to load data.'}`;
+             studentLoadingMessage.style.display = 'block'; // Show error message
+             // Optionally clear potentially partially loaded data
+             allStudentsData = [];
+             studentTableBody.innerHTML = '';
+             populateMealsTable([]); // Clear meals table too
         }
+
+    }
+
+    // --- CUSTOM DATE PICKER FUNCTIONS ---
+    var monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+    function selectDate(dateInputId, year, month, day) {
+        var dateInput = document.getElementById(dateInputId);
+        if (dateInput) {
+            dateInput.value = year + "-" + String(month).padStart(2, '0') + "-" + String(day).padStart(2, '0');
+        }
+        removeCalendar();
+        return false;
+    }
+
+    function showMonth(calendarDestId, dateInputId, month, year) {
+        var target = document.getElementById(calendarDestId); if (!target) return false;
+        var currentMonth = month != null ? month : new Date().getMonth(); var currentYear = year || new Date().getFullYear();
+        var firstOfMonth = new Date(currentYear, currentMonth, 1); var lastOfMonth = new Date(currentYear, currentMonth + 1, 0);
+        var prevYear = currentYear, nextYear = currentYear, prevMonth = currentMonth - 1, nextMonth = currentMonth + 1;
+        if (prevMonth < 0) { prevYear--; prevMonth = 11; } if (nextMonth > 11) { nextYear++; nextMonth = 0; }
+        var tbl = `<div class='calendarMonth'><a href='#' onclick='event.preventDefault(); showMonth("${calendarDestId}", "${dateInputId}", ${prevMonth}, ${prevYear}); return false;'>&lt;&lt;</a> ${monthNames[currentMonth]} ${currentYear} <a href='#' onclick='event.preventDefault(); showMonth("${calendarDestId}", "${dateInputId}", ${nextMonth}, ${nextYear}); return false;'>&gt;&gt;</a></div><table><tr><th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th></tr><tr>`;
+        var firstDayOfWeek = firstOfMonth.getDay(); for (var i = 0; i < firstDayOfWeek; i++) tbl += "<td></td>";
+        var currentDayOfWeek = firstDayOfWeek; for (var day = 1; day <= lastOfMonth.getDate(); day++) { if (currentDayOfWeek === 7) { tbl += "</tr><tr>"; currentDayOfWeek = 0; } tbl += `<td><a href='#' onclick='event.preventDefault(); selectDate("${dateInputId}", ${currentYear}, ${currentMonth + 1}, ${day}); return false;'>${day}</a></td>`; currentDayOfWeek++; }
+        while (currentDayOfWeek < 7 && currentDayOfWeek !== 0) { tbl += "<td></td>"; currentDayOfWeek++; } tbl += "</tr></table>"; target.innerHTML = tbl; return false;
+    }
+
+    function dismissCalendar(event) { var cal = document.getElementById("calendar"); if (cal) { if (cal.targetInputElement && event.target === cal.targetInputElement) return; var elem = event.target; while (elem) { if (elem.id === "calendar") return; elem = elem.parentElement; } removeCalendar(); } }
+
+    function showDatePicker(target) {
+        var currentCalendar = document.getElementById("calendar"); if (currentCalendar) { if (currentCalendar.targetInputElement === target) return; else removeCalendar(); }
+        var selectedMonth = null, selectedYear = null; var dateSelectedStr = target.value;
+        if (dateSelectedStr && /^\d{4}-\d{2}-\d{2}$/.test(dateSelectedStr)) { var comp = dateSelectedStr.split("-"); var y = parseInt(comp[0], 10), m = parseInt(comp[1], 10) - 1, d = parseInt(comp[2], 10); if (!isNaN(y) && !isNaN(m) && !isNaN(d)) { var dateSel = new Date(y, m, d); if (dateSel.getFullYear() === y && dateSel.getMonth() === m && dateSel.getDate() === d) { selectedMonth = m; selectedYear = y; } } }
+        var calDiv = document.createElement("div"); calDiv.id = "calendar"; calDiv.targetInputElement = target; const rect = target.getBoundingClientRect(); calDiv.style.position = "absolute"; calDiv.style.left = `${rect.left + window.scrollX}px`; calDiv.style.top = `${rect.bottom + window.scrollY}px`;
+        calDiv.style.border = "1px solid #ccc"; calDiv.style.background = "#fff"; calDiv.style.padding = "10px"; calDiv.style.boxShadow = "0 2px 5px rgba(0,0,0,0.2)"; calDiv.style.zIndex = "1001"; calDiv.style.borderRadius = "8px";
+        document.body.appendChild(calDiv); showMonth("calendar", target.id, selectedMonth, selectedYear); setTimeout(() => document.addEventListener("mousedown", dismissCalendar), 0);
+    }
+
+    function removeCalendar() { var calDiv = document.getElementById("calendar"); if (calDiv) { delete calDiv.targetInputElement; calDiv.parentElement.removeChild(calDiv); } document.removeEventListener("mousedown", dismissCalendar); }
+    // --- END DATE PICKER ---
+
+    async function logout() {
+        try { const accessToken = localStorage.getItem('accessToken'); if (!accessToken) { window.location.href = 'login.html'; return; } const response = await authenticatedFetch(`${BACKEND_BASE_URL}/logout`, { method: 'POST', headers: { 'Authorization': `Bearer ${accessToken}` } }); if (response && response.ok) { localStorage.clear(); window.location.href = 'login.html'; } else { console.error("Logout failed. Status:", response ? response.status : 'No Response'); localStorage.clear(); window.location.href = 'login.html'; } } catch (error) { console.error("Error during logout:", error); localStorage.clear(); window.location.href = 'login.html'; }
+    }
+
+
+    document.addEventListener('DOMContentLoaded', () => {
+        fetchAllData(); // Fetch main data on load
+        // Fetch data for other tabs that might be needed immediately or defer to tab click
+        // fetchLeaveRequests();
+        // fetchAttendance();
+        // fetchMealRequests();
+    });
 </script>
 
 </body>

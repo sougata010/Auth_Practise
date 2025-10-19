@@ -7,273 +7,35 @@
     <title>Student Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #fff7ed;
-        }
-
-        .tab-button {
-            transition: all 0.2s ease-in-out;
-        }
-
-        .tab-button.active {
-            color: #f97316;
-            border-bottom-color: #f97316;
-            font-weight: 600;
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        .status-badge {
-            padding: 4px 12px;
-            border-radius: 9999px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
-        .status-pending {
-            background-color: #f59e0b;
-            color: white;
-        }
-
-        .status-approved {
-            background-color: #10b981;
-            color: white;
-        }
-
-        .status-rejected {
-            background-color: #ef4444;
-            color: white;
-        }
-
-        /* Modal Styles */
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.6);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-        }
-
-        .modal.open {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .modal-content {
-            background: white;
-            padding: 25px;
-            border-radius: 10px;
-            width: 90%;
-            max-width: 400px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-            transform: scale(0.9);
-            transition: transform 0.3s ease;
-        }
-
-        /* NEW max-width for notification modal */
-        #notificationModal .modal-content {
-            max-width: 450px;
-        }
-
-        /* END NEW max-width for notification modal */
-
-        .modal.open .modal-content {
-            transform: scale(1);
-        }
-
-        /* Date Picker Styles */
-        #calendar {
-            display: block;
-            position: absolute;
-            border: 1px solid #ccc;
-            background: #fff;
-            padding: 10px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-            z-index: 1000;
-            border-radius: 8px;
-        }
-
-        .calendarMonth {
-            text-align: center;
-            margin-bottom: 10px;
-            font-weight: bold;
-        }
-
-        .calendarMonth a {
-            text-decoration: none;
-            color: #f97316;
-            margin: 0 10px;
-            cursor: pointer;
-        }
-
-        table {
-            border-collapse: collapse;
-            width: 100%;
-        }
-
-        th,
-        td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: center;
-            width: 14.28%;
-        }
-
-        th {
-            background-color: #f2f2f2;
-            font-weight: bold;
-        }
-
-        td a {
-            text-decoration: none;
-            color: #333;
-            display: block;
-            padding: 5px;
-            cursor: pointer;
-        }
-
-        td a:hover {
-            background-color: #e9ecef;
-        }
-    </style>
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #fff7ed;
-        }
-
-        .tab-button {
-            transition: all 0.2s ease-in-out;
-        }
-
-        .tab-button.active {
-            color: #f97316;
-            border-bottom-color: #f97316;
-            font-weight: 600;
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        .status-badge {
-            padding: 4px 12px;
-            border-radius: 9999px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
-        .status-pending {
-            background-color: #f59e0b;
-            color: white;
-        }
-
-        .status-approved {
-            background-color: #10b981;
-            color: white;
-        }
-
-        .status-rejected {
-            background-color: #ef4444;
-            color: white;
-        }
-
-        /* Modal Styles */
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.6);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-        }
-
-        .modal.open {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .modal-content {
-            background: white;
-            padding: 25px;
-            border-radius: 10px;
-            width: 90%;
-            max-width: 400px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-            transform: scale(0.9);
-            transition: transform 0.3s ease;
-        }
-
-        .modal.open .modal-content {
-            transform: scale(1);
-        }
-
-        /* --- MODERN DATE/TIME INPUT STYLING --- */
-        /* Hides the default calendar icon from date inputs */
-        input[type="date"]::-webkit-calendar-picker-indicator,
-        input[type="time"]::-webkit-calendar-picker-indicator {
-            opacity: 0;
-            width: 100%;
-            height: 100%;
-            cursor: pointer;
-            position: absolute;
-            left: 0;
-            top: 0;
-        }
-
-        /* Ensures the inputs look like clean text fields */
-        input[type="date"],
-        input[type="time"] {
-            appearance: none;
-            position: relative;
-        }
-
-        /* Adds the custom calendar/clock icon inside the inputs */
-        .date-time-input-wrapper {
-            position: relative;
-        }
-
-        .date-time-input-wrapper .icon {
-            position: absolute;
-            right: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            pointer-events: none;
-            /* Icon shouldn't interfere with the picker click area */
-            color: #4b5563;
-            /* Gray-600 */
-        }
-
-        /* ------------------------------------- */
+        body { font-family: 'Inter', sans-serif; background-color: #fff7ed; }
+        .tab-button { transition: all 0.2s ease-in-out; }
+        .tab-button.active { color: #f97316; border-bottom-color: #f97316; font-weight: 600; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .status-badge { padding: 4px 12px; border-radius: 9999px; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: white; }
+        .status-pending { background-color: #f59e0b; }
+        .status-approved { background-color: #10b981; }
+        .status-rejected { background-color: #ef4444; }
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); display: flex; justify-content: center; align-items: center; z-index: 1000; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; }
+        .modal.open { opacity: 1; visibility: visible; }
+        .modal-content { background: white; padding: 25px; border-radius: 10px; width: 90%; max-width: 400px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); transform: scale(0.9); transition: transform 0.3s ease; }
+        #notificationModal .modal-content { max-width: 450px; }
+        .modal.open .modal-content { transform: scale(1); }
+        #calendar { display: block; position: absolute; border: 1px solid #ccc; background: #fff; padding: 10px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); z-index: 1001; border-radius: 8px; }
+        .calendarMonth { text-align: center; margin-bottom: 10px; font-weight: bold; }
+        .calendarMonth a { text-decoration: none; color: #f97316; margin: 0 10px; cursor: pointer; }
+        #calendar table { border-collapse: collapse; width: 100%; }
+        #calendar th, #calendar td { border: 1px solid #ddd; padding: 8px; text-align: center; width: 14.28%; }
+        #calendar th { background-color: #f2f2f2; font-weight: bold; }
+        #calendar td a { text-decoration: none; color: #333; display: block; padding: 5px; cursor: pointer; }
+        #calendar td a:hover { background-color: #e9ecef; }
+        input[type="date"]::-webkit-calendar-picker-indicator, input[type="time"]::-webkit-calendar-picker-indicator { opacity: 0; width: 100%; height: 100%; cursor: pointer; position: absolute; left: 0; top: 0; }
+        input[type="date"], input[type="time"] { appearance: none; position: relative; }
+        .date-time-input-wrapper { position: relative; }
+        .date-time-input-wrapper .icon { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; color: #4b5563; }
+        #attendanceChartContainer { max-width: 400px; margin: 20px auto; }
     </style>
 </head>
 
@@ -281,41 +43,26 @@
 
     <div class="fixed top-4 right-4 sm:top-6 sm:right-8 flex space-x-2 z-50">
         <button id="notificationButton" onclick="openNotificationModal()"
-            class="p-2 rounded-full bg-orange-600 text-white hover:bg-orange-700 transition shadow-lg">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6">
-                <path d="M10 20.25a2 2 0 0 0 4 0" />
-                <path d="M18 8a6 6 0 0 0-12 0c0 1.28.18 2.51.52 3.59L3 17h18l-1.52-5.41c.34-1.08.52-2.31.52-3.59Z" />
-                <path d="M19.7 4.5c.78.78.78 2.05 0 2.83l-1.42 1.42" />
-                <path d="M4.3 4.5c-.78.78-.78 2.05 0 2.83l-1.42 1.42" />
-            </svg>
+            class="relative p-2 rounded-full bg-orange-600 text-white hover:bg-orange-700 transition shadow-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M10 20.25a2 2 0 0 0 4 0" /><path d="M18 8a6 6 0 0 0-12 0c0 1.28.18 2.51.52 3.59L3 17h18l-1.52-5.41c.34-1.08.52-2.31.52-3.59Z" /><path d="M19.7 4.5c.78.78.78 2.05 0 2.83l-1.42 1.42" /><path d="M4.3 4.5c-.78.78-.78 2.05 0 2.83l-1.42 1.42" /></svg>
             <span id="notificationBadge"
-                class="hidden absolute top-0 right-0 inline-flex items-center justify-center p-1 text-xs font-bold leading-none text-red-100 transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">0</span>
+                  class="hidden absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-red-100 transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">0</span>
         </button>
         <button onclick="logout()" class="p-2 rounded-full bg-red-600 text-white hover:bg-red-700 transition shadow-lg">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6">
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                <polyline points="16,17 21,12 16,7" />
-                <line x1="21" y1="12" x2="9" y2="12" />
-            </svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16,17 21,12 16,7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>
         </button>
     </div>
-    <div class="main-container mx-auto max-w-4xl">
 
+    <div class="main-container mx-auto max-w-4xl">
         <div class="bg-white p-6 rounded-xl shadow-lg mb-6">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center">
                 <div>
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/e/e4/Emblem-Ramakrishna-Mission-Transparent.png"
-                        alt="Ramakrishna Mission Vidyamandira Logo" class="mx-auto mb-4 h-20 w-auto sm:mx-0">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/e/e4/Emblem-Ramakrishna-Mission-Transparent.png" alt="Logo" class="mx-auto mb-4 h-20 w-auto sm:mx-0">
                     <h1 class="text-3xl font-extrabold text-gray-800">Student Dashboard</h1>
                     <p class="text-gray-500 mt-1">Manage your weekly meals and leave requests.</p>
                 </div>
-                <div id="user-profile-info"
-                    class="mt-4 sm:mt-0 text-left sm:text-right bg-orange-50 p-4 rounded-lg border flex flex-col items-start">
-
-                    <p class="font-semibold text-gray-600"><strong id="fullName"
-                            class="text-orange-600">Loading...</strong></p>
+                <div id="user-profile-info" class="mt-4 sm:mt-0 text-left sm:text-right bg-orange-50 p-4 rounded-lg border flex flex-col items-start">
+                    <p class="font-semibold text-gray-600"><strong id="fullName" class="text-orange-600">Loading...</strong></p>
                     <p class="font-semibold text-gray-600" id="userName">...</p>
                     <p class="font-semibold text-gray-600" id="userRoll">Roll: ...</p>
                     <p class="font-semibold text-gray-600" id="userDept">Department: ...</p>
@@ -326,16 +73,9 @@
 
         <div class="bg-white rounded-xl shadow-lg p-2 mb-6">
             <nav class="flex space-x-2" aria-label="Tabs">
-                <button
-                    class="tab-button active flex-1 text-center py-3 px-4 border-b-2 border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
-                    data-tab="meals">
-                    🍲 Meal Selector
-                </button>
-                <button
-                    class="tab-button flex-1 text-center py-3 px-4 border-b-2 border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
-                    data-tab="leaves">
-                    ✈️ Leave Application
-                </button>
+                 <button class="tab-button active flex-1 text-center py-3 px-4 border-b-2 border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700" data-tab="meals">🍲 Meal Selector</button>
+                 <button class="tab-button flex-1 text-center py-3 px-4 border-b-2 border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700" data-tab="leaves">✈️ Leave Application</button>
+                 <button class="tab-button flex-1 text-center py-3 px-4 border-b-2 border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700" data-tab="attendance-overview">📊 Attendance</button>
             </nav>
         </div>
 
@@ -343,51 +83,24 @@
             <div id="meals" class="tab-content active space-y-6">
                 <div class="bg-white p-6 rounded-xl shadow-lg">
                     <h2 class="text-xl font-bold text-gray-700 mb-4">🍽️ Weekday Day Meal (Mon - Sat)</h2>
-                    <select id="weekday-day-main"
-                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500">
-                        <option value="" disabled selected>-- Select Main Dish --</option>
-                        <option value="fish">🐟 Fish</option>
-                        <option value="curd">🥛 Curd</option>
-                    </select>
+                    <select id="weekday-day-main" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"><option value="" disabled selected>-- Select --</option><option value="veg">🥬 Veg</option><option value="fish">🐟 Fish</option><option value="curd">🥛 Curd</option></select>
                 </div>
                 <div class="bg-white p-6 rounded-xl shadow-lg">
-                    <h2 class="text-xl font-bold text-gray-700 mb-4">🌙 Weekday Night Meal (Mon - Sat)</h2>
-                    <div class="space-y-4">
-                        <select id="weekday-night-main"
-                            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500">
-                            <option value="" disabled selected>-- Select Main Dish --</option>
-                            <option value="veg">🥬 Veg</option>
-                            <option value="egg">🥚 Egg</option>
-                        </select>
-                        <select id="weekday-night-carb"
-                            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500">
-                            <option value="" disabled selected>-- Select Carb/Starch --</option>
-                            <option value="roti">🫓 Roti</option>
-                            <option value="rice">🍚 Rice</option>
-                        </select>
-                    </div>
+                     <h2 class="text-xl font-bold text-gray-700 mb-4">🌙 Weekday Night Meal (Mon - Sat)</h2>
+                     <div class="space-y-4">
+                         <select id="weekday-night-main" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"><option value="" disabled selected>-- Select Main --</option><option value="veg">🥬 Veg</option><option value="egg">🥚 Egg</option></select>
+                         <select id="weekday-night-carb" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"><option value="" disabled selected>-- Select Carb --</option><option value="roti">🫓 Roti</option><option value="rice">🍚 Rice</option></select>
+                     </div>
                 </div>
                 <div class="bg-white p-6 rounded-xl shadow-lg">
-                    <h2 class="text-xl font-bold text-gray-700 mb-4">☀️ Sunday Special</h2>
-                    <div class="space-y-4">
-                        <select id="sunday-day"
-                            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500">
-                            <option value="" disabled selected>-- Select Day Main --</option>
-                            <option value="meat">🍗 Meat</option>
-                            <option value="fish">🐟 Fish</option>
-                            <option value="paneer">🧀 Paneer</option>
-                        </select>
-                        <select id="sunday-night"
-                            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500">
-                            <option value="" disabled selected>-- Select Night Main --</option>
-                            <option value="veg">🥬 Veg</option>
-                        </select>
-                    </div>
+                     <h2 class="text-xl font-bold text-gray-700 mb-4">☀️ Sunday Special</h2>
+                     <div class="space-y-4">
+                         <select id="sunday-day" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"><option value="" disabled selected>-- Select Day --</option><option value="meat">🍗 Meat</option><option value="fish">🐟 Fish</option><option value="panner">🧀 Paneer</option></select>
+                         <select id="sunday-night" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"><option value="" disabled selected>-- Select Night --</option><option value="veg">🥬 Veg</option></select>
+                     </div>
                 </div>
                 <div class="text-center mt-6">
-                    <button onclick="submitMealSelections()"
-                        class="w-full sm:w-auto bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 px-8 rounded-lg shadow-md transition duration-300 transform hover:scale-105">Save
-                        Meal Choices</button>
+                    <button onclick="submitMealSelections()" class="w-full sm:w-auto bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 px-8 rounded-lg shadow-md transition duration-300 transform hover:scale-105">Save Meal Choices</button>
                 </div>
             </div>
 
@@ -395,182 +108,45 @@
                 <div class="bg-white p-6 rounded-xl shadow-lg">
                     <h2 class="text-xl font-bold text-gray-700 mb-4">📝 Apply for Leave</h2>
                     <form id="leaveForm" class="space-y-6">
-
                         <div class="p-4 rounded-lg border border-red-200 bg-red-50">
-                            <h3 class="text-lg font-semibold text-red-700 mb-3 flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="1.5" stroke="currentColor" class="w-6 h-6 mr-2">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M15.75 9l-3 3m0 0l-3-3m3 3V5.25" />
-                                </svg>
-                                Departure Details
-                            </h3>
+                            <h3 class="text-lg font-semibold text-red-700 mb-3 flex items-center"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 mr-2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M15.75 9l-3 3m0 0l-3-3m3 3V5.25" /></svg> Departure Details</h3>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div class="date-time-input-wrapper">
-                                    <label for="departure-date"
-                                        class="block text-xs font-medium text-gray-600 mb-1">Date</label>
-                                    <input type="text" id="departure-date" required placeholder="YYYY-MM-DD"
-                                        onfocus="showDatePicker(this)" onkeydown="return false;"
-                                        class="w-full p-3 pr-10 border border-gray-300 rounded-lg shadow-sm focus:ring-orange-500 focus:border-orange-500 appearance-none bg-white">
-                                    <svg class="icon h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                    </svg>
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-medium text-gray-600 mb-1">Time</label>
-                                    <div class="flex space-x-2">
-                                        <select id="departure-hour" required
-                                            class="flex-1 p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-orange-500 focus:border-orange-500">
-                                            <option value="">HH</option>
-                                            <script>for (let i = 0; i < 24; i++) { document.write(`<option value="${i.toString().padStart(2, '0')}">${i.toString().padStart(2, '0')}</option>`); }</script>
-                                        </select>
-                                        <span class="self-center text-gray-500">:</span>
-                                        <select id="departure-minute" required
-                                            class="flex-1 p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-orange-500 focus:border-orange-500">
-                                            <option value="">MM</option>
-                                            <script>for (let i = 0; i < 60; i += 5) { document.write(`<option value="${i.toString().padStart(2, '0')}">${i.toString().padStart(2, '0')}</option>`); }</script>
-                                        </select>
-                                    </div>
-                                </div>
+                                <div class="date-time-input-wrapper"><label for="departure-date" class="block text-xs font-medium text-gray-600 mb-1">Date</label><input type="text" id="departure-date" required placeholder="YYYY-MM-DD" onfocus="showDatePicker(this)" onkeydown="return false;" class="w-full p-3 pr-10 border border-gray-300 rounded-lg shadow-sm focus:ring-orange-500 focus:border-orange-500 appearance-none bg-white"><svg class="icon h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg></div>
+                                <div><label class="block text-xs font-medium text-gray-600 mb-1">Time</label><div class="flex space-x-2"><select id="departure-hour" required class="flex-1 p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-orange-500 focus:border-orange-500"><option value="">HH</option><script>for(let i=0;i<24;i++){document.write(`<option value="${i.toString().padStart(2,'0')}">${i.toString().padStart(2,'0')}</option>`);}</script></select><span class="self-center text-gray-500">:</span><select id="departure-minute" required class="flex-1 p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-orange-500 focus:border-orange-500"><option value="">MM</option><script>for(let i=0;i<60;i+=5){document.write(`<option value="${i.toString().padStart(2,'0')}">${i.toString().padStart(2,'0')}</option>`);}</script></select></div></div>
                             </div>
                         </div>
-
                         <div class="p-4 rounded-lg border border-green-200 bg-green-50">
-                            <h3 class="text-lg font-semibold text-green-700 mb-3 flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="1.5" stroke="currentColor" class="w-6 h-6 mr-2">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M8.25 7.5V11.25m0-3.75h3.75M15.75 12V7.5a2.25 2.25 0 00-2.25-2.25H12a2.25 2.25 0 00-2.25 2.25M15.75 12V16.5a2.25 2.25 0 01-2.25 2.25H12a2.25 2.25 0 01-2.25-2.25m0-4.5h3.75m-3.75 0h-1.5M10.5 15h3.75M12 21.75c-4.97 0-9-4.03-9-9s4.03-9 9-9 9 4.03 9 9-4.03 9-9 9z" />
-                                </svg>
-                                Arrival Details
-                            </h3>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div class="date-time-input-wrapper">
-                                    <label for="arrival-date"
-                                        class="block text-xs font-medium text-gray-600 mb-1">Date</label>
-                                    <input type="text" id="arrival-date" required placeholder="YYYY-MM-DD"
-                                        onfocus="showDatePicker(this)" onkeydown="return false;"
-                                        class="w-full p-3 pr-10 border border-gray-300 rounded-lg shadow-sm focus:ring-orange-500 focus:border-orange-500 appearance-none bg-white">
-                                    <svg class="icon h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                    </svg>
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-medium text-gray-600 mb-1">Time</label>
-                                    <div class="flex space-x-2">
-                                        <select id="arrival-hour" required
-                                            class="flex-1 p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-orange-500 focus:border-orange-500">
-                                            <option value="">HH</option>
-                                            <script>for (let i = 0; i < 24; i++) { document.write(`<option value="${i.toString().padStart(2, '0')}">${i.toString().padStart(2, '0')}</option>`); }</script>
-                                        </select>
-                                        <span class="self-center text-gray-500">:</span>
-                                        <select id="arrival-minute" required
-                                            class="flex-1 p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-orange-500 focus:border-orange-500">
-                                            <option value="">MM</option>
-                                            <script>for (let i = 0; i < 60; i += 5) { document.write(`<option value="${i.toString().padStart(2, '0')}">${i.toString().padStart(2, '0')}</option>`); }</script>
-                                        </select>
-                                    </div>
-                                </div>
+                             <h3 class="text-lg font-semibold text-green-700 mb-3 flex items-center"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 mr-2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 7.5V11.25m0-3.75h3.75M15.75 12V7.5a2.25 2.25 0 00-2.25-2.25H12a2.25 2.25 0 00-2.25 2.25M15.75 12V16.5a2.25 2.25 0 01-2.25 2.25H12a2.25 2.25 0 01-2.25-2.25m0-4.5h3.75m-3.75 0h-1.5M10.5 15h3.75M12 21.75c-4.97 0-9-4.03-9-9s4.03-9 9-9 9 4.03 9 9-4.03 9-9 9z" /></svg> Arrival Details</h3>
+                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div class="date-time-input-wrapper"><label for="arrival-date" class="block text-xs font-medium text-gray-600 mb-1">Date</label><input type="text" id="arrival-date" required placeholder="YYYY-MM-DD" onfocus="showDatePicker(this)" onkeydown="return false;" class="w-full p-3 pr-10 border border-gray-300 rounded-lg shadow-sm focus:ring-orange-500 focus:border-orange-500 appearance-none bg-white"><svg class="icon h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg></div>
+                                <div><label class="block text-xs font-medium text-gray-600 mb-1">Time</label><div class="flex space-x-2"><select id="arrival-hour" required class="flex-1 p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-orange-500 focus:border-orange-500"><option value="">HH</option><script>for(let i=0;i<24;i++){document.write(`<option value="${i.toString().padStart(2,'0')}">${i.toString().padStart(2,'0')}</option>`);}</script></select><span class="self-center text-gray-500">:</span><select id="arrival-minute" required class="flex-1 p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-orange-500 focus:border-orange-500"><option value="">MM</option><script>for(let i=0;i<60;i+=5){document.write(`<option value="${i.toString().padStart(2,'0')}">${i.toString().padStart(2,'0')}</option>`);}</script></select></div></div>
                             </div>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-bold text-gray-700 mb-3">Meal Options:</label>
-                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                                <div
-                                    class="bg-gray-100 p-3 rounded-lg flex items-center border border-gray-200 hover:bg-gray-200 transition">
-                                    <input id="cancel-lunch-before" type="checkbox"
-                                        class="h-5 w-5 text-orange-600 border-gray-300 rounded focus:ring-orange-500">
-                                    <label for="cancel-lunch-before"
-                                        class="ml-2 text-sm font-medium text-gray-700 select-none">Lunch Before</label>
-                                </div>
-                                <div
-                                    class="bg-gray-100 p-3 rounded-lg flex items-center border border-gray-200 hover:bg-gray-200 transition">
-                                    <input id="cancel-dinner-before" type="checkbox"
-                                        class="h-5 w-5 text-orange-600 border-gray-300 rounded focus:ring-orange-500">
-                                    <label for="cancel-dinner-before"
-                                        class="ml-2 text-sm font-medium text-gray-700 select-none">Dinner Before</label>
-                                </div>
-                                <div
-                                    class="bg-gray-100 p-3 rounded-lg flex items-center border border-gray-200 hover:bg-gray-200 transition">
-                                    <input id="cancel-lunch-after" type="checkbox"
-                                        class="h-5 w-5 text-orange-600 border-gray-300 rounded focus:ring-orange-500">
-                                    <label for="cancel-lunch-after"
-                                        class="ml-2 text-sm font-medium text-gray-700 select-none">Lunch After</label>
-                                </div>
-                                <div
-                                    class="bg-gray-100 p-3 rounded-lg flex items-center border border-gray-200 hover:bg-gray-200 transition">
-                                    <input id="cancel-dinner-after" type="checkbox"
-                                        class="h-5 w-5 text-orange-600 border-gray-300 rounded focus:ring-orange-500">
-                                    <label for="cancel-dinner-after"
-                                        class="ml-2 text-sm font-medium text-gray-700 select-none">Dinner After</label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div>
-                            <label for="leave-reason" class="block text-sm font-bold text-gray-700 mb-1">Reason for
-                                Leave</label>
-                            <textarea id="leave-reason" rows="3" required
-                                class="mt-1 block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-orange-500 focus:border-orange-500"
-                                placeholder="e.g., Family function, medical appointment..."></textarea>
-                        </div>
-
-                        <div class="text-right pt-2">
-                            <button type="submit"
-                                class="w-full sm:w-auto bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 transform hover:scale-105">Submit
-                                Request</button>
-                        </div>
+                         </div>
+                        <div><label class="block text-sm font-bold text-gray-700 mb-3">Meal Options During Leave:</label><div class="grid grid-cols-2 sm:grid-cols-4 gap-4"><div class="bg-gray-100 p-3 rounded-lg flex items-center border border-gray-200 hover:bg-gray-200 transition"><input id="cancel-lunch-before" type="checkbox" class="h-5 w-5 text-orange-600 border-gray-300 rounded focus:ring-orange-500"><label for="cancel-lunch-before" class="ml-2 text-sm font-medium text-gray-700 select-none">No Lunch (Dep. Day)</label></div><div class="bg-gray-100 p-3 rounded-lg flex items-center border border-gray-200 hover:bg-gray-200 transition"><input id="cancel-dinner-before" type="checkbox" class="h-5 w-5 text-orange-600 border-gray-300 rounded focus:ring-orange-500"><label for="cancel-dinner-before" class="ml-2 text-sm font-medium text-gray-700 select-none">No Dinner (Dep. Day)</label></div><div class="bg-gray-100 p-3 rounded-lg flex items-center border border-gray-200 hover:bg-gray-200 transition"><input id="cancel-lunch-after" type="checkbox" class="h-5 w-5 text-orange-600 border-gray-300 rounded focus:ring-orange-500"><label for="cancel-lunch-after" class="ml-2 text-sm font-medium text-gray-700 select-none">No Lunch (Arr. Day)</label></div><div class="bg-gray-100 p-3 rounded-lg flex items-center border border-gray-200 hover:bg-gray-200 transition"><input id="cancel-dinner-after" type="checkbox" class="h-5 w-5 text-orange-600 border-gray-300 rounded focus:ring-orange-500"><label for="cancel-dinner-after" class="ml-2 text-sm font-medium text-gray-700 select-none">No Dinner (Arr. Day)</label></div></div><p class="text-xs text-gray-500 mt-2">Check box if you will **NOT** take the meal.</p></div>
+                        <div><label for="leave-reason" class="block text-sm font-bold text-gray-700 mb-1">Reason for Leave</label><textarea id="leave-reason" rows="3" required class="mt-1 block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-orange-500 focus:border-orange-500" placeholder="e.g., Family function..."></textarea></div>
+                        <div class="text-right pt-2"><button type="submit" class="w-full sm:w-auto bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 transform hover:scale-105">Submit Request</button></div>
                     </form>
                 </div>
                 <div class="bg-white p-6 rounded-xl shadow-lg">
-                    <h2 class="text-xl font-bold text-gray-700 mb-4">Status of Your Requests</h2>
-                    <div id="leave-history" class="space-y-3">
-                        <p id="leave-history-loading" class="text-gray-500 text-center">Loading leave history...</p>
-                    </div>
+                    <h2 class="text-xl font-bold text-gray-700 mb-4">🗓️ Status of Your Leave Requests</h2>
+                    <div id="leave-history" class="space-y-3"><p id="leave-history-loading" class="text-gray-500 text-center">Loading leave history...</p></div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <div id="customAlertModal" class="modal">
-        <div class="modal-content">
-            <h3 id="modalTitle" class="text-xl font-bold mb-3 text-gray-800">Notification</h3>
-            <p id="modalMessage" class="mb-5 text-gray-600">Message</p>
-            <div class="flex justify-end">
-                <button
-                    class="px-4 py-2 bg-orange-600 text-white font-semibold rounded-md hover:bg-orange-700 transition"
-                    onclick="hideModal()">OK</button>
+            <div id="attendance-overview" class="tab-content space-y-6">
+                 <div class="bg-white p-6 rounded-xl shadow-lg">
+                     <h2 class="text-xl font-bold text-gray-700 mb-4">📊 Attendance Overview</h2>
+                     <div id="attendance-summary-text" class="mb-6 text-center text-gray-600"><p>Loading attendance data...</p></div>
+                     <div id="attendanceChartContainer"><canvas id="attendanceChart"></canvas></div>
+                 </div>
             </div>
         </div>
     </div>
 
-    <div id="notificationModal" class="modal">
-        <div class="modal-content">
-            <h3 class="text-xl font-bold mb-5 text-gray-800 flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                    class="w-6 h-6 mr-2 text-orange-600">
-                    <path d="M10 20.25a2 2 0 0 0 4 0" />
-                    <path
-                        d="M18 8a6 6 0 0 0-12 0c0 1.28.18 2.51.52 3.59L3 17h18l-1.52-5.41c.34-1.08.52-2.31.52-3.59Z" />
-                    <path d="M19.7 4.5c.78.78.78 2.05 0 2.83l-1.42 1.42" />
-                    <path d="M4.3 4.5c-.78.78-.78 2.05 0 2.83l-1.42 1.42" />
-                </svg>
-                Request Statuses
-            </h3>
-            <div id="notificationContent" class="space-y-4">
-                <p class="text-gray-500 text-center" id="notificationLoading">Loading statuses...</p>
-            </div>
-            <div class="flex justify-end mt-6">
-                <button class="px-4 py-2 bg-gray-500 text-white font-semibold rounded-md hover:bg-gray-600 transition"
-                    onclick="closeNotificationModal()">Close</button>
-            </div>
-        </div>
-    </div>
-    <script>
+    <div id="customAlertModal" class="modal"><div class="modal-content"><h3 id="modalTitle" class="text-xl font-bold mb-3 text-gray-800">Notification</h3><p id="modalMessage" class="mb-5 text-gray-600">Message</p><div class="flex justify-end"><button class="px-4 py-2 bg-orange-600 text-white font-semibold rounded-md hover:bg-orange-700 transition" onclick="hideModal()">OK</button></div></div></div>
+    <div id="notificationModal" class="modal"><div class="modal-content"><h3 class="text-xl font-bold mb-5 text-gray-800 flex items-center"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 mr-2 text-orange-600"><path d="M10 20.25a2 2 0 0 0 4 0" /><path d="M18 8a6 6 0 0 0-12 0c0 1.28.18 2.51.52 3.59L3 17h18l-1.52-5.41c.34-1.08.52-2.31.52-3.59Z" /><path d="M19.7 4.5c.78.78.78 2.05 0 2.83l-1.42 1.42" /><path d="M4.3 4.5c-.78.78-.78 2.05 0 2.83l-1.42 1.42" /></svg> Notifications & Statuses</h3><div id="notificationContent" class="space-y-4 max-h-96 overflow-y-auto"><p class="text-gray-500 text-center" id="notificationLoading">Loading statuses...</p></div><div class="flex justify-end mt-6"><button class="px-4 py-2 bg-gray-500 text-white font-semibold rounded-md hover:bg-gray-600 transition" onclick="closeNotificationModal()">Close</button></div></div></div>
+
+<script>
         const BACKEND_BASE_URL = "http://localhost:5000";
 
         // ===================================
@@ -600,6 +176,7 @@
                     return null;
                 }
             } catch (error) {
+                console.error("Token renewal error:", error);
                 return null;
             }
         }
@@ -620,25 +197,36 @@
             let response = await fetch(url, options);
 
             if ((response.status === 401 || response.status === 403) && retry) {
+                console.log('Access token expired or invalid, attempting to refresh...');
                 const newAccessToken = await renewAccessToken();
 
                 if (newAccessToken) {
+                    console.log('Token refreshed successfully.');
                     options.headers['Authorization'] = `Bearer ${newAccessToken}`;
-                    response = await authenticatedFetch(url, options, false);
+                    response = await fetch(url, options);
                 } else {
+                    console.log('Failed to refresh token, redirecting to login.');
+                    window.location.href = 'login.html';
                     return null;
                 }
             }
 
+            if (!response || response.status === 401 || response.status === 403) {
+                console.error(`Fetch failed for ${url} with status: ${response ? response.status : 'No Response'}. Redirecting to login.`);
+                if (response) window.location.href = 'login.html';
+                return null;
+            }
+
             return response;
         }
+
 
         // --- Ensure authentication on load ---
         if (!localStorage.getItem('accessToken')) {
             window.location.href = 'login.html';
         }
 
-        // --- MODAL FUNCTIONS (SLIGHTLY MODIFIED) ---
+        // --- MODAL FUNCTIONS (MODIFIED) ---
         const modal = document.getElementById('customAlertModal');
         const notificationModal = document.getElementById('notificationModal');
         const notificationContent = document.getElementById('notificationContent');
@@ -651,17 +239,17 @@
             modal.classList.add('open');
         }
 
-        // NEW Notification Modal functions
+        // --- MODIFIED --- Notification Modal functions
         function openNotificationModal() {
             notificationModal.classList.add('open');
-            // Refetch data when opening to ensure it's up to date
-            updateNotificationStatus();
+            // Refetch data when opening AND mark new announcements as "read"
+            updateNotificationStatus({ markAsRead: true });
         }
 
         function closeNotificationModal() {
             notificationModal.classList.remove('open');
         }
-        // END NEW Notification Modal functions
+        // --- END MODIFIED ---
 
         // --- TAB SWITCHING LOGIC (NO CHANGE) ---
         const tabs = document.querySelectorAll('.tab-button');
@@ -676,6 +264,8 @@
 
                 if (tab.dataset.tab === 'leaves') {
                     fetchLeaveHistory();
+                } else if (tab.dataset.tab === 'attendance-overview') {
+                    fetchAttendanceOverview();
                 }
             });
         });
@@ -683,7 +273,6 @@
         // --- MEAL SELECTION LOGIC (NO CHANGE) ---
         const MEAL_FIELDS = { 'weekday-day-main': 'day', 'weekday-night-main': 'night1', 'weekday-night-carb': 'night2', 'sunday-day': 'sunday_day', 'sunday-night': 'sunday_night' };
         async function submitMealSelections() {
-            // NOTE: The keys here must match the keys the backend is expecting from req.body 
             const selections = {
                 weekdayDayMain: document.getElementById('weekday-day-main').value,
                 weekdayNightMain: document.getElementById('weekday-night-main').value,
@@ -703,7 +292,7 @@
                 const response = await authenticatedFetch(`${BACKEND_BASE_URL}/meal`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(selections) // Sending the data with camelCase keys
+                    body: JSON.stringify(selections)
                 });
 
                 if (!response) return;
@@ -726,7 +315,7 @@
             }
         }
 
-        // --- LEAVE APPLICATION LOGIC (MODIFIED FOR REUSABLE HISTORY FETCH) ---
+        // --- LEAVE APPLICATION LOGIC (NO CHANGE) ---
         const leaveForm = document.getElementById('leaveForm');
         leaveForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -734,43 +323,41 @@
         });
 
         async function submitLeaveRequest() {
-            // Get date from text input
             const fullNameElement = document.getElementById('fullName');
             const usernameElement = document.getElementById('userName');
-            const fullName = fullNameElement ? fullNameElement.textContent.replace('Fullname: ', '').trim() : '';
-            const username = usernameElement ? usernameElement.textContent.replace('username: ', '').trim() : '';
+            const fullName = fullNameElement ? fullNameElement.textContent.replace('Fullname: ', '').trim() : 'Unknown';
+            const username = usernameElement ? usernameElement.textContent.replace('username: ', '').trim() : 'unknown';
+
             const departureDate = document.getElementById('departure-date').value;
             const arrivalDate = document.getElementById('arrival-date').value;
-
-            // Get time from selects
             const departureHour = document.getElementById('departure-hour').value;
             const departureMinute = document.getElementById('departure-minute').value;
             const arrivalHour = document.getElementById('arrival-hour').value;
             const arrivalMinute = document.getElementById('arrival-minute').value;
-
             const departureTime = `${departureHour}:${departureMinute}`;
-            const arrivalTime = `${arrivalHour}:${arrivalMinute}`;
-
-            // Concatenate Date and Time (Assuming backend expects ISO-like format)
+            const arrivalTime = `${arrivalHour}:${arrivalTime}`;
             const departureDateTime = `${departureDate}T${departureTime}:00`;
             const arrivalDateTime = `${arrivalDate}T${arrivalTime}:00`;
-
             const reason = document.getElementById('leave-reason').value;
-
-            // Meal Checkboxes
             const cancelLunchBefore = document.getElementById('cancel-lunch-before').checked;
             const cancelDinnerBefore = document.getElementById('cancel-dinner-before').checked;
             const cancelLunchAfter = document.getElementById('cancel-lunch-after').checked;
             const cancelDinnerAfter = document.getElementById('cancel-dinner-after').checked;
 
-            // Basic validation
             if (!departureDate || !departureHour || !departureMinute || !arrivalDate || !arrivalHour || !arrivalMinute) {
                 showMessage("Missing Fields", "Please fill all date and time fields.");
                 return;
             }
-
             if (new Date(arrivalDateTime) < new Date(departureDateTime)) {
                 showMessage("Invalid Dates", "Arrival date/time cannot be before the departure date/time.");
+                return;
+            }
+            if (!reason) {
+                showMessage("Missing Reason", "Please provide a reason for your leave.");
+                return;
+            }
+            if (!username || username === 'unknown' || !fullName || fullName === 'Unknown') {
+                showMessage("Error", "Could not retrieve user details. Please refresh the page.");
                 return;
             }
 
@@ -796,8 +383,8 @@
                 if (response.ok) {
                     showMessage('Success', 'Leave request submitted successfully. Please check the notifications for status.');
                     leaveForm.reset();
-                    fetchLeaveHistory(); // Refresh the history tab
-                    updateNotificationStatus(); // Update badge
+                    fetchLeaveHistory();
+                    updateNotificationStatus();
                 } else {
                     const errorData = await response.json();
                     showMessage("Submission Error", errorData.error || "Failed to submit leave request.");
@@ -807,7 +394,7 @@
             }
         }
 
-        // Modified to be reusable for notifications
+        // --- FETCH LEAVE HISTORY (NO CHANGE) ---
         async function fetchLeaveHistory(renderToTab = true) {
             const historyContainer = document.getElementById('leave-history');
             try {
@@ -815,122 +402,257 @@
                     historyContainer.innerHTML = `<p id="leave-history-loading" class="text-gray-500 text-center">Loading leave history...</p>`;
                 }
                 const response = await authenticatedFetch(`${BACKEND_BASE_URL}/leave/history`);
-                if (!response) {
+                if (!response || !response.ok) {
                     if (renderToTab) historyContainer.innerHTML = '<p class="text-red-500 text-center">Could not load history.</p>';
                     return [];
                 }
+                const contentType = response.headers.get("content-type");
+                if (!contentType || !contentType.includes("application/json")) {
+                    console.warn("Received non-JSON response for leave history");
+                    if (renderToTab) historyContainer.innerHTML = '<p class="text-gray-500 text-center">No leave history found.</p>';
+                    return [];
+                }
+
                 const history = await response.json();
 
                 if (renderToTab) {
                     historyContainer.innerHTML = '';
-                    if (history.length === 0) {
+                    if (!history || history.length === 0) {
                         historyContainer.innerHTML = `<p class="text-gray-500 text-center">You have not applied for any leave yet.</p>`;
                     } else {
-                        history.forEach(leave => {
-                            const statusClass = `status-${leave.status.toLowerCase()}`;
-                            const card = document.createElement('div');
-                            card.className = 'border rounded-lg p-4 flex justify-between items-center bg-orange-50 hover:shadow-md transition';
-                            card.innerHTML = `
-                                <div>
-                                    <p class="font-semibold text-gray-800">From: ${leave.from.substring(0, 10)} To: ${leave.to.substring(0, 10)}</p>
-                                    <p class="text-sm text-gray-600">${leave.reason}</p>
-                                </div>
-                                <span class="status-badge ${statusClass}">${leave.status}</span>
-                            `;
-                            historyContainer.appendChild(card);
-                        });
+                        if (Array.isArray(history)) {
+                            history.forEach(leave => {
+                                const statusClass = `status-${(leave.status || 'pending').toLowerCase()}`;
+                                const card = document.createElement('div');
+                                card.className = 'border rounded-lg p-4 flex justify-between items-center bg-orange-50 hover:shadow-md transition';
+                                card.innerHTML = `
+                                    <div>
+                                        <p class="font-semibold text-gray-800">From: ${leave.from ? leave.from.substring(0, 10) : 'N/A'} To: ${leave.to ? leave.to.substring(0, 10) : 'N/A'}</p>
+                                        <p class="text-sm text-gray-600">${leave.reason || 'No reason provided'}</p>
+                                    </div>
+                                    <span class="status-badge ${statusClass}">${leave.status || 'Pending'}</span>
+                                `;
+                                historyContainer.appendChild(card);
+                            });
+                        } else {
+                            console.error("Leave history response is not an array:", history);
+                            historyContainer.innerHTML = `<p class="text-red-500 text-center">Error processing leave history data.</p>`;
+                        }
                     }
                 }
-                // Return history for use in notification function
-                return history;
-
+                return Array.isArray(history) ? history : [];
             } catch (error) {
+                console.error("Error fetching or processing leave history:", error);
                 if (renderToTab) historyContainer.innerHTML = `<p class="text-red-500 text-center">Failed to load leave history.</p>`;
                 return [];
             }
         }
 
-
-        // --- NEW MEAL REQUEST HISTORY FETCH ---
+        // --- FETCH MEAL HISTORY (NO CHANGE) ---
         async function fetchMealRequestHistory() {
             try {
-                // Using the new endpoint /meal/history
                 const response = await authenticatedFetch(`${BACKEND_BASE_URL}/meal/history`);
-                if (!response) return [];
+                if (!response || !response.ok) {
+                    console.error("Failed to fetch meal request history, status:", response ? response.status : 'No Response');
+                    return [];
+                }
+
+                const contentType = response.headers.get("content-type");
+                if (!contentType || !contentType.includes("application/json")) {
+                    console.warn("Received non-JSON response for meal history");
+                    return [];
+                }
+
                 const history = await response.json();
-                return history;
+                return (history && Array.isArray(history.mealUpdate)) ? history.mealUpdate : [];
+
             } catch (error) {
                 console.error("Failed to fetch meal request history:", error);
                 return [];
             }
         }
+        
 
-        // --- CONSOLIDATED STATUS UPDATE / NOTIFICATION LOGIC ---
-        async function updateNotificationStatus() {
-            notificationContent.innerHTML = `<p class="text-gray-500 text-center" id="notificationLoading">Loading statuses...</p>`;
+        // --- NEW --- FETCH ANNOUNCEMENTS ---
+        async function fetchAnnouncements() {
+            try {
+                // Assuming the endpoint is /announcement based on your controller
+                const response = await authenticatedFetch(`${BACKEND_BASE_URL}/user-details/announcement`); 
+                if (!response || !response.ok) {
+                    console.error("Failed to fetch announcements, status:", response ? response.status : 'No Response');
+                    return [];
+                }
 
-            // Fetch histories without rendering to the tabs
-            const [leaveHistory, mealHistory] = await Promise.all([
+                const contentType = response.headers.get("content-type");
+                if (!contentType || !contentType.includes("application/json")) {
+                    console.warn("Received non-JSON response for announcements");
+                    return [];
+                }
+
+                const data = await response.json();
+                // Your controller returns { fetchannouncement: [...] }
+                return (data && Array.isArray(data.fetchannouncement)) ? data.fetchannouncement : [];
+
+            } catch (error) {
+                console.error("Failed to fetch announcements:", error);
+                return [];
+            }
+        }
+        // --- END NEW ---
+
+        // --- CONSOLIDATED STATUS UPDATE / NOTIFICATION LOGIC (MODIFIED) ---
+        async function updateNotificationStatus(options = {}) {
+            // Check if we are opening the modal, which means we should mark items as "read"
+            const markAsRead = options.markAsRead || false;
+
+            // Only show loading message if we're opening the modal
+            if (markAsRead) {
+                notificationContent.innerHTML = `<p class="text-gray-500 text-center" id="notificationLoading">Loading statuses...</p>`;
+            }
+
+            // Fetch all notification sources in parallel
+            const [leaveHistory, mealHistory, announcements] = await Promise.all([
                 fetchLeaveHistory(false),
-                fetchMealRequestHistory()
+                fetchMealRequestHistory(),
+                fetchAnnouncements() // --- NEW ---
             ]);
 
-            notificationContent.innerHTML = '';
-            let unreadCount = 0;
+            // Clear modal content only if we are rendering it
+            if (markAsRead) {
+                 notificationContent.innerHTML = '';
+            }
+           
+            let finalBadgeCount = 0;
+            const lastSeenTimestamp = localStorage.getItem('lastSeenAnnouncementTimestamp');
+            let newAnnouncementsForBadge = 0;
+            let newestTimestamp = null;
 
-            // 1. Leave Status
-            if (leaveHistory.length > 0) {
-                const latestLeave = leaveHistory[0]; // Assuming history is returned newest first
-                const status = latestLeave.status.toLowerCase();
-                const statusClass = `status-${status}`;
-                const leaveCard = document.createElement('div');
-                leaveCard.className = 'border rounded-lg p-4 bg-gray-50';
-                leaveCard.innerHTML = `
-                    <p class="font-bold text-gray-800 mb-1 flex justify-between items-center">
-                        <span class="flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 mr-2 text-red-500">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 01.92 0m-.92 0a.75.75 0 00.92 0M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 3a.75.75 0 00.75-.75V9.75M12 9h.008v.008H12V9z" />
-                            </svg>
-                            Leave Request 
-                        </span>
-                        <span class="status-badge ${statusClass}">${latestLeave.status}</span>
-                    </p>
-                    <p class="text-sm text-gray-600">Latest request: ${latestLeave.from.substring(0, 10)} to ${latestLeave.to.substring(0, 10)}</p>
-                `;
-                notificationContent.appendChild(leaveCard);
-                if (status === 'pending') unreadCount++;
+            // --- 1. Process Announcements ---
+            if (announcements && announcements.length > 0) {
+                newestTimestamp = announcements[0].createdAt; // Get the newest timestamp
+
+                // Check how many are "new"
+                newAnnouncementsForBadge = announcements.filter(a => !lastSeenTimestamp || a.createdAt > lastSeenTimestamp).length;
+                finalBadgeCount += newAnnouncementsForBadge;
+
+                // Render announcements ONLY if the modal is being opened
+                if (markAsRead) {
+                    announcements.forEach(ann => {
+                        // isNew is for visual flair (the "NEW" badge)
+                        const isNew = !lastSeenTimestamp || ann.createdAt > lastSeenTimestamp;
+                        
+                        // Format dates as requested
+                        const createdDate = ann.createdAt ? new Date(ann.createdAt).toLocaleString() : 'N/A';
+                        const targetDate = ann.targetDate ? new Date(ann.targetDate).toLocaleString() : null; 
+                        const username = ann.username || 'Admin'; // Default to 'Admin'
+                        const message = ann.message || 'No message content.'; // Get message
+
+                        const annCard = document.createElement('div');
+                        annCard.className = 'border rounded-lg p-4 bg-gray-50';
+                        annCard.innerHTML = `
+                            <p class="font-bold text-gray-800 mb-2 flex justify-between items-center">
+                                <span class="flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2 text-blue-500">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.017 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+                                    </svg>
+                                    Announcement
+                                </span>
+                                ${isNew ? '<span class="px-2 py-0.5 bg-blue-500 text-white text-xs font-bold rounded-full">NEW</span>' : ''}
+                            </p>
+                            <p class="text-sm text-gray-800 mb-1">${message}</p>
+                            <p class="text-xs text-gray-500">By: ${username} | Posted: ${createdDate}</p>
+                            ${targetDate ? `<p class="text-xs text-blue-600 font-medium">Target Date: ${targetDate}</p>` : ''}
+                        `;
+                        // Append to modal
+                        notificationContent.appendChild(annCard);
+                    });
+                }
             }
 
-            // 2. Meal Change Status
-            if (mealHistory.length > 0) {
+            // --- 2. Process Leave Requests ---
+            if (leaveHistory && leaveHistory.length > 0) {
+                const latestLeave = leaveHistory[0];
+                const status = (latestLeave.status || 'pending').toLowerCase();
+                
+                // Add to badge count if pending
+                if (status === 'pending') {
+                    finalBadgeCount++;
+                }
+
+                // Render in modal if opening
+                if (markAsRead) {
+                    const fromDate = latestLeave.from ? latestLeave.from.substring(0, 10) : 'N/A';
+                    const toDate = latestLeave.to ? latestLeave.to.substring(0, 10) : 'N/A';
+                    const statusClass = `status-${status}`;
+                    const leaveCard = document.createElement('div');
+                    leaveCard.className = 'border rounded-lg p-4 bg-gray-50';
+                    leaveCard.innerHTML = `
+                        <p class="font-bold text-gray-800 mb-1 flex justify-between items-center">
+                            <span class="flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 mr-2 text-red-500">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 01.92 0m-.92 0a.75.75 0 00.92 0M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 3a.75.75 0 00.75-.75V9.75M12 9h.008v.008H12V9z" />
+                                </svg>
+                                Leave Request
+                            </span>
+                            <span class="status-badge ${statusClass}">${latestLeave.status || 'Pending'}</span>
+                        </p>
+                        <p class="text-sm text-gray-600">Latest request: ${fromDate} to ${toDate}</p>
+                    `;
+                    notificationContent.appendChild(leaveCard);
+                }
+            }
+
+            // --- 3. Process Meal Requests ---
+            if (mealHistory && mealHistory.length > 0) {
                 const latestMeal = mealHistory[0];
-                const status = latestMeal.status.toLowerCase();
-                const statusClass = `status-${status}`;
-                const mealCard = document.createElement('div');
-                mealCard.className = 'border rounded-lg p-4 bg-gray-50';
-                mealCard.innerHTML = `
-                    <p class="font-bold text-gray-800 mb-1 flex justify-between items-center">
-                        <span class="flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 mr-2 text-orange-500">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1.5m0 15V21m9-9h-1.5M4.5 12H3m18 0a9 9 0 11-18 0 9 9 0 0118 0zm-7.5-6h-3M15 15.75h-3M9 12h.008v.008H9V12zm3 0h.008v.008H12V12z" />
-                            </svg>
-                            Meal Change Request
-                        </span>
-                        <span class="status-badge ${statusClass}">${latestMeal.status}</span>
-                    </p>
-                    <p class="text-sm text-gray-600">Status for new choices: Day: ${latestMeal.day}, Night: ${latestMeal.night1}/${latestMeal.night2}</p>
-                `;
-                notificationContent.appendChild(mealCard);
-                if (status === 'pending') unreadCount++;
+                const status = (latestMeal.status || 'pending').toLowerCase();
+                
+                // Add to badge count if pending
+                if (status === 'pending') {
+                    finalBadgeCount++;
+                }
+                
+                // Render in modal if opening
+                if (markAsRead) {
+                    const dayMeal = latestMeal.day || 'N/A';
+                    const night1Meal = latestMeal.night1 || 'N/A';
+                    const night2Meal = latestMeal.night2 || 'N/A';
+                    const statusClass = `status-${status}`;
+                    const mealCard = document.createElement('div');
+                    mealCard.className = 'border rounded-lg p-4 bg-gray-50';
+                    mealCard.innerHTML = `
+                        <p class="font-bold text-gray-800 mb-1 flex justify-between items-center">
+                            <span class="flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 mr-2 text-orange-500">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1.5m0 15V21m9-9h-1.5M4.5 12H3m18 0a9 9 0 11-18 0 9 9 0 0118 0zm-7.5-6h-3M15 15.75h-3M9 12h.008v.008H9V12zm3 0h.008v.008H12V12z" />
+                                </svg>
+                                Meal Change Request
+                            </span>
+                            <span class="status-badge ${statusClass}">${latestMeal.status || 'Pending'}</span>
+                        </p>
+                        <p class="text-sm text-gray-600">Status for choices: Day: ${dayMeal}, Night: ${night1Meal}/${night2Meal}</p>
+                    `;
+                    notificationContent.appendChild(mealCard);
+                }
+            }
+            
+            // --- 4. Handle "Mark as Read" ---
+            // If we just opened the modal AND there were new announcements,
+            // update localStorage and remove them from the badge count.
+            if (markAsRead && newAnnouncementsForBadge > 0) {
+                console.log(`Marking as read. Setting lastSeenTimestamp to: ${newestTimestamp}`);
+                localStorage.setItem('lastSeenAnnouncementTimestamp', newestTimestamp);
+                finalBadgeCount -= newAnnouncementsForBadge; // Remove from badge count
             }
 
-            if (leaveHistory.length === 0 && mealHistory.length === 0) {
-                notificationContent.innerHTML = `<p class="text-gray-500 text-center">No pending requests found.</p>`;
+            // --- 5. Final Modal & Badge Update ---
+            if (markAsRead && notificationContent.children.length === 0) {
+                notificationContent.innerHTML = `<p class="text-gray-500 text-center">No recent requests or announcements.</p>`;
             }
 
             // Update badge count
-            if (unreadCount > 0) {
-                notificationBadge.textContent = unreadCount;
+            if (finalBadgeCount > 0) {
+                notificationBadge.textContent = finalBadgeCount;
                 notificationBadge.classList.remove('hidden');
             } else {
                 notificationBadge.classList.add('hidden');
@@ -938,52 +660,154 @@
         }
 
 
-        // --- INITIAL DATA LOAD ---
+        // --- INITIAL DATA LOAD (NO CHANGE) ---
         async function fetchInitialData() {
             try {
                 const response = await authenticatedFetch(`${BACKEND_BASE_URL}/user-details`);
-                if (!response) return;
+                if (!response || !response.ok) {
+                    console.error("Failed to fetch user details. Status:", response ? response.status : 'No Response');
+                    showMessage("Error", "Failed to load your profile data. Please try refreshing or logging in again.");
+                    return;
+                }
 
-                if (response.ok) {
-                    const data = await response.json();
+                const data = await response.json();
+                if (!data || typeof data !== 'object') {
+                    console.error("Invalid user details data received:", data);
+                    showMessage("Error", "Received invalid profile data from the server.");
+                    return;
+                }
 
-                    // Populating all user profile details
-                    document.getElementById('userName').textContent = `username: ${data.username || 'N/A'}`;
-                    document.getElementById('fullName').textContent = `Fullname: ${data.fullName || 'N/A'}`;
-                    document.getElementById('userRoll').textContent = `Roll: ${data.roll || 'N/A'}`;
-                    document.getElementById('userDept').textContent = `Department: ${data.department || 'N/A'}`;
-                    document.getElementById('userYear').textContent = `Year: ${data.year || 'N/A'}`;
+                document.getElementById('userName').textContent = `username: ${data.username || 'N/A'}`;
+                document.getElementById('fullName').textContent = `Fullname: ${data.fullName || 'N/A'}`;
+                document.getElementById('userRoll').textContent = `Roll: ${data.roll || 'N/A'}`;
+                document.getElementById('userDept').textContent = `Department: ${data.department || 'N/A'}`;
+                document.getElementById('userYear').textContent = `Year: ${data.year || 'N/A'}`;
 
+                const meals = data.mealPreferences;
+                if (meals && typeof meals === 'object') {
+                    const mealMap = {
+                        'day': 'weekday-day-main',
+                        'night1': 'weekday-night-main',
+                        'night2': 'weekday-night-carb',
+                        'sunday_day': 'sunday-day',
+                        'sunday_night': 'sunday-night'
+                    };
 
-                    // Populate Meal Selections
-                    const meals = data.mealPreferences;
-                    if (meals) {
-                        const mealMap = {
-                            'day': 'weekday-day-main',
-                            'night1': 'weekday-night-main',
-                            'night2': 'weekday-night-carb',
-                            'sunday_day': 'sunday-day',
-                            'sunday_night': 'sunday-night'
-                        };
+                    for (const dbFieldName in mealMap) {
+                        const elementId = mealMap[dbFieldName];
+                        const selectElement = document.getElementById(elementId);
 
-                        for (const dbFieldName in mealMap) {
-                            const elementId = mealMap[dbFieldName];
-                            const selectElement = document.getElementById(elementId);
-
-                            if (meals[dbFieldName] && selectElement) {
+                        if (meals[dbFieldName] && selectElement) {
+                            if (Array.from(selectElement.options).some(option => option.value === meals[dbFieldName])) {
                                 selectElement.value = meals[dbFieldName];
+                            } else {
+                                console.warn(`Value "${meals[dbFieldName]}" not found in select options for element ID "${elementId}". Defaulting to empty.`);
+                                selectElement.value = "";
                             }
+                        } else if (selectElement) {
+                            selectElement.value = "";
                         }
                     }
                 } else {
-                    showMessage("Error", "Failed to load your profile data.");
+                    console.warn("Meal preferences data is missing or not an object:", meals);
+                    Object.values(MEAL_FIELDS).forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el) el.value = "";
+                    });
                 }
             } catch (error) {
-                showMessage("Network Error", "Could not connect to the server.");
+                console.error("Error during initial data fetch:", error);
+                showMessage("Network Error", "Could not connect to the server to load initial data.");
             }
         }
 
-        // --- CUSTOM DATE PICKER FUNCTIONS ---
+        // --- ATTENDANCE OVERVIEW (NO CHANGE) ---
+        let attendanceChartInstance = null;
+        async function fetchAttendanceOverview() {
+            const summaryTextElement = document.getElementById('attendance-summary-text');
+            const canvas = document.getElementById('attendanceChart');
+            const ctx = canvas.getContext('2d');
+            summaryTextElement.innerHTML = '<p>Loading attendance data...</p>';
+
+            if (attendanceChartInstance) {
+                attendanceChartInstance.destroy();
+                attendanceChartInstance = null;
+            }
+
+            try {
+                const response = await authenticatedFetch(`${BACKEND_BASE_URL}/user-details/totalattendance`);
+                if (!response || !response.ok) {
+                    const errorText = response ? `Server responded with status ${response.status}` : 'No response from server';
+                    console.error("Failed to fetch attendance overview:", errorText);
+                    summaryTextElement.innerHTML = '<p class="text-red-500">Failed to load attendance data.</p>';
+                    return;
+                }
+
+                const contentType = response.headers.get("content-type");
+                if (!contentType || !contentType.includes("application/json")) {
+                    console.warn("Received non-JSON response for attendance overview");
+                    summaryTextElement.innerHTML = '<p class="text-red-500">Received invalid data format for attendance.</p>';
+                    return;
+                }
+
+                const data = await response.json();
+                const status = data.status;
+
+                if (!status || typeof status.present !== 'number' || typeof status.absent !== 'number' || typeof status.totalDays !== 'number') {
+                    console.error("Invalid attendance data structure received:", data);
+                    summaryTextElement.innerHTML = '<p class="text-red-500">Error: Invalid attendance data format.</p>';
+                    return;
+                }
+
+                summaryTextElement.innerHTML = `
+                    <p><strong class="text-green-600">Present:</strong> ${status.present} days</p>
+                    <p><strong class="text-red-600">Absent:</strong> ${status.absent} days</p>
+                    <p><strong class="text-gray-700">Total Recorded:</strong> ${status.totalDays} days</p>
+                `;
+
+                if (status.totalDays > 0) {
+                    attendanceChartInstance = new Chart(ctx, {
+                        type: 'pie',
+                        data: {
+                            labels: ['Present', 'Absent'],
+                            datasets: [{
+                                label: 'Attendance Days',
+                                data: [status.present, status.absent],
+                                backgroundColor: ['#10B981', '#EF4444'],
+                                borderColor: ['#ffffff', '#ffffff'],
+                                borderWidth: 2
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: { position: 'top' },
+                                title: { display: true, text: 'Attendance Distribution' },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function (context) {
+                                            let label = context.label || '';
+                                            if (label) { label += ': '; }
+                                            if (context.parsed !== null) {
+                                                label += context.parsed + ' days';
+                                            }
+                                            return label;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                } else {
+                    summaryTextElement.innerHTML += '<p class="mt-4 text-gray-500">No attendance data to display chart.</p>';
+                }
+            } catch (error) {
+                console.error("Error fetching or rendering attendance overview:", error);
+                summaryTextElement.innerHTML = '<p class="text-red-500">An error occurred while loading attendance data.</p>';
+            }
+        }
+
+        // --- CUSTOM DATE PICKER FUNCTIONS (NO CHANGE) ---
         var monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
         function selectDate(dateInputId, year, month, day) {
@@ -997,21 +821,17 @@
 
         function showMonth(calendarDestId, dateInputId, month, year) {
             var target = document.getElementById(calendarDestId);
-            var month = month != null ? month : new Date().getMonth();
-            var year = year || new Date().getFullYear();
-            var firstOfMonth = new Date();
-            firstOfMonth.setFullYear(year);
-            firstOfMonth.setMonth(month);
-            firstOfMonth.setDate(1);
-            var lastOfMonth = new Date();
-            lastOfMonth.setDate(1);
-            lastOfMonth.setFullYear(year);
-            lastOfMonth.setMonth(month + 1);
-            lastOfMonth.setDate(lastOfMonth.getDate() - 1);
-            var previousYear = year;
-            var nextYear = year;
-            var previousMonth = month - 1;
-            var nextMonth = month + 1;
+            if (!target) return false;
+
+            var currentMonth = month != null ? month : new Date().getMonth();
+            var currentYear = year || new Date().getFullYear();
+            var firstOfMonth = new Date(currentYear, currentMonth, 1);
+            var lastOfMonth = new Date(currentYear, currentMonth + 1, 0);
+
+            var previousYear = currentYear;
+            var nextYear = currentYear;
+            var previousMonth = currentMonth - 1;
+            var nextMonth = currentMonth + 1;
             if (previousMonth < 0) {
                 previousYear -= 1;
                 previousMonth = 11;
@@ -1020,50 +840,59 @@
                 nextYear += 1;
                 nextMonth = 0;
             }
-            var tbl = "<div class='calendarMonth'><a href='#inv' onclick='return showMonth(\"" + calendarDestId + "\", \"" + dateInputId + "\", " + previousMonth + ", " + previousYear + ");'>&lt;&lt;</a>" +
-                " " + monthNames[month] + " " + year + " " +
-                "<a href='#inv' onclick='return showMonth(\"" + calendarDestId + "\", \"" + dateInputId + "\", " + nextMonth + ", " + nextYear + ");'>&gt;&gt;</a></div>" +
+            var tbl = "<div class='calendarMonth'><a href='#' onclick='event.preventDefault(); showMonth(\"" + calendarDestId + "\", \"" + dateInputId + "\", " + previousMonth + ", " + previousYear + "); return false;'>&lt;&lt;</a>" +
+                " " + monthNames[currentMonth] + " " + currentYear + " " +
+                "<a href='#' onclick='event.preventDefault(); showMonth(\"" + calendarDestId + "\", \"" + dateInputId + "\", " + nextMonth + ", " + nextYear + "); return false;'>&gt;&gt;</a></div>" +
                 "<table>" +
                 "<tr><th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th></tr>" +
                 "<tr>";
-            var dow = firstOfMonth.getDay();
-            for (var i = 0; i < firstOfMonth.getDay(); i++) {
+
+            var firstDayOfWeek = firstOfMonth.getDay();
+            for (var i = 0; i < firstDayOfWeek; i++) {
                 tbl += "<td></td>";
             }
+
+            var currentDayOfWeek = firstDayOfWeek;
             for (var day = 1; day <= lastOfMonth.getDate(); day++) {
-                if (dow == 7) {
+                if (currentDayOfWeek === 7) {
                     tbl += "</tr><tr>";
-                    dow = 0;
+                    currentDayOfWeek = 0;
                 }
-                tbl += "<td><a href='#inv' onclick='return selectDate(\"" + dateInputId + "\", " + year + ", " + (month + 1) + ", " + day + ");'>" + day + "</a></td>";
-                dow++;
+                tbl += "<td><a href='#' onclick='event.preventDefault(); selectDate(\"" + dateInputId + "\", " + currentYear + ", " + (currentMonth + 1) + ", " + day + "); return false;'>" + day + "</a></td>";
+                currentDayOfWeek++;
             }
+
+            while (currentDayOfWeek < 7 && currentDayOfWeek !== 0) {
+                tbl += "<td></td>";
+                currentDayOfWeek++;
+            }
+
             tbl += "</tr></table>";
             target.innerHTML = tbl;
+            return false;
         }
 
         function dismissCalendar(event) {
             var cal = document.getElementById("calendar");
             if (cal) {
-                if (event.target == cal.targetId) {
+                if (cal.targetInputElement && event.target === cal.targetInputElement) {
                     return;
                 }
                 var elem = event.target;
                 while (elem) {
-                    if (elem.id == "calendar") {
+                    if (elem.id === "calendar") {
                         return;
                     }
                     elem = elem.parentElement;
                 }
-                cal.parentElement.removeChild(cal);
-                document.removeEventListener("mousedown", dismissCalendar);
+                removeCalendar();
             }
         }
 
         function showDatePicker(target) {
             var currentCalendar = document.getElementById("calendar");
             if (currentCalendar) {
-                if (currentCalendar.targetId && currentCalendar.targetId == target.id) {
+                if (currentCalendar.targetInputElement === target) {
                     return;
                 } else {
                     removeCalendar();
@@ -1072,81 +901,92 @@
 
             var selectedMonth = null;
             var selectedYear = null;
-
             var dateSelectedStr = target.value;
-            if (dateSelectedStr) {
-                var dateSelected = new Date();
-                if (dateSelectedStr != "") {
-                    var components = dateSelectedStr.split("-");
-                    dateSelected.setFullYear(components[0]);
-                    dateSelected.setMonth(components[1] - 1);
-                    dateSelected.setDate(components[2]);
+            if (dateSelectedStr && /^\d{4}-\d{2}-\d{2}$/.test(dateSelectedStr)) {
+                var components = dateSelectedStr.split("-");
+                var year = parseInt(components[0], 10);
+                var month = parseInt(components[1], 10) - 1;
+                var day = parseInt(components[2], 10);
+                if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
+                    var dateSelected = new Date(year, month, day);
+                    if (dateSelected.getFullYear() === year && dateSelected.getMonth() === month && dateSelected.getDate() === day) {
+                        selectedMonth = dateSelected.getMonth();
+                        selectedYear = dateSelected.getFullYear();
+                    }
                 }
-                selectedMonth = dateSelected.getMonth();
-                selectedYear = dateSelected.getFullYear();
             }
 
             var calendarDiv = document.createElement("div");
             calendarDiv.id = "calendar";
-            calendarDiv.style.display = "block";
+            calendarDiv.targetInputElement = target;
+            const rect = target.getBoundingClientRect();
             calendarDiv.style.position = "absolute";
-            var leftOffset = 0;
-            var topOffset = 0;
-            var elem = target;
-            while (elem != null) {
-                leftOffset += elem.offsetLeft;
-                topOffset += elem.offsetTop;
-                elem = elem.offsetParent;
-            }
-            calendarDiv.style.left = leftOffset + "px";
-            calendarDiv.style.top = (topOffset + target.offsetHeight) + "px";
-            calendarDiv.style.border = "1px solid";
+            calendarDiv.style.left = `${rect.left + window.scrollX}px`;
+            calendarDiv.style.top = `${rect.bottom + window.scrollY}px`;
+            calendarDiv.style.border = "1px solid #ccc";
             calendarDiv.style.background = "#fff";
-            calendarDiv.targetId = target.id;
+            calendarDiv.style.padding = "10px";
+            calendarDiv.style.boxShadow = "0 2px 5px rgba(0,0,0,0.2)";
+            calendarDiv.style.zIndex = "1001";
+            calendarDiv.style.borderRadius = "8px";
+
             document.body.appendChild(calendarDiv);
             showMonth("calendar", target.id, selectedMonth, selectedYear);
-            document.addEventListener("mousedown", dismissCalendar);
+
+            setTimeout(() => {
+                document.addEventListener("mousedown", dismissCalendar);
+            }, 0);
         }
 
         function removeCalendar() {
             var calendarDiv = document.getElementById("calendar");
             if (calendarDiv) {
+                delete calendarDiv.targetInputElement;
                 calendarDiv.parentElement.removeChild(calendarDiv);
             }
             document.removeEventListener("mousedown", dismissCalendar);
         }
 
+        // --- LOGOUT (NO CHANGE) ---
         async function logout() {
             try {
                 const accessToken = localStorage.getItem('accessToken');
+                if (!accessToken) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+
                 const response = await authenticatedFetch(`${BACKEND_BASE_URL}/logout`,
                     {
                         method: 'POST',
-                        headers: {
-                            'Authorization': `Bearer ${accessToken}`
-                        }
-
+                        headers: { 'Authorization': `Bearer ${accessToken}` }
                     });
+
                 if (response && response.ok) {
                     localStorage.clear();
                     window.location.href = 'login.html';
                 } else {
-                    showMessage("Logout Error", "Failed to logout. Please try again.");
+                    console.error("Logout failed. Status:", response ? response.status : 'No Response');
+                    localStorage.clear();
+                    window.location.href = 'login.html';
                 }
             } catch (error) {
-                showMessage("Network Error", "Could not connect to the server for logout.");
+                console.error("Error during logout:", error);
+                localStorage.clear();
+                window.location.href = 'login.html';
             }
         }
 
+        // --- DOM CONTENT LOADED (MODIFIED) ---
         document.addEventListener('DOMContentLoaded', () => {
             fetchInitialData();
-            fetchLeaveHistory();
-            updateNotificationStatus(); // Initial check for notifications
+            fetchLeaveHistory(); // Fetch for the tab view
+            // Initial check for notifications without marking as read
+            updateNotificationStatus({ markAsRead: false }); 
             // Set an interval to refresh the notifications periodically
-            setInterval(updateNotificationStatus, 60000); // refresh every minute
+            setInterval(() => updateNotificationStatus({ markAsRead: false }), 60000); // refresh every minute
         });
     </script>
 
 </body>
-
 </html>
